@@ -106,6 +106,8 @@ model MtaServer {
   installationStatus String? @default("Not Installed")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  virtualLists    VirtualList[]
+  sendProcesses   SendProcess[]
 }
 
 model Domain {
@@ -138,17 +140,19 @@ model DomainRecord {
 }
 
 model DataList {
-  id              Int       @id @default(autoincrement())
-  name            String
-  emailCount      Int       @default(0)
-  country         String?
-  vertical        String?
-  isp             String?
-  encryptEmails   String    @default("Disabled")
-  status          String    @default("Activated")
-  createdBy       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  name                String
+  emailCount          Int       @default(0)
+  country             String?
+  vertical            String?
+  isp                 String?
+  encryptEmails       String    @default("Disabled")
+  status              String    @default("Activated")
+  createdBy           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  autoResponderLists  AutoResponderList[]
+  sendProcesses       SendProcess[]
 }
 
 model SmtpGroup {
@@ -159,6 +163,8 @@ model SmtpGroup {
   createdBy       String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  virtualLists    VirtualList[]
+  sendProcesses   SendProcess[]
 }
 
 model Proxy {
@@ -171,4 +177,160 @@ model Proxy {
   status    String    @default("Activated")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Offer {
+  id            Int      @id @default(autoincrement())
+  name          String
+  url           String?
+  fromName      String?
+  fromEmail     String?
+  subject       String?
+  replyTo       String?
+  headers       String?
+  status        String   @default("Activated")
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  suppressions  Suppression[]
+  sendProcesses SendProcess[]
+}
+
+model Suppression {
+  id            Int      @id @default(autoincrement())
+  offerId       Int?
+  name          String
+  type          String   @default("Email")
+  data          String?
+  count         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  offer         Offer?   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+model AffiliateNetwork {
+  id            Int      @id @default(autoincrement())
+  name          String
+  url           String?
+  status        String   @default("Activated")
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AutoResponder {
+  id            Int      @id @default(autoincrement())
+  name          String
+  fromName      String?
+  fromEmail     String?
+  subject       String?
+  delay         Int       @default(0)
+  headers       String?
+  message       String?
+  status        String   @default("Activated")
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lists         AutoResponderList[]
+}
+
+model AutoResponderList {
+  id              Int           @id @default(autoincrement())
+  autoResponderId Int
+  dataListId      Int
+  autoResponder   AutoResponder @relation(fields: [autoResponderId], references: [id], onDelete: Cascade)
+  dataList        DataList      @relation(fields: [dataListId], references: [id], onDelete: Cascade)
+
+  @@unique([autoResponderId, dataListId])
+}
+
+model VirtualList {
+  id            Int      @id @default(autoincrement())
+  name          String
+  smtpGroupId   Int?
+  mtaServerId   Int?
+  status        String   @default("Activated")
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  smtpGroup     SmtpGroup? @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
+  mtaServer     MtaServer? @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
+  sendProcesses SendProcess[]
+}
+
+model Production {
+  id              Int      @id @default(autoincrement())
+  name            String
+  status          String   @default("Activated")
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  processes       SendProcess[]
+}
+
+model SendProcess {
+  id              Int      @id @default(autoincrement())
+  productionId    Int
+  dataListId      Int?
+  smtpGroupId     Int?
+  mtaServerId     Int?
+  offerId         Int?
+  virtualListId   Int?
+  processName     String
+  subject         String?
+  fromEmail       String?
+  fromName        String?
+  replyTo         String?
+  senderScore     Int?
+  throttle        Int       @default(0)
+  speed           Int       @default(100)
+  scheduleAt      DateTime?
+  repeat          String?
+  status          String    @default("Pending")
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  production      Production @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  dataList        DataList?  @relation(fields: [dataListId], references: [id], onDelete: SetNull)
+  smtpGroup       SmtpGroup? @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
+  mtaServer       MtaServer? @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
+  offer           Offer?     @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  virtualList     VirtualList? @relation(fields: [virtualListId], references: [id], onDelete: SetNull)
+}
+
+model GmailAccount {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  clientId        String?
+  clientSecret    String?
+  refreshToken    String?
+  status          String   @default("Activated")
+  senderScore     Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model GSuiteAccount {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  clientId        String?
+  clientSecret    String?
+  refreshToken    String?
+  status          String   @default("Activated")
+  senderScore     Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model OutlookAccount {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  clientId        String?
+  clientSecret    String?
+  refreshToken    String?
+  tenantId        String?
+  status          String   @default("Activated")
+  senderScore     Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

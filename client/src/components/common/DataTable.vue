@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({
   columns: { type: Array, required: true },
@@ -24,7 +24,7 @@ const loadData = async () => {
   loading.value = true;
   try {
     const params = { page: page.value, limit: limit.value, search: search.value, ...filters.value };
-    const result = await fetchData(params);
+    const result = await props.fetchData(params);
     data.value = result.data;
     total.value = result.total;
   } catch (e) {
@@ -37,6 +37,7 @@ const loadData = async () => {
 watch(page, loadData);
 watch(search, () => { page.value = 1; });
 watch(selected, (val) => { emit('update:selected', [...val]); }, { deep: true });
+onMounted(loadData);
 
 const totalPages = () => Math.ceil(total.value / limit.value);
 const selectAll = ref(false);
