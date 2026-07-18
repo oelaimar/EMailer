@@ -38,17 +38,7 @@ cd client && npm run dev
 - **Database:** `vugex_v2`
 - **Connection:** `mysql://root:password@localhost:3307/vugex_v2`
 - **Prisma commands:** `npm run db:migrate`, `npm run db:seed`, `npm run db:studio`, `npm run db:reset`
-
-### Models (7 total)
-
-| Model | Purpose |
-|---|---|
-| User | Users with email, password, status, superUserStatus |
-| Role | Named roles with JSON permissions (94 sections x read/write/delete) |
-| UserRole | Many-to-many join (user <-> role) with cascade delete |
-| Session | JWT sessions with token, refreshToken, isActive, expiresAt |
-| SmtpServer | SMTP servers with host, port, encryption, proxy support |
-| ServerProvider | Server provider names (stub) |
+- **Latest migration:** `20260718225724_add_phase6_headers_providers_isps_management_mailboxes`
 
 ## API Style
 
@@ -57,7 +47,44 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — Phase 2 COMPLETE
+## Current State — Phase 6 COMPLETE
+
+### Database Models (32 total)
+
+| Model | Purpose |
+|---|---|
+| User | Users with email, password, status, superUserStatus |
+| Role | Named roles with JSON permissions (94 sections x read/write/delete) |
+| UserRole | Many-to-many join (user <-> role) with cascade delete |
+| Session | JWT sessions with token, refreshToken, isActive, expiresAt |
+| SmtpServer | SMTP servers with host, port, encryption, proxy support |
+| ServerProvider | Server provider names with status |
+| MtaServer | MTA servers with SSH config, OS, IPs, installation status |
+| Domain | Domains with status, flags, availability, brand |
+| DomainRecord | DNS records (A, MX, TXT, etc.) linked to domains |
+| DataList | Email data lists with vertical, ISP, country |
+| DataProvider | Data provider names |
+| Header | Email headers with name + content |
+| Isp | ISP names |
+| Mailbox | Mailboxes linked to domains with IMAP/SMTP config |
+| ManagementServer | Management servers with SSH config (user-pass or PEM) |
+| SmtpGroup | SMTP groups with encryption, bulk create |
+| Proxy | HTTP/SOCKS proxy servers |
+| Offer | Offers with name, payout, cap, vertical |
+| Suppression | Suppression lists linked to offers |
+| AffiliateNetwork | Affiliate networks with postback config |
+| AutoResponder | Auto responder sequences |
+| AutoResponderList | Auto responder list associations |
+| VirtualList | Virtual data lists with filters |
+| Production | Campaign production entries |
+| SendProcess | Send processes linked to production |
+| GmailAccount | Gmail API accounts with OAuth tokens |
+| GSuiteAccount | G Suite API accounts with OAuth tokens |
+| OutlookAccount | Outlook API accounts with OAuth tokens |
+| CloudAccount | Cloud provider accounts (generic: provider field for aws/azure/do/hetzner/linode/ovh/scaleway/vultr/atlantic/idcloud/google) |
+| CloudInstance | Cloud instances (generic: provider field, dynamic instance types per provider) |
+| RegistrarAccount | Domain registrar accounts (generic: registrar field for cloudflare/godaddy/namecheap/namecom/dynadot/spaceship) |
+| PostmasterAccount | Postmaster accounts with IMAP/SMTP config for ISP inbox monitoring |
 
 ### Backend (server/src/)
 
@@ -80,23 +107,48 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | controllers/domainController.js | CRUD + bulkAction + getRecords + setRecords |
 | controllers/dataListController.js | CRUD + upload (multer) + bulkAction |
 | controllers/smtpGroupController.js | CRUD + bulkAction + bulk create from newline-separated names |
-| routes/ | 10 route files, all with auth + roleCheck middleware |
+| controllers/productionController.js | CRUD + bulkAction + addProcess for production campaigns |
+| controllers/offerController.js | CRUD + bulkAction + suppression list management |
+| controllers/suppressionController.js | CRUD + bulkAction + upload for suppression lists |
+| controllers/affiliateNetworkController.js | CRUD + bulkAction for affiliate networks |
+| controllers/autoResponderController.js | CRUD + bulkAction + addList for auto responders |
+| controllers/virtualListController.js | CRUD + bulkAction for virtual lists |
+| controllers/gmailController.js | CRUD + bulkAction for Gmail API accounts |
+| controllers/gsuiteController.js | CRUD + bulkAction for G Suite API accounts |
+| controllers/outlookController.js | CRUD + bulkAction for Outlook API accounts |
+| controllers/cloudAccountController.js | CRUD + bulkAction + listByProvider for cloud accounts |
+| controllers/cloudInstanceController.js | CRUD + bulkAction for cloud instances |
+| controllers/registrarAccountController.js | CRUD + bulkAction + listByRegistrar for registrar accounts |
+| controllers/proxyController.js | CRUD + bulkAction + listByType for proxy servers |
+| controllers/postmasterAccountController.js | CRUD + bulkAction for postmaster accounts |
+| controllers/headerController.js | CRUD + bulkAction for email headers |
+| controllers/dataProviderController.js | CRUD + bulkAdd + bulkAction for data providers |
+| controllers/ispController.js | CRUD + bulkAdd + bulkAction for ISPs |
+| controllers/serverProviderController.js | CRUD + bulkAdd + bulkAction for server providers |
+| controllers/managementServerController.js | CRUD + bulkAction for management servers (SSH config) |
+| controllers/mailboxController.js | CRUD + bulkAction + listDomains for mailboxes |
+| routes/ | 30 route files, all with auth + roleCheck middleware |
 
 ### Frontend (client/src/)
 
 | File | What It Does |
 |---|---|
 | App.vue | Calls fetchUser on init for fresh data |
-| router/index.js | 28 routes + auth guards + 404 catch-all |
+| router/index.js | ~64 routes + auth guards + 404 catch-all |
 | stores/auth.js | Pinia: login, logout, fetchUser |
 | api/client.js | Axios with token inject + auto-refresh + store sync |
 | api/auth.js, users.js, roles.js, sessions.js, smtpServers.js, dashboard.js | Phase 1 API wrappers |
 | api/mtaServers.js, domains.js, dataLists.js, smtpGroups.js | Phase 2 API wrappers |
+| api/production.js, offers.js, suppressions.js, affiliateNetworks.js, autoResponders.js, virtualLists.js | Phase 3 API wrappers |
+| api/gmailAccounts.js, gsuiteAccounts.js, outlookAccounts.js | Phase 3 API wrappers (email providers) |
+| api/cloudAccounts.js, cloudInstances.js, registrarAccounts.js | Phase 4 API wrappers |
+| api/proxies.js, postmasterAccounts.js | Phase 5 API wrappers |
+| api/headers.js, dataProviders.js, isps.js, serverProviders.js, managementServers.js, mailboxes.js | Phase 6 API wrappers |
 | layouts/DefaultLayout.vue | Sidebar + Header + content |
 | layouts/AuthLayout.vue | Dark gradient login wrapper |
 | components/common/DataTable.vue | Server-side paginated table with search, select, group actions |
 | components/common/ConfirmDialog.vue | Reusable confirm modal |
-| components/layout/Sidebar.vue | Navigation sidebar with 9 collapsible sections |
+| components/layout/Sidebar.vue | Navigation sidebar with 27 collapsible sections |
 | components/layout/Header.vue | Top bar with user menu |
 | views/auth/LoginView.vue | Login form |
 | views/dashboard/DashboardView.vue | 12 stat cards + 4 chart placeholders |
@@ -108,23 +160,70 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | views/users/* | List, Form |
 | views/roles/* | List, Form, RoleAffect, RoleUsers |
 | views/sessions/SessionsView.vue | Session list with force disconnect |
+| views/production/* | List, Form, SendProcessesView |
+| views/offers/* | List, Form, SuppressionView |
+| views/affiliate-networks/* | List, Form |
+| views/auto-responders/* | List, Form |
+| views/virtual-lists/* | List, Form |
+| views/gmail/* | GmailAccountsList, GmailAccountForm |
+| views/gsuite/* | GSuiteAccountsList, GSuiteAccountForm |
+| views/outlook/* | OutlookAccountsList, OutlookAccountForm |
+| views/cloud-accounts/* | CloudAccountsList, CloudAccountForm |
+| views/cloud-instances/* | CloudInstancesList, CloudInstanceForm |
+| views/registrar-accounts/* | RegistrarAccountsList, RegistrarAccountForm |
+| views/proxies/* | ProxiesList, ProxyForm |
+| views/postmaster-accounts/* | PostmasterAccountsList, PostmasterAccountForm |
+| views/headers/* | HeadersList, HeaderForm |
+| views/data-providers/* | DataProvidersList, DataProviderForm |
+| views/isps/* | IspsList, IspForm |
+| views/server-providers/* | ServerProvidersList, ServerProviderForm |
+| views/management-servers/* | ManagementServersList, ManagementServerForm |
+| views/mailboxes/* | MailboxesList, MailboxForm |
 
-### Database Models (13 total)
+### Sidebar Sections (27 total)
 
-| Model | Purpose |
-|---|---|
-| User | Users with email, password, status, superUserStatus |
-| Role | Named roles with JSON permissions (94 sections) |
-| UserRole | Many-to-many join (user <-> role) |
-| Session | JWT sessions with token, refreshToken, isActive |
-| SmtpServer | SMTP servers with host, port, encryption, proxy |
-| ServerProvider | Server provider names (stub) |
-| MtaServer | MTA servers with SSH config, OS, IPs, installation status |
-| Domain | Domains with status, flags, availability, brand |
-| DomainRecord | DNS records (A, MX, TXT, etc.) linked to domains |
-| DataList | Email data lists with vertical, ISP, country |
-| SmtpGroup | SMTP groups with encryption, bulk create |
-| Proxy | HTTP/SOCKS proxy servers |
+1. Dashboard
+2. Production
+3. MTA Servers
+4. SMTP Servers
+5. SMTP Groups
+6. Domains
+7. Data Lists
+8. Data Providers
+9. Mailboxes
+10. Offers
+11. Virtual Lists
+12. Auto Responders
+13. Headers
+14. Affiliate Networks
+15. Gmail API
+16. G Suite API
+17. Outlook API
+18. ISPs
+19. Cloud APIs
+20. Servers Providers
+21. Management Servers
+22. DNS Management
+23. Proxies
+24. Postmaster
+25. Users
+26. Application Roles
+27. Sessions
+7. Data Lists
+8. Offers
+9. Virtual Lists
+10. Auto Responders
+11. Affiliate Networks
+12. Gmail API
+13. G Suite API
+14. Outlook API
+15. **Cloud APIs** (Phase 4 — Cloud Accounts + Cloud Instances)
+16. **DNS Management** (Phase 4 — Registrar Accounts)
+17. **Proxies** (Phase 5 — Proxy management)
+18. **Postmaster** (Phase 5 — Postmaster accounts)
+19. Users
+20. Application Roles
+21. Sessions
 
 ### Verified Working
 
@@ -133,6 +232,23 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 - Phase 2: Domains (CRUD, bulk actions, DNS records)
 - Phase 2: Data Lists (CRUD, file upload with email counting)
 - Phase 2: SMTP Groups (CRUD, bulk create from newline-separated names)
+- Phase 3: Production (CRUD, send processes)
+- Phase 3: Offers (CRUD, suppression lists)
+- Phase 3: Affiliate Networks (CRUD)
+- Phase 3: Auto Responders (CRUD, list associations)
+- Phase 3: Virtual Lists (CRUD, filters)
+- Phase 3: Gmail/GSuite/Outlook Accounts (CRUD)
+- Phase 4: Cloud Accounts (CRUD, 11 providers via generic model)
+- Phase 4: Cloud Instances (CRUD, dynamic instance types per provider)
+- Phase 4: Registrar Accounts (CRUD, 6 registrars via generic model)
+- Phase 5: Proxies (CRUD, HTTP/SOCKS5 types, bulk actions)
+- Phase 5: Postmaster Accounts (CRUD, IMAP/SMTP config, bulk actions)
+- Phase 6: Headers (CRUD, email header content management)
+- Phase 6: Data Providers (CRUD, bulk add from newline-separated names)
+- Phase 6: ISPs (CRUD, bulk add from newline-separated names)
+- Phase 6: Server Providers (CRUD, bulk add from newline-separated names)
+- Phase 6: Management Servers (CRUD, SSH config with user-pass/PEM)
+- Phase 6: Mailboxes (CRUD, linked to domains with IMAP/SMTP config)
 - All CRUD endpoints with pagination, search, sort, filtering
 - Frontend builds clean (0 errors)
 
@@ -159,38 +275,27 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 
 ### Permission Sections (94 total)
 
-Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/groups), MTA (servers/install/ips/etc), Domains, Production, Cloud Providers (AWS/Azure/DO/Hetzner/Linode/OVH/Scaleway/Vultr/Atlantic/IDCloud), Domain Registrars (Cloudflare/GoDaddy/Namecheap/Namecom/Dynadot/Spaceship), Gmail/GSuite/Outlook, Tools, Data Lists, Postmaster, Geo Manager, Sessions, Settings.
+Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/groups), MTA (servers/install/ips/etc), Domains, Production, Cloud Providers (AWS/Azure/DO/Hetzner/Linode/OVH/Scaleway/Vultr/Atlantic/IDCloud), Domain Registrars (Cloudflare/GoDaddy/Namecheap/Namecom/Dynadot/Spaceship), Gmail/GSuite/Outlook, Tools, Data Lists, Postmaster, ISPs, Headers, Data Providers, Mailboxes, Servers Providers, Management Servers, Proxies, Geo Manager, Sessions, Settings.
 
-## What's Next: Phase 3
+## What's Next: Phase 7
 
-### Production (Send Campaigns)
-- Send process page, MTA drops monitor, SMTP drops monitor
-- Virtual lists builder + processes
-- Auto responders setup
-- Offer management, creative handling
-- Suppression list management
+### Teams
+- Team CRUD, authorizations, user-to-team assignment
 
-### Gmail API
-- Account management, send via Gmail API
-- Gmail drops/tests monitors
+### Geo Manager
+- Geographic routing/distribution of data lists by country
 
-### G Suite API
-- Account management, send via Google Workspace
-- GSuite drops/tests monitors
+### Settings
+- Application settings
 
-### Outlook API
-- Account management, send via Outlook
-- Outlook drops/tests monitors
+### Tools
+- SPF checker, Blacklist check, Mailbox extractor, Value extractor
 
-### New Prisma Models Needed
-- Production, SendProcess, VirtualList, Offer, AffiliateNetwork, Creative
+### Statistics
+- Full revenue reports, advanced analytics
 
-### New Backend Files Needed
-- controllers/productionController.js, gmailController.js, gsuiteController.js, outlookController.js
-- routes/production.js, gmail.js, gsuite.js, outlook.js
-
-### New Frontend Files Needed
-- views/production/*, views/gmail/*, views/gsuite/*, views/outlook/*
+### PMTA
+- PowerMTA config, VMTAs (global/individual/SMTP/route), templates, commands, scheduler
 
 ## Project Files
 
@@ -198,7 +303,7 @@ Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/g
 |---|---|
 | docker-compose.yml | MySQL 8 container (port 3307) |
 | server/.env | DB URL, JWT secrets, CORS origin, port |
-| server/prisma/schema.prisma | 13 database models |
+| server/prisma/schema.prisma | 32 database models |
 | server/prisma/seed.js | Admin user + role with all permissions |
-| vugex-v2.postman_collection.json | 22 API requests for Postman |
+| vugex-v2.postman_collection.json | 28 API requests for Postman |
 | ../vugex-full/PROJECT_PLAN.md | Full 14-phase plan (501 lines) |

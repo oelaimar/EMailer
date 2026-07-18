@@ -81,7 +81,10 @@ model SmtpServer {
 model ServerProvider {
   id        Int      @id @default(autoincrement())
   name      String
+  status    String   @default("Activated")
+  createdBy String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MtaServer {
@@ -124,6 +127,7 @@ model Domain {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   records         DomainRecord[]
+  mailboxes       Mailbox[]
 }
 
 model DomainRecord {
@@ -384,4 +388,81 @@ model RegistrarAccount {
   createdBy       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model PostmasterAccount {
+  id              Int      @id @default(autoincrement())
+  domain          String
+  serverName      String?
+  providerName    String?
+  imapHost        String?
+  imapPort        Int?
+  smtpHost        String?
+  smtpPort        Int?
+  username        String?
+  password        String?
+  status          String   @default("Activated")
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Header {
+  id        Int      @id @default(autoincrement())
+  name      String
+  header    String   @db.Text
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataProvider {
+  id        Int      @id @default(autoincrement())
+  name      String
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Isp {
+  id        Int      @id @default(autoincrement())
+  name      String
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ManagementServer {
+  id              Int      @id @default(autoincrement())
+  name            String
+  providerId      Int?
+  status          String   @default("Activated")
+  expirationDate  DateTime?
+  hostname        String?
+  mainIp          String
+  sshPort         Int      @default(22)
+  loginType       String   @default("user-pass")
+  username        String   @default("root")
+  password        String?
+  passphrase      String?
+  pemFile         String?
+  sshStatus       String   @default("Unknown")
+  lastChecked     DateTime?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Mailbox {
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  email     String
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
 }

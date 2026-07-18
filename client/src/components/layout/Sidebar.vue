@@ -42,6 +42,14 @@ const menuItems = [
     { label: 'Data Lists', path: '/data-lists' },
     { label: 'Add Data List', path: '/data-lists/add' },
   ]},
+  { id: 'data-providers', label: 'Data Providers', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4', children: [
+    { label: 'Providers List', path: '/data-providers' },
+    { label: 'Add Provider', path: '/data-providers/add' },
+  ]},
+  { id: 'mailboxes', label: 'Mailboxes', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
+    { label: 'Mailboxes List', path: '/mailboxes' },
+    { label: 'Add Mailbox', path: '/mailboxes/add' },
+  ]},
   { id: 'offers', label: 'Offers', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', children: [
     { label: 'Offers List', path: '/offers' },
     { label: 'Add Offer', path: '/offers/add' },
@@ -53,6 +61,10 @@ const menuItems = [
   { id: 'auto-responders', label: 'Auto Responders', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Auto Responders List', path: '/auto-responders' },
     { label: 'Add Auto Responder', path: '/auto-responders/add' },
+  ]},
+  { id: 'headers', label: 'Headers', icon: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z', children: [
+    { label: 'Headers List', path: '/headers' },
+    { label: 'Add Header', path: '/headers/add' },
   ]},
   { id: 'affiliate-networks', label: 'Affiliate Networks', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', children: [
     { label: 'Networks List', path: '/affiliate-networks' },
@@ -70,15 +82,35 @@ const menuItems = [
     { label: 'Accounts List', path: '/outlook-accounts' },
     { label: 'Add Account', path: '/outlook-accounts/add' },
   ]},
+  { id: 'isps', label: 'ISPs', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
+    { label: 'ISPs List', path: '/isps' },
+    { label: 'Add ISP', path: '/isps/add' },
+  ]},
   { id: 'cloud', label: 'Cloud APIs', icon: 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z', children: [
     { label: 'Cloud Accounts', path: '/cloud-accounts' },
     { label: 'Add Cloud Account', path: '/cloud-accounts/add' },
     { label: 'Cloud Instances', path: '/cloud-instances' },
     { label: 'Launch Instance', path: '/cloud-instances/add' },
   ]},
+  { id: 'servers-providers', label: 'Servers Providers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2', children: [
+    { label: 'Providers List', path: '/server-providers' },
+    { label: 'Add Provider', path: '/server-providers/add' },
+  ]},
+  { id: 'management-servers', label: 'Management Servers', icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z', children: [
+    { label: 'Servers List', path: '/management-servers' },
+    { label: 'Add Server', path: '/management-servers/add' },
+  ]},
   { id: 'dns', label: 'DNS Management', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
     { label: 'Registrar Accounts', path: '/registrar-accounts' },
     { label: 'Add Registrar Account', path: '/registrar-accounts/add' },
+  ]},
+  { id: 'proxies', label: 'Proxies', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
+    { label: 'Proxies List', path: '/proxies' },
+    { label: 'Add Proxy', path: '/proxies/add' },
+  ]},
+  { id: 'postmaster', label: 'Postmaster', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
+    { label: 'Accounts List', path: '/postmaster-accounts' },
+    { label: 'Add Account', path: '/postmaster-accounts/add' },
   ]},
   { id: 'users', label: 'Users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zM12.75 12a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z', children: [
     { label: 'Add Users', path: '/users/add' },

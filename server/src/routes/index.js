@@ -22,5 +22,13 @@ router.use('/outlook-accounts', require('./outlookAccounts'));
 router.use('/cloud-accounts', require('./cloudAccounts'));
 router.use('/cloud-instances', require('./cloudInstances'));
 router.use('/registrar-accounts', require('./registrarAccounts'));
+router.use('/proxies', require('./proxies'));
+router.use('/postmaster-accounts', require('./postmasterAccounts'));
+router.use('/headers', require('./headers'));
+router.use('/data-providers', require('./dataProviders'));
+router.use('/isps', require('./isps'));
+router.use('/server-providers', require('./serverProviders'));
+router.use('/management-servers', require('./managementServers'));
+router.use('/mailboxes', require('./mailboxes'));
 
 module.exports = router;
