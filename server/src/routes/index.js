@@ -19,5 +19,8 @@ router.use('/production', require('./production'));
 router.use('/gmail-accounts', require('./gmailAccounts'));
 router.use('/gsuite-accounts', require('./gsuiteAccounts'));
 router.use('/outlook-accounts', require('./outlookAccounts'));
+router.use('/cloud-accounts', require('./cloudAccounts'));
+router.use('/cloud-instances', require('./cloudInstances'));
+router.use('/registrar-accounts', require('./registrarAccounts'));
 
 module.exports = router;

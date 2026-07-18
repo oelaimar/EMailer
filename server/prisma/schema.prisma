@@ -334,3 +334,54 @@ model OutlookAccount {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model CloudAccount {
+  id              Int      @id @default(autoincrement())
+  provider        String
+  name            String
+  status          String   @default("Activated")
+  apiKey          String?
+  apiSecret       String?
+  proxyIp         String?
+  proxyPort       Int?
+  proxyUsername   String?
+  proxyPassword   String?
+  providerConfig  Json?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  instances       CloudInstance[]
+}
+
+model CloudInstance {
+  id              Int       @id @default(autoincrement())
+  provider        String
+  cloudAccountId  Int?
+  numberOfInstances Int     @default(1)
+  regions         Json?
+  dnsAccountId    Int?
+  os              String    @default("ubuntu-22.04")
+  instanceType    String?
+  privateIps      Int       @default(1)
+  storage         Int       @default(10)
+  status          String    @default("Pending")
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  cloudAccount    CloudAccount? @relation(fields: [cloudAccountId], references: [id], onDelete: SetNull)
+}
+
+model RegistrarAccount {
+  id              Int      @id @default(autoincrement())
+  registrar       String
+  name            String
+  status          String   @default("Activated")
+  apiKey          String?
+  apiSecret       String?
+  apiToken        String?
+  username        String?
+  password        String?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
