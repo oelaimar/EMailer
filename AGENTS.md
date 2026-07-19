@@ -47,7 +47,7 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — Phase 15 COMPLETE (all features implemented)
+## Current State — ALL PHASES COMPLETE (full legacy parity achieved)
 
 ### Database Models (49 total)
 
@@ -330,9 +330,7 @@ Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/g
 
 ## Known Remaining Gaps
 
-1. **Production Send Page** — Full campaign launch workflow (VMTA selection, headers, bodies, link types, creative preview/crop)
-2. **Advanced Analytics Dashboard** — ECharts-based charts, KPI cards, geo map, revenue forecast
-3. **Full Revenue Report** — Column builder with 25+ metrics, per-column filters
+None — all legacy features have been rebuilt.
 
 ## Project Files
 

@@ -6,5 +6,6 @@ const roleCheck = require('../middleware/roleCheck');
 
 router.get('/full-report', auth, roleCheck('statistics', 'read'), controller.getFullReport);
 router.get('/advanced-report', auth, roleCheck('statistics', 'read'), controller.getAdvancedReport);
+router.get('/columns', auth, roleCheck('statistics', 'read'), controller.getColumns);
 
 module.exports = router;

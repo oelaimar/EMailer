@@ -40,5 +40,7 @@ router.use('/geo-manager', require('./geoManager'));
 router.use('/statistics', require('./statistics'));
 router.use('/pmta', require('./pmta'));
 router.use('/logs', require('./logs'));
+router.use('/virtual-list-processes', require('./virtualListProcesses'));
+router.use('/elastic-ips', require('./elasticIps'));
 
 module.exports = router;

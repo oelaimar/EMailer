@@ -38,6 +38,7 @@ const menuItems = [
   { id: 'production', label: 'Production', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4', children: [
     { label: 'Production List', path: '/production' },
     { label: 'Add Production', path: '/production/add' },
+    { label: 'Launch Campaign', path: '/production/1/send' },
     { label: 'MTA Drops', path: '/production/mta-drops' },
     { label: 'MTA Tests', path: '/production/mta-tests' },
     { label: 'SMTP Drops', path: '/production/smtp-drops' },
@@ -95,6 +96,7 @@ const menuItems = [
   { id: 'virtual-lists', label: 'Virtual Lists', icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z', children: [
     { label: 'Virtual Lists', path: '/virtual-lists' },
     { label: 'Add Virtual List', path: '/virtual-lists/add' },
+    { label: 'Processes', path: '/virtual-lists/processes' },
   ]},
   { id: 'auto-responders', label: 'Auto Responders', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Auto Responders List', path: '/auto-responders' },
@@ -140,6 +142,7 @@ const menuItems = [
     { label: 'Launch Instance', path: '/cloud-instances/add' },
     { label: 'Azure Processes', path: '/cloud-instances/azure-processes' },
     { label: 'Azure Domain Change', path: '/cloud-instances/azure-domain-change' },
+    { label: 'AWS Elastic IPs', path: '/cloud-instances/elastic-ips' },
   ]},
   { id: 'servers-providers', label: 'Servers Providers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2', children: [
     { label: 'Providers List', path: '/server-providers' },
@@ -196,6 +199,7 @@ const menuItems = [
   { id: 'statistics', label: 'Statistics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', children: [
     { label: 'Full Report', path: '/statistics/full-report' },
     { label: 'Advanced Report', path: '/statistics/advanced-report' },
+    { label: 'Analytics Dashboard', path: '/statistics/analytics' },
   ]},
   { id: 'pmta', label: 'PMTA', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01', children: [
     { label: 'Commands', path: '/pmta/commands' },

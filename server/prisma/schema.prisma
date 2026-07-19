@@ -278,6 +278,7 @@ model VirtualList {
   smtpGroup     SmtpGroup? @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
   mtaServer     MtaServer? @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
   sendProcesses SendProcess[]
+  processes     VirtualListProcess[]
 }
 
 model Production {
@@ -391,6 +392,7 @@ model CloudInstance {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   cloudAccount    CloudAccount? @relation(fields: [cloudAccountId], references: [id], onDelete: SetNull)
+  elasticIps      ElasticIp[]
 }
 
 model RegistrarAccount {
@@ -702,4 +704,36 @@ model DomainSubdomain {
   status       String   @default("Activated")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model VirtualListProcess {
+  id              Int      @id @default(autoincrement())
+  virtualListId   Int
+  processName     String
+  status          String   @default("Pending")
+  totalEmails     Int      @default(0)
+  processedEmails Int      @default(0)
+  filteredEmails  Int      @default(0)
+  errorCount      Int      @default(0)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  errorMessage    String?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  virtualList     VirtualList @relation(fields: [virtualListId], references: [id], onDelete: Cascade)
+}
+
+model ElasticIp {
+  id              Int      @id @default(autoincrement())
+  cloudInstanceId Int?
+  ipAddress       String?
+  allocationId    String?
+  status          String   @default("Pending")
+  instanceId      String?
+  region          String?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  cloudInstance   CloudInstance? @relation(fields: [cloudInstanceId], references: [id], onDelete: SetNull)
 }
