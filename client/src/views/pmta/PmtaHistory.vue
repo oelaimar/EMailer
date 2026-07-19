@@ -16,7 +16,7 @@ const columns = [
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-800">PMTA History</h1>
-      <router-link to="/pmta" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
+      <router-link to="/pmta/commands" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
     </div>
 
     <DataTable

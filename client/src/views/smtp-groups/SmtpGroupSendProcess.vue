@@ -1,16 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import client from '../../api/client';
-import { getSmtpGroups } from '../../api/smtpGroups';
 
-const route = useRoute();
-const router = useRouter();
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
-const groupId = route.params.id;
-const group = ref(null);
+const groups = ref([]);
+const selectedGroupId = ref('');
 
 const form = ref({
   recipients: '',
@@ -22,18 +18,19 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    const { data } = await client.get(`/smtp-groups/${groupId}`);
-    group.value = data;
-  } catch { error.value = 'Failed to load SMTP group.'; }
+    const { data } = await client.get('/smtp-groups', { params: { limit: 500 } });
+    groups.value = data.data || [];
+  } catch { error.value = 'Failed to load SMTP groups.'; }
 });
 
 const handleSend = async () => {
+  if (!selectedGroupId.value) { error.value = 'Please select an SMTP group.'; return; }
   if (!form.value.recipients) { error.value = 'Recipients are required.'; return; }
   loading.value = true;
   error.value = '';
   success.value = '';
   try {
-    await client.post(`/smtp-groups/${groupId}/send-process`, form.value);
+    await client.post(`/smtp-groups/${selectedGroupId.value}/send-process`, form.value);
     success.value = `Send ${form.value.action} initiated successfully.`;
   } catch (e) {
     error.value = e.response?.data?.error || 'Failed to send.';
@@ -46,16 +43,21 @@ const handleSend = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Send Process</h1>
-        <p v-if="group" class="text-sm text-gray-500">{{ group.name }} — {{ group.encryption }}</p>
-      </div>
-      <router-link to="/smtp-groups" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to List</router-link>
+      <h1 class="text-2xl font-bold text-gray-800">SMTP Send Process</h1>
+      <router-link to="/smtp-groups" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back</router-link>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Group *</label>
+        <select v-model="selectedGroupId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="">Select a group...</option>
+          <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name }} ({{ g.encryption }})</option>
+        </select>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>

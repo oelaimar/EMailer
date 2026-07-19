@@ -48,7 +48,7 @@ const saveConfig = async () => {
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-800">PMTA Configurations</h1>
-      <router-link to="/pmta" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
+      <router-link to="/pmta/commands" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
     </div>
 
     <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
@@ -70,7 +70,7 @@ const saveConfig = async () => {
         </div>
       </div>
       <div v-if="editingId === config.id">
-        <textarea v-model="editForm.value" rows="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+        <textarea v-model="editForm" rows="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
       </div>
       <pre v-else class="bg-gray-50 p-3 rounded-lg text-xs font-mono text-gray-700 overflow-x-auto max-h-48">{{ config.value || JSON.stringify(config, null, 2) }}</pre>
     </div>
