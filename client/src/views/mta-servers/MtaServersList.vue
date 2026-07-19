@@ -27,7 +27,8 @@ const columns = [
 
 const actions = [
   { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/mta-servers/${row.id}/edit`) },
-  { label: 'Check', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: async (row) => {
+  { label: 'Install', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: (row) => router.push(`/mta-servers/install/${row.id}`) },
+  { label: 'Check', class: 'bg-purple-100 text-purple-700 hover:bg-purple-200', handler: async (row) => {
     try { await checkMtaServer(row.id); tableRef.value?.loadData(); } catch (e) { console.error(e); }
   }},
   { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
@@ -61,9 +62,23 @@ const handleConfirm = async () => {
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-800">MTA Servers</h1>
-      <router-link to="/mta-servers/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-        + Add New Server
-      </router-link>
+      <div class="flex items-center gap-2">
+        <router-link to="/mta-servers/multi-add" class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
+          Multi-Add
+        </router-link>
+        <router-link to="/mta-servers/install" class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+          Install
+        </router-link>
+        <router-link to="/mta-servers/actions" class="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors">
+          Actions
+        </router-link>
+        <router-link to="/mta-servers/vmtas" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+          VMTAs
+        </router-link>
+        <router-link to="/mta-servers/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+          + Add New Server
+        </router-link>
+      </div>
     </div>
 
     <DataTable

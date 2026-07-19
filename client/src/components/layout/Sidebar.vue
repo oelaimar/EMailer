@@ -42,6 +42,12 @@ const menuItems = [
   { id: 'mta', label: 'MTA Servers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01', children: [
     { label: 'MTA Servers List', path: '/mta-servers' },
     { label: 'Add MTA Server', path: '/mta-servers/add' },
+    { label: 'Multi-Add Servers', path: '/mta-servers/multi-add' },
+    { label: 'Install Wizard', path: '/mta-servers/install' },
+    { label: 'Bulk Install', path: '/mta-servers/bulk-install' },
+    { label: 'Configure IPs', path: '/mta-servers/configure-ips' },
+    { label: 'Server Actions', path: '/mta-servers/actions' },
+    { label: 'VMTAs List', path: '/mta-servers/vmtas' },
   ]},
   { id: 'smtp', label: 'SMTP Servers', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', children: [
     { label: 'SMTP Servers List', path: '/smtp-servers' },

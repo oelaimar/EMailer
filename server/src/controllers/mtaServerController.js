@@ -300,6 +300,118 @@ exports.generateDkim = async (req, res, next) => {
   }
 };
 
+exports.bulkAdd = async (req, res, next) => {
+  try {
+    const { prefix, serverProviderId, os, username, password, mainIps } = req.body;
+    if (!prefix || !mainIps) {
+      return res.status(400).json({ error: 'Prefix and Main IPs list are required.' });
+    }
+
+    const ipList = mainIps.split('\n').map(ip => ip.trim()).filter(Boolean);
+    if (ipList.length === 0) {
+      return res.status(400).json({ error: 'At least one IP is required.' });
+    }
+
+    const created = await prisma.$transaction(
+      ipList.map((ip, i) =>
+        prisma.mtaServer.create({
+          data: {
+            name: `${prefix}-${String(i + 1).padStart(3, '0')}`,
+            serverProviderId: serverProviderId ? parseInt(serverProviderId, 10) : null,
+            os: os || 'ubuntu',
+            mainIp: ip,
+            loginType: 'user-pass',
+            username: username || 'root',
+            password: password || null,
+            status: 'Activated',
+          },
+          select: mtaSelect,
+        })
+      )
+    );
+
+    logAction(req.user?.email, 'MtaServer', 'bulk-create', null, `Bulk added ${created.length} servers with prefix "${prefix}"`, req.user?.id).catch(() => {});
+    res.status(201).json({ message: `${created.length} servers created.`, servers: created });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getServerInfo = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    const server = await prisma.mtaServer.findUnique({ where: { id } });
+    if (!server) return res.status(404).json({ error: 'MTA server not found.' });
+
+    const info = await sshService.getServerInfo(server.mainIp, server.sshPort, server.username, server.password);
+
+    const domains = await prisma.domain.findMany({ where: { status: 'Activated' }, select: { id: true, name: true } });
+
+    const existingIps = server.ips ? server.ips.split(',').map(ip => ip.trim()).filter(Boolean) : [server.mainIp];
+
+    res.json({
+      server: { id: server.id, name: server.name, mainIp: server.mainIp, os: server.os, ...info },
+      domains: domains.map(d => ({ id: d.id, name: d.name })),
+      ipsV4: info.ipsV4.length ? info.ipsV4 : existingIps,
+      ipsV6: info.ipsV6,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.configureAdditionalIps = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    const { lines } = req.body;
+    if (!lines) return res.status(400).json({ error: 'IP lines are required.' });
+
+    const server = await prisma.mtaServer.findUnique({ where: { id } });
+    if (!server) return res.status(404).json({ error: 'MTA server not found.' });
+
+    const result = await sshService.configureAdditionalIps(server.mainIp, server.sshPort, server.username, server.password, server.os, lines);
+
+    if (result.status === 'ok') {
+      const updated = await prisma.mtaServer.update({
+        where: { id },
+        data: { ips: lines.split('\n').map(l => l.trim()).filter(Boolean).join(', ') },
+        select: mtaSelect,
+      });
+      res.json({ ...updated, output: result.output });
+    } else {
+      res.status(500).json({ error: result.output });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.executeServersCommand = async (req, res, next) => {
+  try {
+    const { servers, action } = req.body;
+    if (!servers || !Array.isArray(servers) || !action) {
+      return res.status(400).json({ error: 'Servers array and action are required.' });
+    }
+
+    const results = await Promise.all(
+      servers.map(async (serverId) => {
+        const id = parseInt(serverId, 10);
+        const server = await prisma.mtaServer.findUnique({ where: { id } });
+        if (!server) return { id, name: `Server #${id}`, output: 'Server not found' };
+        const result = await sshService.executeServersCommand(server.mainIp, server.sshPort, server.username, server.password, action);
+        return { id: server.id, name: server.name, output: result.output };
+      })
+    );
+
+    logAction(req.user?.email, 'MtaServer', 'execute-command', null, `Executed "${action}" on ${results.length} servers`, req.user?.id).catch(() => {});
+    res.json({ results });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.beginBulkInstallation = async (req, res, next) => {
   try {
     const { ids } = req.body;
