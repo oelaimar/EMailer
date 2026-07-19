@@ -65,7 +65,7 @@ exports.create = async (req, res, next) => {
       select,
     });
 
-    logAction(req.user?.email, 'PostmasterAccount', 'create', item.id, item.email, req.user?.id).catch(() => {});
+    logAction(req.user?.email, 'PostmasterAccount', 'create', item.id, item.domain, req.user?.id).catch(() => {});
     res.status(201).json(item);
   } catch (error) {
     next(error);
@@ -95,7 +95,7 @@ exports.update = async (req, res, next) => {
       select,
     });
 
-    logAction(req.user?.email, 'PostmasterAccount', 'update', item.id, item.email, req.user?.id).catch(() => {});
+    logAction(req.user?.email, 'PostmasterAccount', 'update', item.id, item.domain, req.user?.id).catch(() => {});
     res.json(item);
   } catch (error) {
     next(error);

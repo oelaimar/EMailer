@@ -67,8 +67,9 @@ exports.create = async (req, res, next) => {
         }).catch(() => null);
         if (group) created.push(group);
       }
-      return logAction(req.user?.email, 'SmtpGroup', 'create', created.id, created.name, req.user?.id).catch(() => {});
-    res.status(201).json(created);
+      res.status(201).json(created);
+      return;
+    }
     }
 
     if (!name) return res.status(400).json({ error: 'Group name is required.' });

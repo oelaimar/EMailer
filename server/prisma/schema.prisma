@@ -172,6 +172,20 @@ model SmtpGroup {
   updatedAt       DateTime  @updatedAt
   virtualLists    VirtualList[]
   sendProcesses   SendProcess[]
+  customVmtas     CustomVmta[]
+}
+
+model CustomVmta {
+  id          Int      @id @default(autoincrement())
+  smtpGroupId Int
+  name        String
+  ip          String?
+  port        Int?
+  status      String   @default("Activated")
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  smtpGroup   SmtpGroup @relation(fields: [smtpGroupId], references: [id], onDelete: Cascade)
 }
 
 model Proxy {

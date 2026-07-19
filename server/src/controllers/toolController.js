@@ -51,7 +51,7 @@ exports.blacklistCheck = async (req, res, next) => {
           }
         }
       } else {
-        itemResults.push({ note: 'Domain reputation check requires external API integration.' });
+        itemResults.push({ implemented: false, note: 'Domain reputation check requires external API integration.' });
       }
       results.push({ item, type, results: itemResults });
     }
@@ -107,19 +107,16 @@ exports.extractValues = async (req, res, next) => {
 
 exports.extractMailbox = async (req, res, next) => {
   try {
-    const { mailboxes, folder, maxEmails, order, returnType, filters } = req.body;
+    const { mailboxes } = req.body;
     if (!mailboxes) return res.status(400).json({ error: 'Mailboxes are required.' });
 
     const mailboxList = mailboxes.split('\n').map((m) => m.trim()).filter(Boolean);
-    const results = [];
-
-    for (const mailbox of mailboxList) {
-      results.push({
-        mailbox,
-        status: 'Mailbox extraction requires IMAP connection. Configure mailboxes in the Mailboxes section.',
-        emails: [],
-      });
-    }
+    const results = mailboxList.map((mailbox) => ({
+      mailbox,
+      implemented: false,
+      status: 'Mailbox extraction requires IMAP connection. Configure mailboxes in the Mailboxes section.',
+      emails: [],
+    }));
 
     res.json({ results, total: results.length });
   } catch (error) {

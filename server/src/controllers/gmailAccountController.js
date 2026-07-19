@@ -130,7 +130,7 @@ exports.sendProcessData = async (req, res, next) => {
       prisma.gmailAccount.findMany({ where: { status: 'Activated' }, select: { id: true, email: true } }),
       prisma.smtpGroup.findMany({ where: { status: 'Activated' }, select: { id: true, name: true } }),
       prisma.offer.findMany({ where: { status: 'Activated' }, select: { id: true, name: true } }),
-      prisma.header.findMany({ select: { id: true, name: true, content: true } }),
+      prisma.header.findMany({ select: { id: true, name: true, header: true } }),
     ]);
 
     res.json({ accounts, smtpGroups, offers, headers });

@@ -258,7 +258,10 @@ exports.downloadList = async (req, res, next) => {
 
 exports.fetchEmails = async (req, res, next) => {
   try {
-    res.json({ message: 'Email fetch initiated. This feature requires IMAP server configuration.' });
+    res.json({
+      implemented: false,
+      message: 'Email fetch requires IMAP server integration. Configure mailboxes in the Mailboxes section first.',
+    });
   } catch (error) {
     next(error);
   }

@@ -420,7 +420,25 @@ exports.beginBulkInstallation = async (req, res, next) => {
     const intIds = ids.map((id) => parseInt(id, 10));
     await prisma.mtaServer.updateMany({ where: { id: { in: intIds } }, data: { installationStatus: 'Installing' } });
 
-    res.json({ message: 'Bulk installation started.', count: intIds.length });
+    const installScript = `bash <(curl -s https://raw.githubusercontent.com/mta/installer/main/install.sh) 2>&1`;
+
+    const results = await Promise.all(
+      intIds.map(async (id) => {
+        const server = await prisma.mtaServer.findUnique({ where: { id } });
+        if (!server) return { id, status: 'not_found', output: 'Server not found' };
+        try {
+          const result = await sshService.executeCommand(server.mainIp, server.sshPort, server.username, server.password, installScript, 120000);
+          await prisma.mtaServer.update({ where: { id }, data: { installationStatus: 'Installed' } });
+          return { id, status: 'ok', output: result.stdout };
+        } catch (err) {
+          await prisma.mtaServer.update({ where: { id }, data: { installationStatus: 'Failed' } });
+          return { id, status: 'error', output: err.message };
+        }
+      })
+    );
+
+    logAction(req.user?.email, 'MtaServer', 'bulk-install', null, `Bulk install on ${intIds.length} servers`, req.user?.id).catch(() => {});
+    res.json({ message: 'Bulk installation completed.', results });
   } catch (error) {
     next(error);
   }
@@ -432,9 +450,21 @@ exports.getBulkInstallationLogs = async (req, res, next) => {
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs array is required.' });
 
     const intIds = ids.map((id) => parseInt(id, 10));
-    const servers = await prisma.mtaServer.findMany({ where: { id: { in: intIds } }, select: { id: true, name: true, installationStatus: true } });
 
-    res.json({ servers });
+    const results = await Promise.all(
+      intIds.map(async (id) => {
+        const server = await prisma.mtaServer.findUnique({ where: { id }, select: { id: true, name: true, installationStatus: true, mainIp: true, sshPort: true, username: true, password: true } });
+        if (!server) return { id, name: `Server #${id}`, logs: 'Server not found' };
+        try {
+          const result = await sshService.executeCommand(server.mainIp, server.sshPort, server.username, server.password, 'cat /var/log/install.log 2>/dev/null || echo "No logs available"', 10000);
+          return { id: server.id, name: server.name, status: server.installationStatus, logs: result.stdout };
+        } catch {
+          return { id: server.id, name: server.name, status: server.installationStatus, logs: 'Unable to fetch logs.' };
+        }
+      })
+    );
+
+    res.json({ servers: results });
   } catch (error) {
     next(error);
   }

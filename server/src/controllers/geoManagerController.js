@@ -83,7 +83,9 @@ exports.start = async (req, res, next) => {
       data: { processId: id, action: 'Started', details: 'Process started by user.' },
     });
 
-    res.json(item);
+    logAction(req.user?.email, 'GeoManagerProcess', 'start', item.id, item.name, req.user?.id).catch(() => {});
+
+    res.json({ ...item, implemented: false, message: 'Geo Manager background processing is not yet implemented. Status updated for tracking purposes.' });
   } catch (error) {
     next(error);
   }
@@ -104,7 +106,9 @@ exports.stop = async (req, res, next) => {
       data: { processId: id, action: 'Stopped', details: 'Process stopped by user.' },
     });
 
-    res.json(item);
+    logAction(req.user?.email, 'GeoManagerProcess', 'stop', item.id, item.name, req.user?.id).catch(() => {});
+
+    res.json({ ...item, implemented: false, message: 'Geo Manager background processing is not yet implemented. Status updated for tracking purposes.' });
   } catch (error) {
     next(error);
   }

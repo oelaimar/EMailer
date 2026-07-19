@@ -60,7 +60,7 @@ exports.create = async (req, res, next) => {
       select,
     });
 
-    logAction(req.user?.email, 'Proxy', 'create', item.id, item.host, req.user?.id).catch(() => {});
+    logAction(req.user?.email, 'Proxy', 'create', item.id, item.ip, req.user?.id).catch(() => {});
     res.status(201).json(item);
   } catch (error) {
     next(error);
@@ -86,7 +86,7 @@ exports.update = async (req, res, next) => {
       select,
     });
 
-    logAction(req.user?.email, 'Proxy', 'update', item.id, item.host, req.user?.id).catch(() => {});
+    logAction(req.user?.email, 'Proxy', 'update', item.id, item.ip, req.user?.id).catch(() => {});
     res.json(item);
   } catch (error) {
     next(error);
