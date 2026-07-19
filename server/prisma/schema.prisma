@@ -140,6 +140,7 @@ model DomainRecord {
   value     String
   ttl       Int      @default(3600)
   priority  Int?
+  proxied   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
@@ -419,9 +420,50 @@ model PostmasterAccount {
   username        String?
   password        String?
   status          String   @default("Activated")
+  lastChecked     DateTime? @map("last_checked")
+  connectionStatus String?  @default("Unknown") @map("connection_status")
+  lastError       String?   @map("last_error")
   createdBy       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  messages        PostmasterMessage[]
+  runs            PostmasterRun[]
+}
+
+model PostmasterMessage {
+  id              Int      @id @default(autoincrement())
+  accountId       Int
+  account         PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  messageId       String   @map("message_id")
+  uid             Int
+  folder          String   @default("INBOX")
+  from            String
+  to              String?
+  subject         String?
+  date            DateTime?
+  bodyHtml        String?  @map("body_html") @db.Text
+  bodyText        String?  @map("body_text") @db.Text
+  rawHeaders     String?  @map("raw_headers") @db.Text
+  isBlacklisted  Boolean  @default(false)
+  isDeleted      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@unique([accountId, messageId])
+  @@index([accountId])
+}
+
+model PostmasterRun {
+  id              Int      @id @default(autoincrement())
+  accountId       Int
+  account         PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status          String   @default("running")
+  messageCount    Int      @default(0)
+  newCount        Int      @default(0)
+  errorLog        String?  @map("error_log") @db.Text
+  startedAt       DateTime @default(now())
+  finishedAt      DateTime?
+
+  @@index([accountId])
 }
 
 model Header {
@@ -550,12 +592,19 @@ model GeoManagerProcess {
   id            Int      @id @default(autoincrement())
   name          String
   status        String   @default("Pending")
+  sourceSchema  String?  @map("source_schema")
+  sourceTables  Json?    @map("source_tables")
   targetRows    Int?
   targetGeos    Json?
   batchSize     Int      @default(500)
   tablePattern  String   @default("e_")
   duplicateMode String   @default("delete")
+  movedRows     Int      @default(0) @map("moved_rows")
+  deletedRows   Int      @default(0) @map("deleted_rows")
+  skippedRows   Int      @default(0) @map("skipped_rows")
   scheduledAt   DateTime?
+  startedAt     DateTime? @map("started_at")
+  finishedAt    DateTime? @map("finished_at")
   createdBy     String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

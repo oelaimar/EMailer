@@ -4,6 +4,9 @@ const controller = require('../controllers/geoManagerController');
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
 
+router.get('/schemas', auth, roleCheck('geo-manager', 'read'), controller.getSchemas);
+router.post('/source-tables', auth, roleCheck('geo-manager', 'read'), controller.getSourceTables);
+router.post('/summary', auth, roleCheck('geo-manager', 'read'), controller.getGeoSummary);
 router.get('/', auth, roleCheck('geo-manager', 'read'), controller.list);
 router.get('/:id', auth, roleCheck('geo-manager', 'read'), controller.getById);
 router.post('/', auth, roleCheck('geo-manager', 'write'), controller.create);

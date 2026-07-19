@@ -13,3 +13,6 @@ export const deletePmtaTemplate = (id) => client.delete(`/pmta/templates/${id}`)
 export const getPmtaVmtas = (params) => client.get('/pmta/vmtas', { params });
 export const createPmtaVmta = (data) => client.post('/pmta/vmtas', data);
 export const deletePmtaVmta = (id) => client.delete(`/pmta/vmtas/${id}`);
+export const getPmtaServerNames = () => client.get('/pmta/server-names');
+export const createPmtaVmtaRotation = (data) => client.post('/pmta/vmtas/create-rotation', data);
+export const resetPmtaVmtas = (data) => client.post('/pmta/vmtas/reset', data);

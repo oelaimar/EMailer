@@ -11,5 +11,6 @@ router.post('/', auth, roleCheck('mta-proxies', 'write'), controller.create);
 router.put('/:id', auth, roleCheck('mta-proxies', 'write'), controller.update);
 router.delete('/:id', auth, roleCheck('mta-proxies', 'delete'), controller.remove);
 router.post('/bulk-action', auth, roleCheck('mta-proxies', 'delete'), controller.bulkAction);
+router.post('/install', auth, roleCheck('mta-proxies', 'write'), controller.installOnServers);
 
 module.exports = router;

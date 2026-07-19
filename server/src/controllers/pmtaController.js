@@ -311,3 +311,79 @@ exports.listHistory = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.createServerVmtas = async (req, res, next) => {
+  try {
+    const { serverNames, encryption, smtps } = req.body;
+    if (!serverNames || !Array.isArray(serverNames) || serverNames.length === 0) {
+      return res.status(400).json({ error: 'At least one server name is required.' });
+    }
+    if (!smtps || typeof smtps !== 'string') {
+      return res.status(400).json({ error: 'SMTPs list is required (host port username password, one per line).' });
+    }
+
+    const lines = smtps.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return res.status(400).json({ error: 'No valid SMTP entries found.' });
+
+    const created = [];
+    for (const serverName of serverNames) {
+      const configData = {
+        encryption: encryption || 'none',
+        smtps: lines.map((line) => {
+          const parts = line.split(/\s+/);
+          return { host: parts[0], port: parts[1] || '25', username: parts[2] || '', password: parts[3] || '' };
+        }),
+        rotation: true,
+        createdAt: new Date().toISOString(),
+      };
+
+      const item = await prisma.pmtaVmta.create({
+        data: {
+          serverName,
+          vmtaType: 'smtp',
+          configData,
+          createdBy: req.user?.email || 'admin',
+        },
+      });
+      created.push(item);
+    }
+
+    logAction(req.user?.email, 'PmtaVmta', 'create', null, `Created SMTP VMTAs for ${serverNames.length} servers (${lines.length} entries, ${encryption || 'none'})`, req.user?.id).catch(() => {});
+    res.status(201).json({ message: `Created ${created.length} SMTP VMTA rotation configs.`, data: created });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.resetServerVmtas = async (req, res, next) => {
+  try {
+    const { serverNames } = req.body;
+    if (!serverNames || !Array.isArray(serverNames) || serverNames.length === 0) {
+      return res.status(400).json({ error: 'At least one server name is required.' });
+    }
+
+    const deleted = await prisma.pmtaVmta.deleteMany({
+      where: {
+        serverName: { in: serverNames },
+        vmtaType: 'smtp',
+      },
+    });
+
+    logAction(req.user?.email, 'PmtaVmta', 'delete', null, `Reset SMTP VMTAs for ${serverNames.length} servers (${deleted.count} deleted)`, req.user?.id).catch(() => {});
+    res.json({ message: `Deleted ${deleted.count} SMTP VMTA configs.`, count: deleted.count });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getServerNames = async (req, res, next) => {
+  try {
+    const servers = await prisma.mtaServer.findMany({
+      select: { id: true, name: true, mainIp: true },
+      orderBy: { name: 'asc' },
+    });
+    res.json(servers);
+  } catch (error) {
+    next(error);
+  }
+};

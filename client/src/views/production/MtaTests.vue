@@ -1,6 +1,14 @@
 <script setup>
+import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
-import { getMtaTests } from '../../api/production';
+import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import { getMtaTests, executeProcessAction } from '../../api/production';
+
+const tableRef = ref(null);
+const confirmDialog = ref(false);
+const confirmMessage = ref('');
+const confirmAction = ref(null);
+const loading = ref(false);
 
 const columns = [
   { key: 'id', label: 'ID' },
@@ -15,6 +23,26 @@ const columns = [
   { key: 'opens', label: 'Opens' },
   { key: 'clicks', label: 'Clicks' },
 ];
+
+const actions = [
+  { label: 'Pause', class: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200', handler: (row) => {
+    confirmMessage.value = `Pause test #${row.id}?`;
+    confirmAction.value = () => executeProcessAction(row.id, 'pause').then(() => tableRef.value?.loadData());
+    confirmDialog.value = true;
+  }},
+  { label: 'Stop', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+    confirmMessage.value = `Stop test #${row.id}?`;
+    confirmAction.value = () => executeProcessAction(row.id, 'stop').then(() => tableRef.value?.loadData());
+    confirmDialog.value = true;
+  }},
+];
+
+const handleConfirm = async () => {
+  loading.value = true;
+  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  loading.value = false;
+  confirmDialog.value = false;
+};
 </script>
 
 <template>
@@ -25,14 +53,19 @@ const columns = [
     </div>
 
     <DataTable
+      ref="tableRef"
       :columns="columns"
       :fetch-data="async (params) => (await getMtaTests(params)).data"
+      :selectable="true"
+      :actions="actions"
     >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-blue-100 text-blue-700' : value === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-blue-100 text-blue-700' : value === 'Completed' ? 'bg-emerald-100 text-emerald-700' : value === 'Paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700']">
           {{ value }}
         </span>
       </template>
     </DataTable>
+
+    <ConfirmDialog :show="confirmDialog" title="Confirm Action" :message="confirmMessage" confirm-text="Confirm" @confirm="handleConfirm" @cancel="confirmDialog = false" />
   </div>
 </template>

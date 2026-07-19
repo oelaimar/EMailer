@@ -149,3 +149,58 @@ exports.listByType = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.installOnServers = async (req, res, next) => {
+  try {
+    const { serverIds, httpPort, socksPort, username, password } = req.body;
+    if (!serverIds || !Array.isArray(serverIds) || serverIds.length === 0) {
+      return res.status(400).json({ error: 'Select at least one server.' });
+    }
+
+    const intIds = serverIds.map((id) => parseInt(id, 10));
+    const servers = await prisma.mtaServer.findMany({ where: { id: { in: intIds } } });
+
+    if (servers.length === 0) return res.status(404).json({ error: 'No servers found.' });
+
+    const sshService = require('../services/sshService');
+    const results = [];
+
+    for (const server of servers) {
+      try {
+        const installCmd = [
+          'apt-get update -qq',
+          'apt-get install -y -qq squid squid-common',
+          `sed -i 's/#http_port 3128/http_port ${httpPort || 3128}/' /etc/squid/squid.conf`,
+          socksPort ? `echo 'http_port ${socksPort}' >> /etc/squid/squid.conf` : '',
+          username && password ? `echo 'http_access allow ${username}' >> /etc/squid/squid.conf` : '',
+          'service squid restart',
+        ].filter(Boolean).join(' && ');
+
+        await sshService.executeCommand(server, installCmd);
+
+        const proxyData = {
+          ip: server.mainIp,
+          port: parseInt(httpPort, 10) || 3128,
+          username: username || null,
+          password: password || null,
+          type: 'HTTP',
+          status: 'Activated',
+        };
+
+        const existing = await prisma.proxy.findFirst({ where: { ip: proxyData.ip, port: proxyData.port } });
+        if (!existing) {
+          await prisma.proxy.create({ data: proxyData });
+        }
+
+        results.push({ server: server.name, status: 'Success', message: `Squid installed on port ${httpPort || 3128}` });
+      } catch (e) {
+        results.push({ server: server.name, status: 'Failed', message: e.message });
+      }
+    }
+
+    logAction(req.user?.email, 'Proxy', 'install', null, `Installed proxy on ${results.filter((r) => r.status === 'Success').length}/${servers.length} servers`, req.user?.id).catch(() => {});
+    res.json({ results });
+  } catch (error) {
+    next(error);
+  }
+};

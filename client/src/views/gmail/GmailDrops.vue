@@ -1,6 +1,15 @@
 <script setup>
+import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
+import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getGmailDrops } from '../../api/gmailProduction';
+import { executeProcessAction } from '../../api/production';
+
+const tableRef = ref(null);
+const confirmDialog = ref(false);
+const confirmMessage = ref('');
+const confirmAction = ref(null);
+const loading = ref(false);
 
 const columns = [
   { key: 'id', label: 'ID' },
@@ -17,6 +26,26 @@ const columns = [
   { key: 'leads', label: 'Leads' },
   { key: 'unsubs', label: 'Unsubs' },
 ];
+
+const actions = [
+  { label: 'Pause', class: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200', handler: (row) => {
+    confirmMessage.value = `Pause process #${row.id}?`;
+    confirmAction.value = () => executeProcessAction(row.id, 'pause').then(() => tableRef.value?.loadData());
+    confirmDialog.value = true;
+  }},
+  { label: 'Stop', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+    confirmMessage.value = `Stop process #${row.id}?`;
+    confirmAction.value = () => executeProcessAction(row.id, 'stop').then(() => tableRef.value?.loadData());
+    confirmDialog.value = true;
+  }},
+];
+
+const handleConfirm = async () => {
+  loading.value = true;
+  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  loading.value = false;
+  confirmDialog.value = false;
+};
 </script>
 
 <template>
@@ -25,10 +54,21 @@ const columns = [
       <h1 class="text-2xl font-bold text-gray-800">Gmail Drops</h1>
       <router-link to="/gmail-accounts" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back</router-link>
     </div>
-    <DataTable :columns="columns" :fetch-data="async (params) => (await getGmailDrops(params)).data">
+
+    <DataTable
+      ref="tableRef"
+      :columns="columns"
+      :fetch-data="async (params) => (await getGmailDrops(params)).data"
+      :selectable="true"
+      :actions="actions"
+    >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-blue-100 text-blue-700' : value === 'Completed' ? 'bg-emerald-100 text-emerald-700' : value === 'Paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700']">{{ value }}</span>
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-blue-100 text-blue-700' : value === 'Completed' ? 'bg-emerald-100 text-emerald-700' : value === 'Paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700']">
+          {{ value }}
+        </span>
       </template>
     </DataTable>
+
+    <ConfirmDialog :show="confirmDialog" title="Confirm Action" :message="confirmMessage" confirm-text="Confirm" @confirm="handleConfirm" @cancel="confirmDialog = false" />
   </div>
 </template>

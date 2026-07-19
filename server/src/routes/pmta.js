@@ -25,4 +25,8 @@ router.get('/configs', auth, roleCheck('pmta', 'read'), controller.listConfigs);
 router.put('/configs/:id', auth, roleCheck('pmta', 'write'), controller.updateConfig);
 router.get('/history', auth, roleCheck('pmta', 'read'), controller.listHistory);
 
+router.get('/server-names', auth, roleCheck('pmta', 'read'), controller.getServerNames);
+router.post('/vmtas/create-rotation', auth, roleCheck('pmta', 'write'), controller.createServerVmtas);
+router.post('/vmtas/reset', auth, roleCheck('pmta', 'write'), controller.resetServerVmtas);
+
 module.exports = router;

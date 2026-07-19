@@ -24,6 +24,7 @@ router.use('/cloud-instances', require('./cloudInstances'));
 router.use('/registrar-accounts', require('./registrarAccounts'));
 router.use('/proxies', require('./proxies'));
 router.use('/postmaster-accounts', require('./postmasterAccounts'));
+router.use('/postmaster', require('./postmaster'));
 router.use('/headers', require('./headers'));
 router.use('/data-providers', require('./dataProviders'));
 router.use('/isps', require('./isps'));

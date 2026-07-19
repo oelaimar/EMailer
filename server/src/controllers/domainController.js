@@ -155,7 +155,7 @@ exports.getRecords = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
-    const records = await prisma.domainRecord.findMany({ where: { domainId: id } });
+    const records = await prisma.domainRecord.findMany({ where: { domainId: id }, orderBy: { type: 'asc' } });
     res.json(records);
   } catch (error) {
     next(error);
@@ -173,11 +173,110 @@ exports.setRecords = async (req, res, next) => {
     await prisma.domainRecord.deleteMany({ where: { domainId: id } });
     const created = await Promise.all(
       records.map((r) => prisma.domainRecord.create({
-        data: { domainId: id, type: r.type, name: r.name, value: r.value, ttl: r.ttl || 3600, priority: r.priority },
+        data: {
+          domainId: id,
+          type: r.type,
+          name: r.name,
+          value: r.value,
+          ttl: parseInt(r.ttl, 10) || 3600,
+          priority: r.priority ? parseInt(r.priority, 10) : null,
+          proxied: !!r.proxied,
+        },
       }))
     );
 
+    logAction(req.user?.email, 'DomainRecord', 'update', id, `Set ${created.length} records`, req.user?.id).catch(() => {});
     res.json(created);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAccountDomains = async (req, res, next) => {
+  try {
+    const domains = await prisma.domain.findMany({
+      select: { id: true, name: true, accountName: true },
+      orderBy: { name: 'asc' },
+    });
+    const grouped = {};
+    for (const d of domains) {
+      const key = d.accountName || 'Unassigned';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(d);
+    }
+    res.json(grouped);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.setMultiDomainsRecords = async (req, res, next) => {
+  try {
+    const { domainIds, operation, records } = req.body;
+    if (!domainIds || !Array.isArray(domainIds) || !operation) {
+      return res.status(400).json({ error: 'Domain IDs array and operation are required.' });
+    }
+    if (!records || !Array.isArray(records)) {
+      return res.status(400).json({ error: 'Records array is required.' });
+    }
+
+    const intIds = domainIds.map((id) => parseInt(id, 10));
+    let affected = 0;
+
+    for (const domainId of intIds) {
+      switch (operation) {
+        case 'add': {
+          for (const r of records) {
+            await prisma.domainRecord.create({
+              data: {
+                domainId,
+                type: r.type,
+                name: r.name,
+                value: r.value,
+                ttl: parseInt(r.ttl, 10) || 3600,
+                priority: r.priority ? parseInt(r.priority, 10) : null,
+                proxied: !!r.proxied,
+              },
+            });
+            affected++;
+          }
+          break;
+        }
+        case 'edit': {
+          for (const r of records) {
+            const existing = await prisma.domainRecord.findFirst({
+              where: { domainId, type: r.type, name: r.name },
+            });
+            if (existing) {
+              await prisma.domainRecord.update({
+                where: { id: existing.id },
+                data: {
+                  value: r.value || existing.value,
+                  ttl: r.ttl ? parseInt(r.ttl, 10) : existing.ttl,
+                  proxied: r.proxied !== undefined ? !!r.proxied : existing.proxied,
+                },
+              });
+              affected++;
+            }
+          }
+          break;
+        }
+        case 'delete': {
+          for (const r of records) {
+            const where = { domainId, type: r.type, name: r.name };
+            if (r.value) where.value = r.value;
+            const deleted = await prisma.domainRecord.deleteMany({ where });
+            affected += deleted.count;
+          }
+          break;
+        }
+        default:
+          return res.status(400).json({ error: 'Invalid operation. Use add, edit, or delete.' });
+      }
+    }
+
+    logAction(req.user?.email, 'DomainRecord', `bulk-${operation}`, null, `${operation} ${affected} records across ${intIds.length} domains`, req.user?.id).catch(() => {});
+    res.json({ message: `Bulk ${operation} completed. ${affected} records affected across ${intIds.length} domains.`, affected });
   } catch (error) {
     next(error);
   }

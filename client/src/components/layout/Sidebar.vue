@@ -70,6 +70,8 @@ const menuItems = [
     { label: 'Add Domain', path: '/domains/add' },
     { label: 'Domain Brands', path: '/domains/brands' },
     { label: 'Subdomains', path: '/domains/subdomains' },
+    { label: 'Manage Records', path: '/domains/records' },
+    { label: 'Multi Records', path: '/domains/multi-records' },
   ]},
   { id: 'data-lists', label: 'Data Lists', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', children: [
     { label: 'Data Lists', path: '/data-lists' },
@@ -136,6 +138,8 @@ const menuItems = [
     { label: 'Add Cloud Account', path: '/cloud-accounts/add' },
     { label: 'Cloud Instances', path: '/cloud-instances' },
     { label: 'Launch Instance', path: '/cloud-instances/add' },
+    { label: 'Azure Processes', path: '/cloud-instances/azure-processes' },
+    { label: 'Azure Domain Change', path: '/cloud-instances/azure-domain-change' },
   ]},
   { id: 'servers-providers', label: 'Servers Providers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2', children: [
     { label: 'Providers List', path: '/server-providers' },
@@ -152,10 +156,13 @@ const menuItems = [
   { id: 'proxies', label: 'Proxies', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
     { label: 'Proxies List', path: '/proxies' },
     { label: 'Add Proxy', path: '/proxies/add' },
+    { label: 'Install Proxy', path: '/proxies/install' },
   ]},
   { id: 'postmaster', label: 'Postmaster', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Accounts List', path: '/postmaster-accounts' },
     { label: 'Add Account', path: '/postmaster-accounts/add' },
+    { label: 'Inbox Monitor', path: '/postmaster/inbox' },
+    { label: 'Runs', path: '/postmaster/runs' },
   ]},
   { id: 'users', label: 'Users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zM12.75 12a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z', children: [
     { label: 'Add Users', path: '/users/add' },
@@ -195,6 +202,7 @@ const menuItems = [
     { label: 'Scheduler', path: '/pmta/scheduler' },
     { label: 'Templates', path: '/pmta/templates' },
     { label: 'VMTAs', path: '/pmta/vmtas' },
+    { label: 'VMTA Rotation', path: '/pmta/vmtas/rotation' },
     { label: 'Configs', path: '/pmta/configs' },
     { label: 'History', path: '/pmta/history' },
   ]},

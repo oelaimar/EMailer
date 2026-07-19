@@ -5,6 +5,8 @@ const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
 
 router.get('/', auth, roleCheck('domains', 'read'), controller.list);
+router.get('/account-domains', auth, roleCheck('domains', 'read'), controller.getAccountDomains);
+router.post('/multi-records', auth, roleCheck('domains', 'write'), controller.setMultiDomainsRecords);
 router.get('/:id', auth, roleCheck('domains', 'read'), controller.getById);
 router.post('/', auth, roleCheck('domains', 'write'), controller.create);
 router.put('/:id', auth, roleCheck('domains', 'write'), controller.update);

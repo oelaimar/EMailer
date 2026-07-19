@@ -7,3 +7,4 @@ export const updateProxy = (id, data) => client.put(`/proxies/${id}`, data);
 export const deleteProxy = (id) => client.delete(`/proxies/${id}`);
 export const bulkActionProxies = (action, ids) => client.post('/proxies/bulk-action', { action, ids });
 export const getProxiesByType = (type) => client.get(`/proxies/by-type/${type}`);
+export const installProxyOnServers = (data) => client.post('/proxies/install', data);

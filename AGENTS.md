@@ -2,7 +2,7 @@
 
 ## What Is This
 
-Vugex V2 is a **full rebuild** of the Vugex Solution email marketing infrastructure platform. The original site (164+ HTML pages, 23 sections) is cloned at `../vugex-full/`. This is a ground-up rebuild using modern tech.
+Vugex V2 is a **full rebuild** of the Vugex Solution email marketing infrastructure platform. The original site (164+ HTML pages, 31 sections) is cloned at `../vugex-full/`. This is a ground-up rebuild using modern tech.
 
 ## Tech Stack
 
@@ -38,7 +38,7 @@ cd client && npm run dev
 - **Database:** `vugex_v2`
 - **Connection:** `mysql://root:password@localhost:3307/vugex_v2`
 - **Prisma commands:** `npm run db:migrate`, `npm run db:seed`, `npm run db:studio`, `npm run db:reset`
-- **Latest migration:** `20260719103840_add_phase7_teams_geo_settings_tools_stats_pmta_verticals_audit`
+- **Latest migration:** `20260719182527_extend_geo_manager`
 
 ## API Style
 
@@ -47,9 +47,9 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — Phase 7+8 COMPLETE
+## Current State — Phase 15 COMPLETE (all features implemented)
 
-### Database Models (42 total)
+### Database Models (49 total)
 
 | Model | Purpose |
 |---|---|
@@ -64,11 +64,12 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | DomainRecord | DNS records (A, MX, TXT, etc.) linked to domains |
 | DataList | Email data lists with vertical, ISP, country |
 | DataProvider | Data provider names |
-| Header | Email headers with name + content |
+| Header | Email headers with name + header (Text) |
 | Isp | ISP names |
 | Mailbox | Mailboxes linked to domains with IMAP/SMTP config |
 | ManagementServer | Management servers with SSH config (user-pass or PEM) |
 | SmtpGroup | SMTP groups with encryption, bulk create |
+| CustomVmta | Custom VMTAs linked to SMTP groups (name, ip, port) |
 | Proxy | HTTP/SOCKS proxy servers |
 | Offer | Offers with name, payout, cap, vertical |
 | Suppression | Suppression lists linked to offers |
@@ -81,10 +82,28 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | GmailAccount | Gmail API accounts with OAuth tokens |
 | GSuiteAccount | G Suite API accounts with OAuth tokens |
 | OutlookAccount | Outlook API accounts with OAuth tokens |
-| CloudAccount | Cloud provider accounts (generic: provider field for aws/azure/do/hetzner/linode/ovh/scaleway/vultr/atlantic/idcloud/google) |
-| CloudInstance | Cloud instances (generic: provider field, dynamic instance types per provider) |
-| RegistrarAccount | Domain registrar accounts (generic: registrar field for cloudflare/godaddy/namecheap/namecom/dynadot/spaceship) |
+| CloudAccount | Cloud provider accounts (generic: provider field for 11 providers) |
+| CloudInstance | Cloud instances (generic: provider field, dynamic instance types) |
+| RegistrarAccount | Domain registrar accounts (generic: registrar field for 6 registrars) |
 | PostmasterAccount | Postmaster accounts with IMAP/SMTP config for ISP inbox monitoring |
+| PostmasterMessage | Cached IMAP messages (unique per account+messageId) |
+| PostmasterRun | Postmaster monitoring run history with status and counts |
+| FrontendLog | Frontend application logs (stored in DB) |
+| Blacklist | Blacklisted emails/domains (linked to DataList) |
+| DomainBrand | Domain brand management |
+| DomainSubdomain | Subdomain management (linked to Domain) |
+| GeoManagerProcess | Geo Manager processes with source schema/tables, target geos, progress tracking |
+| GeoManagerLog | Geo Manager process logs |
+| PmtaCommand | PMTA commands (pending/executed) |
+| PmtaSchedule | PMTA scheduled commands |
+| PmtaTemplate | PMTA email templates |
+| PmtaVmta | PMTA VMTA entries |
+| Team | Teams for user grouping |
+| TeamUser | Team membership |
+| TeamAuthorization | Per-user authorizations (MTA/SMTP/Offers/DataLists) |
+| AuditLog | Audit trail for all CRUD operations |
+| Setting | Application settings (key-value) |
+| Vertical | Vertical/niche categories |
 
 ### Backend (server/src/)
 
@@ -96,161 +115,190 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | middleware/roleCheck.js | RBAC: checks role.permissions[section][action] |
 | middleware/errorHandler.js | P2002/P2003/P2025 handling, production-safe errors |
 | utils/helpers.js | paginate(), buildSearch(), buildSort() |
-| services/sshService.js | SSH remote execution (checkServer, executeCommand, getServerIps) |
+| services/sshService.js | SSH remote execution (checkServer, executeCommand, getServerIps, getServerInfo, configureAdditionalIps, executeServersCommand) |
+| services/imapService.js | IMAP connection via imapflow + mailparser (testConnection, fetchMessageSummaries, fetchMessageDetail, deleteMessage) |
+| services/geoDbService.js | MySQL pool + cross-schema queries (getSchemas, getTables, getGeoSummary, moveRows) |
+| services/geoJobRunner.js | In-memory background job manager (startJob, stopJob, graceful stop) |
 | controllers/authController.js | login, logout, refresh, me (with merged permissions) |
 | controllers/userController.js | CRUD, no superUserStatus on create |
 | controllers/roleController.js | CRUD + affectRoleToUsers + affectRolesToUser (transactions) |
 | controllers/smtpServerController.js | CRUD + check + bulkCheck + bulkAction, passwords hidden |
 | controllers/sessionsController.js | list + forceDisconnect |
-| controllers/dashboardController.js | stats (mostly stub) + charts |
-| controllers/mtaServerController.js | CRUD + check + bulkCheck + bulkAction + install + configureIps + extractRdns + generateDkim + bulkInstall |
-| controllers/domainController.js | CRUD + bulkAction + getRecords + setRecords |
-| controllers/dataListController.js | CRUD + upload (multer) + bulkAction |
-| controllers/smtpGroupController.js | CRUD + bulkAction + bulk create from newline-separated names |
-| controllers/productionController.js | CRUD + bulkAction + addProcess for production campaigns |
+| controllers/dashboardController.js | Real stats from DB (activeIPs parsed from string, daily/monthly stats from SendProcess) + real 7-day chart data with earnings from Offer payouts |
+| controllers/mtaServerController.js | CRUD + check + bulkCheck + bulkAction + install + configureIps + extractRdns + generateDkim + bulkAdd + getServerInfo + configureAdditionalIps + executeServersCommand + bulkInstall (SSH wired) + getBulkInstallationLogs (SSH wired) |
+| controllers/domainController.js | CRUD + bulkAction + getRecords + setRecords + listBrands + createBrand + deleteBrand + listSubdomains + createSubdomain + deleteSubdomain |
+| controllers/dataListController.js | CRUD + upload (multer) + bulkAction + listBlacklists + createBlacklist + deleteBlacklist + downloadList + fetchEmails (implemented:false) |
+| controllers/smtpGroupController.js | CRUD + bulkAction + bulk create + listCustomVmtas + addCustomVmta + deleteCustomVmta |
+| controllers/productionController.js | CRUD + bulkAction + addProcess + processAction + listMtaDrops + listMtaTests + listSmtpDrops + listSmtpTests + uploadImages |
 | controllers/offerController.js | CRUD + bulkAction + suppression list management |
 | controllers/suppressionController.js | CRUD + bulkAction + upload for suppression lists |
 | controllers/affiliateNetworkController.js | CRUD + bulkAction for affiliate networks |
 | controllers/autoResponderController.js | CRUD + bulkAction + addList for auto responders |
 | controllers/virtualListController.js | CRUD + bulkAction for virtual lists |
-| controllers/gmailController.js | CRUD + bulkAction for Gmail API accounts |
-| controllers/gsuiteController.js | CRUD + bulkAction for G Suite API accounts |
-| controllers/outlookController.js | CRUD + bulkAction for Outlook API accounts |
+| controllers/gmailAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
+| controllers/gSuiteAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
+| controllers/outlookAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
 | controllers/cloudAccountController.js | CRUD + bulkAction + listByProvider for cloud accounts |
 | controllers/cloudInstanceController.js | CRUD + bulkAction for cloud instances |
 | controllers/registrarAccountController.js | CRUD + bulkAction + listByRegistrar for registrar accounts |
 | controllers/proxyController.js | CRUD + bulkAction + listByType for proxy servers |
 | controllers/postmasterAccountController.js | CRUD + bulkAction for postmaster accounts |
+| controllers/postmasterController.js | 9 endpoints: getSources, getMessages, refreshMailbox, getMessageDetail, deleteMessages, exportReplyAccounts, getRuns, getRunLogs, testConnection |
 | controllers/headerController.js | CRUD + bulkAction for email headers |
 | controllers/dataProviderController.js | CRUD + bulkAdd + bulkAction for data providers |
 | controllers/ispController.js | CRUD + bulkAdd + bulkAction for ISPs |
 | controllers/serverProviderController.js | CRUD + bulkAdd + bulkAction for server providers |
 | controllers/managementServerController.js | CRUD + bulkAction for management servers (SSH config) |
 | controllers/mailboxController.js | CRUD + bulkAction + listDomains for mailboxes |
-| routes/ | 30 route files, all with auth + roleCheck middleware |
+| controllers/logController.js | Backend logs (read /var/log/syslog, mail.log, auth.log) + Frontend logs (CRUD from DB) |
+| controllers/pmtaController.js | Commands CRUD + Schedules CRUD + Templates CRUD + VMTAs (4 types) + Configs read/update + History |
+| controllers/geoManagerController.js | CRUD + start/stop (fully implemented with background jobs) + logs + bulkAction + getSourceTables + getSchemas + getGeoSummary |
+| controllers/statisticsController.js | Full report (paginated) + Advanced report (aggregated by status/MTA/offer) |
+| controllers/toolController.js | SPF check, Blacklist check (DNSBL for IPs, implemented:false for domains), Value extractor, Mailbox extractor (implemented:false) |
+| controllers/auditLogController.js | logAction() helper + list + bulkDelete |
+| controllers/teamController.js | CRUD + listUsers + addUser + removeUser + listAuthorizations + updateAuthorizations |
+| controllers/verticalController.js | CRUD + bulkAction |
+| controllers/settingController.js | get + update (key-value pairs) |
+| routes/ | 39 route files, all with auth + roleCheck middleware |
 
 ### Frontend (client/src/)
 
 | File | What It Does |
 |---|---|
 | App.vue | Calls fetchUser on init for fresh data |
-| router/index.js | ~64 routes + auth guards + 404 catch-all |
+| router/index.js | ~90 routes + auth guards + 404 catch-all |
 | stores/auth.js | Pinia: login, logout, fetchUser |
 | api/client.js | Axios with token inject + auto-refresh + store sync |
-| api/auth.js, users.js, roles.js, sessions.js, smtpServers.js, dashboard.js | Phase 1 API wrappers |
-| api/mtaServers.js, domains.js, dataLists.js, smtpGroups.js | Phase 2 API wrappers |
-| api/production.js, offers.js, suppressions.js, affiliateNetworks.js, autoResponders.js, virtualLists.js | Phase 3 API wrappers |
-| api/gmailAccounts.js, gsuiteAccounts.js, outlookAccounts.js | Phase 3 API wrappers (email providers) |
-| api/cloudAccounts.js, cloudInstances.js, registrarAccounts.js | Phase 4 API wrappers |
-| api/proxies.js, postmasterAccounts.js | Phase 5 API wrappers |
-| api/headers.js, dataProviders.js, isps.js, serverProviders.js, managementServers.js, mailboxes.js | Phase 6 API wrappers |
+| api/ | 43 API wrapper files covering all endpoints |
 | layouts/DefaultLayout.vue | Sidebar + Header + content |
 | layouts/AuthLayout.vue | Dark gradient login wrapper |
 | components/common/DataTable.vue | Server-side paginated table with search, select, group actions |
 | components/common/ConfirmDialog.vue | Reusable confirm modal |
-| components/layout/Sidebar.vue | Navigation sidebar with 27 collapsible sections |
+| components/layout/Sidebar.vue | Navigation sidebar with 30 collapsible sections |
 | components/layout/Header.vue | Top bar with user menu |
-| views/auth/LoginView.vue | Login form |
-| views/dashboard/DashboardView.vue | 12 stat cards + 4 chart placeholders |
-| views/smtp-servers/* | List, Form, BulkCheck |
-| views/mta-servers/* | List, Form (with SSH/OS/install config) |
-| views/domains/* | List, Form |
-| views/data-lists/* | List, Form |
-| views/smtp-groups/* | List, Form (bulk create with newline names) |
-| views/users/* | List, Form |
-| views/roles/* | List, Form, RoleAffect, RoleUsers |
-| views/sessions/SessionsView.vue | Session list with force disconnect |
-| views/production/* | List, Form, SendProcessesView |
-| views/offers/* | List, Form, SuppressionView |
-| views/affiliate-networks/* | List, Form |
-| views/auto-responders/* | List, Form |
-| views/virtual-lists/* | List, Form |
-| views/gmail/* | GmailAccountsList, GmailAccountForm |
-| views/gsuite/* | GSuiteAccountsList, GSuiteAccountForm |
-| views/outlook/* | OutlookAccountsList, OutlookAccountForm |
-| views/cloud-accounts/* | CloudAccountsList, CloudAccountForm |
-| views/cloud-instances/* | CloudInstancesList, CloudInstanceForm |
-| views/registrar-accounts/* | RegistrarAccountsList, RegistrarAccountForm |
-| views/proxies/* | ProxiesList, ProxyForm |
-| views/postmaster-accounts/* | PostmasterAccountsList, PostmasterAccountForm |
-| views/headers/* | HeadersList, HeaderForm |
-| views/data-providers/* | DataProvidersList, DataProviderForm |
-| views/isps/* | IspsList, IspForm |
-| views/server-providers/* | ServerProvidersList, ServerProviderForm |
-| views/management-servers/* | ManagementServersList, ManagementServerForm |
-| views/mailboxes/* | MailboxesList, MailboxForm |
 
-### Sidebar Sections (27 total)
+### Frontend Views (116 files across 40 directories)
+
+| Directory | Files | Key Views |
+|---|---|---|
+| affiliate-networks/ | 2 | List, Form |
+| audit-logs/ | 1 | List (read-only, bulk delete) |
+| auth/ | 1 | LoginView |
+| auto-responders/ | 2 | List, Form |
+| cloud-accounts/ | 2 | List, Form (11 providers) |
+| cloud-instances/ | 2 | List, Form |
+| dashboard/ | 1 | 12 real stat cards + 4 Chart.js charts (bar, doughnut, earnings) |
+| data-lists/ | 5 | List, Form, Blacklists, Download, EmailsFetch |
+| data-providers/ | 2 | List, Form |
+| domains/ | 4 | List, Form, Brands, Subdomains |
+| geo-manager/ | 4 | Processes, Form, Logs, Preview |
+| gmail/ | 5 | List, Form, SendProcess, Drops, Tests |
+| gsuite/ | 5 | List, Form, SendProcess, Drops, Tests |
+| headers/ | 2 | List, Form |
+| isps/ | 2 | List, Form |
+| logs/ | 2 | BackendLogs, FrontendLogs |
+| mailboxes/ | 2 | List, Form |
+| management-servers/ | 2 | List, Form |
+| mta-servers/ | 8 | List, Form, MultiAdd, InstallWizard, BulkInstall, AdditionalIps, ServerActions, VmtasList |
+| offers/ | 3 | List, Form, SuppressionView |
+| outlook/ | 5 | List, Form, SendProcess, Drops, Tests |
+| pmta/ | 7 | Commands, Scheduler, Templates, TemplateForm, Vmtas, Configs, History |
+| postmaster-accounts/ | 2 | List, Form |
+| postmaster/ | 2 | Inbox, Runs |
+| production/ | 8 | List, Form, SendProcessesView, MtaDrops, MtaTests, SmtpDrops, SmtpTests, UploadImages |
+| proxies/ | 2 | List, Form |
+| registrar-accounts/ | 2 | List, Form |
+| roles/ | 4 | List, Form (304 lines), RoleAffect, RoleUsers |
+| server-providers/ | 2 | List, Form |
+| sessions/ | 1 | Session list with force disconnect |
+| settings/ | 1 | Full settings form (40+ fields) |
+| smtp-groups/ | 4 | List, Form, SendProcess (with group dropdown), CustomVmtas (with group dropdown) |
+| smtp-servers/ | 3 | List, Form, BulkCheck |
+| statistics/ | 2 | FullReport, AdvancedReport |
+| teams/ | 4 | List, Form, TeamUsers, TeamAuthorisations |
+| tools/ | 4 | SpfLookup, BlacklistCheck, ValueExtractor, MailboxExtractor |
+| users/ | 2 | List, Form |
+| verticals/ | 2 | List, Form |
+| virtual-lists/ | 2 | List, Form |
+
+### Sidebar Sections (30 total)
 
 1. Dashboard
-2. Production
-3. MTA Servers
-4. SMTP Servers
-5. SMTP Groups
-6. Domains
-7. Data Lists
-8. Data Providers
-9. Mailboxes
-10. Offers
-11. Virtual Lists
-12. Auto Responders
-13. Headers
-14. Affiliate Networks
-15. Gmail API
-16. G Suite API
-17. Outlook API
-18. ISPs
-19. Cloud APIs
-20. Servers Providers
-21. Management Servers
-22. DNS Management
-23. Proxies
-24. Postmaster
-25. Users
-26. Application Roles
+2. Production (List, Add, MTA Drops, MTA Tests, SMTP Drops, SMTP Tests, Upload Images)
+3. MTA Servers (List, Add, Multi-Add, Install Wizard, Bulk Install, Configure IPs, Server Actions, VMTAs)
+4. SMTP Servers (List, Add, Bulk Check)
+5. SMTP Groups (List, Add, Send Process, Custom VMTAs)
+6. Domains (List, Add, Brands, Subdomains)
+7. Data Lists (List, Add, Blacklists, Download, Emails Fetch)
+8. Data Providers (List, Add)
+9. Mailboxes (List, Add)
+10. Offers (List, Add)
+11. Virtual Lists (List, Add)
+12. Auto Responders (List, Add)
+13. Headers (List, Add)
+14. Affiliate Networks (List, Add)
+15. Gmail API (List, Add, Send Process, Drops, Tests)
+16. G Suite API (List, Add, Send Process, Drops, Tests)
+17. Outlook API (List, Add, Send Process, Drops, Tests)
+18. ISPs (List, Add)
+19. Cloud APIs (Accounts, Instances)
+20. Servers Providers (List, Add)
+21. Management Servers (List, Add)
+22. DNS Management (Registrar Accounts)
+23. Proxies (List, Add)
+24. Postmaster (List, Add, Inbox Monitor, Runs)
+25. Users (Add, List)
+26. Application Roles (Add, List, Affect Roles, Affect Users)
 27. Sessions
-7. Data Lists
-8. Offers
-9. Virtual Lists
-10. Auto Responders
-11. Affiliate Networks
-12. Gmail API
-13. G Suite API
-14. Outlook API
-15. **Cloud APIs** (Phase 4 — Cloud Accounts + Cloud Instances)
-16. **DNS Management** (Phase 4 — Registrar Accounts)
-17. **Proxies** (Phase 5 — Proxy management)
-18. **Postmaster** (Phase 5 — Postmaster accounts)
-19. Users
-20. Application Roles
-21. Sessions
+28. Teams (List, Add)
+29. Verticals (List, Add)
+30. Tools (SPF, Blacklist, Value Extractor, Mailbox Extractor)
+31. Geo Manager (Processes, Add)
+32. Statistics (Full Report, Advanced Report)
+33. PMTA (Commands, Scheduler, Templates, VMTAs, Configs, History)
+34. Audit Logs
+35. Logs (Backend, Frontend)
+36. Settings
 
 ### Verified Working
 
-- Phase 1: Login/logout, JWT, RBAC, Users, Roles, Sessions, SMTP Servers
-- Phase 2: MTA Servers (SSH check, install, configure IPs, RDNS, DKIM)
-- Phase 2: Domains (CRUD, bulk actions, DNS records)
-- Phase 2: Data Lists (CRUD, file upload with email counting)
-- Phase 2: SMTP Groups (CRUD, bulk create from newline-separated names)
-- Phase 3: Production (CRUD, send processes)
-- Phase 3: Offers (CRUD, suppression lists)
-- Phase 3: Affiliate Networks (CRUD)
-- Phase 3: Auto Responders (CRUD, list associations)
-- Phase 3: Virtual Lists (CRUD, filters)
-- Phase 3: Gmail/GSuite/Outlook Accounts (CRUD)
-- Phase 4: Cloud Accounts (CRUD, 11 providers via generic model)
-- Phase 4: Cloud Instances (CRUD, dynamic instance types per provider)
-- Phase 4: Registrar Accounts (CRUD, 6 registrars via generic model)
-- Phase 5: Proxies (CRUD, HTTP/SOCKS5 types, bulk actions)
-- Phase 5: Postmaster Accounts (CRUD, IMAP/SMTP config, bulk actions)
-- Phase 6: Headers (CRUD, email header content management)
-- Phase 6: Data Providers (CRUD, bulk add from newline-separated names)
-- Phase 6: ISPs (CRUD, bulk add from newline-separated names)
-- Phase 6: Server Providers (CRUD, bulk add from newline-separated names)
-- Phase 6: Management Servers (CRUD, SSH config with user-pass/PEM)
-- Phase 6: Mailboxes (CRUD, linked to domains with IMAP/SMTP config)
-- All CRUD endpoints with pagination, search, sort, filtering
-- Frontend builds clean (0 errors)
+- **Phase 1:** Login/logout, JWT, RBAC, Users, Roles, Sessions, SMTP Servers
+- **Phase 2:** MTA Servers (SSH check, install, configure IPs, RDNS, DKIM, multi-add, bulk install, server actions, VMTAs)
+- **Phase 2:** Domains (CRUD, bulk actions, DNS records, brands, subdomains)
+- **Phase 2:** Data Lists (CRUD, file upload with email counting, blacklists, download, emails fetch)
+- **Phase 2:** SMTP Groups (CRUD, bulk create, send process, custom VMTAs)
+- **Phase 3:** Production (CRUD, send processes, MTA/SMTP drops/tests, upload images)
+- **Phase 3:** Offers (CRUD, suppression lists)
+- **Phase 3:** Affiliate Networks (CRUD)
+- **Phase 3:** Auto Responders (CRUD, list associations)
+- **Phase 3:** Virtual Lists (CRUD, filters)
+- **Phase 3:** Gmail/GSuite/Outlook Accounts (CRUD + send process + drops + tests)
+- **Phase 4:** Cloud Accounts (CRUD, 11 providers via generic model)
+- **Phase 4:** Cloud Instances (CRUD, dynamic instance types per provider)
+- **Phase 4:** Registrar Accounts (CRUD, 6 registrars via generic model)
+- **Phase 5:** Proxies (CRUD, HTTP/SOCKS5 types, bulk actions)
+- **Phase 5:** Postmaster Accounts (CRUD, IMAP/SMTP config, bulk actions)
+- **Phase 6:** Headers (CRUD, email header content management)
+- **Phase 6:** Data Providers (CRUD, bulk add from newline-separated names)
+- **Phase 6:** ISPs (CRUD, bulk add from newline-separated names)
+- **Phase 6:** Server Providers (CRUD, bulk add from newline-separated names)
+- **Phase 6:** Management Servers (CRUD, SSH config with user-pass/PEM)
+- **Phase 6:** Mailboxes (CRUD, linked to domains with IMAP/SMTP config)
+- **Phase 7:** Teams (CRUD, user assignment, per-user authorizations with full UI)
+- **Phase 7:** Verticals (CRUD with bulk actions)
+- **Phase 7:** Settings (Full application settings form)
+- **Phase 7:** Tools (SPF Lookup, Blacklist Check, Value Extractor, Mailbox Extractor)
+- **Phase 7:** Statistics (Full Report with date filters, Advanced Report with aggregation)
+- **Phase 7:** PMTA (Commands, Scheduler, Templates, VMTAs with 4 types, Configs, History)
+- **Phase 7:** Geo Manager (Process CRUD, logs viewer, schema/table discovery, geo summary, background job start/stop, preview page, progress tracking)
+- **Phase 7:** Audit Logs (read-only list with bulk delete, logAction in all controllers)
+- **Phase 9:** All sub-pages created (26 new views across 7 batches)
+- **Phase 10:** All crash bugs fixed (5) and stubs completed (8)
+- **Phase 11:** Dashboard charts (Chart.js + vue-chartjs, 4 real charts)
+- **Phase 11:** Postmaster monitoring (IMAP inbox, message viewer, reply accounts export, runs history, connection testing)
+- **Phase 11:** Gmail/GSuite/Outlook Drops Pause/Stop actions
+- **Phase 11:** Geo Manager full implementation (schema discovery, table selection, geo summary preview, background job runner with graceful stop)
+- **Routing fixes:** SMTP group send-process/custom-vmtas use dropdown selectors, PMTA back links fixed
 
 ## Conventions
 
@@ -263,6 +311,8 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 - **parseInt** always with radix 10: `parseInt(val, 10)`
 - **Passwords** never in API responses (use `select` clause)
 - **ID validation**: `if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' })`
+- **Implemented features** return real DB data
+- **Not-yet-implemented features** return `{ implemented: false, message: '...' }` — NOT fake status toggles
 
 ### Frontend
 - **Vue 3 Composition API** (`<script setup>`)
@@ -272,30 +322,17 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 - **DataTable** component for all list views (server-side pagination)
 - **ConfirmDialog** for all destructive actions — NO `window.confirm()`
 - **Try/catch** on all async operations in `onMounted`
+- **API wrappers** used consistently (no direct `client.get/post` in views)
 
 ### Permission Sections (94 total)
 
 Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/groups), MTA (servers/install/ips/etc), Domains, Production, Cloud Providers (AWS/Azure/DO/Hetzner/Linode/OVH/Scaleway/Vultr/Atlantic/IDCloud), Domain Registrars (Cloudflare/GoDaddy/Namecheap/Namecom/Dynadot/Spaceship), Gmail/GSuite/Outlook, Tools, Data Lists, Postmaster, ISPs, Headers, Data Providers, Mailboxes, Servers Providers, Management Servers, Proxies, Geo Manager, Sessions, Settings.
 
-## What's Next: Phase 8 COMPLETE
+## Known Remaining Gaps
 
-All Phase 7 features are fully implemented:
-- **Teams:** CRUD, user assignment, per-user authorizations (MTA/SMTP/Offers/Data Lists) with full UI
-- **Verticals:** CRUD with bulk actions
-- **Settings:** Full application settings form (general, app, integrations, image hosting, notifications, production, firewall)
-- **Tools:** SPF Lookup, Blacklist Check (IP DNSBL), Value Extractor (IPs/emails/senders), Mailbox Extractor
-- **Statistics:** Full Report (paginated with date filters), Advanced Report (aggregated stats by status/MTA/offer)
-- **PMTA:** Commands, Scheduler, Templates (CRUD), VMTAs (4-tab: global/individual/smtp/route)
-- **Geo Manager:** Process CRUD with start/stop, logs viewer
-- **Audit Logs:** Read-only list with bulk delete
-
-### Phase 8 Polish (also complete)
-- Sidebar `isActive` fixed: auto-expands active sections, highlights parent when child is active
-- Cloud Instances: edit route + edit mode added (was create-only)
-- Dashboard: 8 real stats from DB (active SMTP servers, MTA servers, offers, IPs, domains, mailboxes, data lists, users)
-- Audit logging: `logAction()` wired into all 30 controllers (~84 CRUD endpoints)
-- Team Authorizations: real checkbox UI with search, select all/clear for MTA/SMTP/Offers/Data Lists
-- Team ISPs: dynamically loaded from Isp model instead of hardcoded
+1. **Production Send Page** — Full campaign launch workflow (VMTA selection, headers, bodies, link types, creative preview/crop)
+2. **Advanced Analytics Dashboard** — ECharts-based charts, KPI cards, geo map, revenue forecast
+3. **Full Revenue Report** — Column builder with 25+ metrics, per-column filters
 
 ## Project Files
 
@@ -303,7 +340,8 @@ All Phase 7 features are fully implemented:
 |---|---|
 | docker-compose.yml | MySQL 8 container (port 3307) |
 | server/.env | DB URL, JWT secrets, CORS origin, port |
-| server/prisma/schema.prisma | 42 database models |
+| server/prisma/schema.prisma | 49 database models |
 | server/prisma/seed.js | Admin user + role with all permissions |
+| SPECIFICATION.md | Full application specification |
 | vugex-v2.postman_collection.json | 28 API requests for Postman |
 | ../vugex-full/PROJECT_PLAN.md | Full 14-phase plan (501 lines) |

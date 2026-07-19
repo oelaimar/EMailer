@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPostmasterAccount, createPostmasterAccount, updatePostmasterAccount } from '../../api/postmasterAccounts';
+import { testPostmasterConnection } from '../../api/postmaster';
 
 const route = useRoute();
 const router = useRouter();
@@ -14,6 +15,8 @@ const form = ref({
   imapHost: '', imapPort: '', smtpHost: '', smtpPort: '',
   username: '', password: '', status: 'Activated',
 });
+const testing = ref(false);
+const testResult = ref(null);
 
 onMounted(async () => {
   if (isEdit.value) {
@@ -45,6 +48,20 @@ const handleSubmit = async () => {
     error.value = e.response?.data?.error || 'Failed to save account.';
   } finally {
     loading.value = false;
+  }
+};
+
+const testConnection = async () => {
+  if (!isEdit.value) return;
+  testing.value = true;
+  testResult.value = null;
+  try {
+    const { data } = await testPostmasterConnection(route.params.id);
+    testResult.value = data;
+  } catch (e) {
+    testResult.value = { success: false, message: e.response?.data?.error || 'Connection test failed.' };
+  } finally {
+    testing.value = false;
   }
 };
 </script>
@@ -88,6 +105,14 @@ const handleSubmit = async () => {
             <label class="block text-sm font-medium text-gray-700 mb-1">IMAP Port</label>
             <input v-model="form.imapPort" type="number" placeholder="993" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
+        </div>
+        <div v-if="isEdit" class="mb-6">
+          <button type="button" @click="testConnection" :disabled="testing" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+            {{ testing ? 'Testing...' : 'Test Connection' }}
+          </button>
+          <span v-if="testResult" :class="['ml-3 text-sm', testResult.success ? 'text-green-600' : 'text-red-600']">
+            {{ testResult.message }}
+          </span>
         </div>
 
         <h3 class="text-sm font-semibold text-gray-700 mb-3">SMTP Settings</h3>

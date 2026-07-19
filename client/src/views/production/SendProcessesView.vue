@@ -31,6 +31,10 @@ const form = ref({
   processName: '', subject: '', fromEmail: '', fromName: '', replyTo: '',
   senderScore: '', throttle: 0, speed: 100, scheduleAt: '', repeat: '',
   dataListId: '', smtpGroupId: '', mtaServerId: '', offerId: '', virtualListId: '',
+  batchSize: 100, batchDelay: 10, rotationType: 'round-robin',
+  headersRotation: false, bodyRotation: false, rcptRotation: false,
+  returnPath: '', contentEncoding: 'none',
+  headersList: '', bodiesList: '', rcptList: '',
 });
 
 onMounted(async () => {
@@ -82,6 +86,10 @@ const handleAdd = async () => {
       processName: '', subject: '', fromEmail: '', fromName: '', replyTo: '',
       senderScore: '', throttle: 0, speed: 100, scheduleAt: '', repeat: '',
       dataListId: '', smtpGroupId: '', mtaServerId: '', offerId: '', virtualListId: '',
+      batchSize: 100, batchDelay: 10, rotationType: 'round-robin',
+      headersRotation: false, bodyRotation: false, rcptRotation: false,
+      returnPath: '', contentEncoding: 'none',
+      headersList: '', bodiesList: '', rcptList: '',
     };
     showForm.value = false;
     tableRef.value?.loadData();
@@ -199,6 +207,76 @@ const handleConfirm = async () => {
             </select>
           </div>
         </div>
+
+        <div class="border-t border-gray-200 pt-4 mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Advanced Send Options</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Batch Size</label>
+              <input v-model.number="form.batchSize" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Batch Delay (sec)</label>
+              <input v-model.number="form.batchDelay" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">VMTA Rotation</label>
+              <select v-model="form.rotationType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="round-robin">Round Robin</option>
+                <option value="random">Random</option>
+                <option value="weighted">Weighted</option>
+                <option value="least-used">Least Used</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Return Path</label>
+              <input v-model="form.returnPath" type="text" placeholder="bounces@domain.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Content Encoding</label>
+              <select v-model="form.contentEncoding" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="none">None</option>
+                <option value="7bit">7bit</option>
+                <option value="8bit">8bit</option>
+                <option value="base64">Base64</option>
+                <option value="quoted-printable">Quoted-Printable</option>
+              </select>
+            </div>
+            <div class="flex items-end gap-4">
+              <label class="flex items-center gap-2 text-sm">
+                <input v-model="form.headersRotation" type="checkbox" class="rounded" />
+                <span class="text-gray-700">Headers Rotation</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input v-model="form.bodyRotation" type="checkbox" class="rounded" />
+                <span class="text-gray-700">Body Rotation</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input v-model="form.rcptRotation" type="checkbox" class="rounded" />
+                <span class="text-gray-700">RCPT Rotation</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="form.headersRotation || form.bodyRotation || form.rcptRotation" class="border-t border-gray-200 pt-4 mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Rotation Lists (one per line)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div v-if="form.headersRotation">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Headers (JSON or text)</label>
+              <textarea v-model="form.headersList" rows="5" placeholder='{"From": "name <email>"}' class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+            </div>
+            <div v-if="form.bodyRotation">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Body Variants</label>
+              <textarea v-model="form.bodiesList" rows="5" placeholder="HTML content per line..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+            </div>
+            <div v-if="form.rcptRotation">
+              <label class="block text-sm font-medium text-gray-700 mb-1">RCPT Values</label>
+              <textarea v-model="form.rcptList" rows="5" placeholder="One value per line..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end">
           <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Creating...' : 'Create Process' }}

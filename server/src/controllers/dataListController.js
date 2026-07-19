@@ -3,6 +3,7 @@ const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 const multer = require('multer');
 const path = require('path');
+const imapService = require('../services/imapService');
 
 const dataListSelect = {
   id: true, name: true, emailCount: true, country: true, vertical: true,
@@ -258,10 +259,20 @@ exports.downloadList = async (req, res, next) => {
 
 exports.fetchEmails = async (req, res, next) => {
   try {
-    res.json({
-      implemented: false,
-      message: 'Email fetch requires IMAP server integration. Configure mailboxes in the Mailboxes section first.',
-    });
+    const { mailboxId, listId, limit: rawLimit } = req.body;
+    if (!mailboxId || !listId) return res.status(400).json({ error: 'Mailbox ID and Data List ID are required.' });
+
+    const mailbox = await prisma.mailbox.findUnique({ where: { id: parseInt(mailboxId, 10) } });
+    if (!mailbox) return res.status(404).json({ error: 'Mailbox not found.' });
+
+    const list = await prisma.dataList.findUnique({ where: { id: parseInt(listId, 10) } });
+    if (!list) return res.status(404).json({ error: 'Data list not found.' });
+
+    const limit = Math.min(parseInt(rawLimit, 10) || 100, 500);
+    const messages = await imapService.fetchMessageSummaries(mailbox, { limit });
+    const emails = messages.map((m) => m.from).filter(Boolean);
+
+    res.json({ message: `Fetched ${emails.length} emails from mailbox "${mailbox.name}".`, emails, count: emails.length });
   } catch (error) {
     next(error);
   }

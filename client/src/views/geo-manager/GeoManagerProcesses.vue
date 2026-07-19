@@ -16,14 +16,19 @@ const columns = [
   { key: 'id', label: 'ID' },
   { key: 'name', label: 'Name' },
   { key: 'status', label: 'Status' },
-  { key: 'targetRows', label: 'Target Rows' },
-  { key: 'batchSize', label: 'Batch Size' },
-  { key: 'duplicateMode', label: 'Duplicate Mode' },
-  { key: 'createdBy', label: 'Created By' },
+  { key: 'sourceSchema', label: 'Schema' },
+  { key: 'sourceTables', label: 'Tables' },
+  { key: 'targetGeos', label: 'Geos' },
+  { key: 'movedRows', label: 'Moved' },
+  { key: 'deletedRows', label: 'Deleted' },
+  { key: 'skippedRows', label: 'Skipped' },
+  { key: 'startedAt', label: 'Started' },
+  { key: 'finishedAt', label: 'Finished' },
   { key: 'createdAt', label: 'Created' },
 ];
 
 const actions = [
+  { label: 'Preview', class: 'bg-teal-100 text-teal-700 hover:bg-teal-200', handler: (row) => router.push(`/geo-manager/${row.id}/preview`) },
   { label: 'Logs', class: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200', handler: (row) => router.push(`/geo-manager/${row.id}/logs`) },
   { label: 'Start', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: (row) => {
     confirmMessage.value = `Start process "${row.name}"?`;
@@ -87,6 +92,27 @@ const statusColor = (s) => {
     >
       <template #cell-status="{ value }">
         <span :class="['px-2 py-1 text-xs font-medium rounded-full', statusColor(value)]">{{ value }}</span>
+      </template>
+      <template #cell-sourceTables="{ value }">
+        <span class="text-xs text-gray-500">{{ Array.isArray(value) ? value.length + ' tables' : '-' }}</span>
+      </template>
+      <template #cell-targetGeos="{ value }">
+        <span class="text-xs text-gray-500">{{ Array.isArray(value) ? value.join(', ') : '-' }}</span>
+      </template>
+      <template #cell-movedRows="{ value }">
+        <span class="text-xs font-medium text-blue-600">{{ value?.toLocaleString() || 0 }}</span>
+      </template>
+      <template #cell-deletedRows="{ value }">
+        <span class="text-xs font-medium text-red-600">{{ value?.toLocaleString() || 0 }}</span>
+      </template>
+      <template #cell-skippedRows="{ value }">
+        <span class="text-xs font-medium text-yellow-600">{{ value?.toLocaleString() || 0 }}</span>
+      </template>
+      <template #cell-startedAt="{ value }">
+        <span class="text-xs text-gray-500">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
+      </template>
+      <template #cell-finishedAt="{ value }">
+        <span class="text-xs text-gray-500">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
       </template>
       <template #cell-createdAt="{ value }">
         {{ new Date(value).toLocaleDateString() }}
