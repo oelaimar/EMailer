@@ -151,3 +151,77 @@ exports.bulkAction = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listCustomVmtas = async (req, res, next) => {
+  try {
+    const groupId = parseInt(req.params.id, 10);
+    if (isNaN(groupId)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+
+    const group = await prisma.smtpGroup.findUnique({ where: { id: groupId } });
+    if (!group) return res.status(404).json({ error: 'SMTP group not found.' });
+
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, sort, order } = req.query;
+
+    const where = {
+      smtpGroupId: groupId,
+      ...(search && {
+        OR: [
+          { name: { contains: search } },
+        ],
+      }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'name', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.customVmta.findMany({ where, orderBy, skip, take: limit }),
+      prisma.customVmta.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addCustomVmta = async (req, res, next) => {
+  try {
+    const groupId = parseInt(req.params.id, 10);
+    if (isNaN(groupId)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+
+    const group = await prisma.smtpGroup.findUnique({ where: { id: groupId } });
+    if (!group) return res.status(404).json({ error: 'SMTP group not found.' });
+
+    const { name, ip, port, status } = req.body;
+    if (!name) return res.status(400).json({ error: 'VMTA name is required.' });
+
+    const item = await prisma.customVmta.create({
+      data: {
+        smtpGroupId: groupId,
+        name,
+        ip: ip || null,
+        port: port ? parseInt(port, 10) : null,
+        status: status || 'Activated',
+        createdBy: req.user?.email || 'admin',
+      },
+    });
+
+    logAction(req.user?.email, 'CustomVmta', 'create', item.id, item.name, req.user?.id).catch(() => {});
+    res.status(201).json(item);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteCustomVmta = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.vmtaId, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    await prisma.customVmta.delete({ where: { id } });
+    logAction(req.user?.email, 'CustomVmta', 'delete', id, null, req.user?.id).catch(() => {});
+    res.json({ message: 'Custom VMTA deleted.' });
+  } catch (error) {
+    next(error);
+  }
+};

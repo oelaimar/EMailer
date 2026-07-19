@@ -123,3 +123,64 @@ exports.bulkAction = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.sendProcessData = async (req, res, next) => {
+  try {
+    const [accounts, smtpGroups, offers, headers] = await Promise.all([
+      prisma.gmailAccount.findMany({ where: { status: 'Activated' }, select: { id: true, email: true } }),
+      prisma.smtpGroup.findMany({ where: { status: 'Activated' }, select: { id: true, name: true } }),
+      prisma.offer.findMany({ where: { status: 'Activated' }, select: { id: true, name: true } }),
+      prisma.header.findMany({ select: { id: true, name: true, content: true } }),
+    ]);
+
+    res.json({ accounts, smtpGroups, offers, headers });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listDrops = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: { id: true, processName: true, subject: true, fromEmail: true, status: true, createdAt: true } }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listTests = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: { id: true, processName: true, subject: true, fromEmail: true, status: true, createdAt: true } }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -129,6 +129,7 @@ model Domain {
   updatedAt       DateTime  @updatedAt
   records         DomainRecord[]
   mailboxes       Mailbox[]
+  subdomains      DomainSubdomain[]
 }
 
 model DomainRecord {
@@ -158,6 +159,7 @@ model DataList {
   updatedAt           DateTime  @updatedAt
   autoResponderLists  AutoResponderList[]
   sendProcesses       SendProcess[]
+  blacklists          Blacklist[]
 }
 
 model SmtpGroup {
@@ -598,6 +600,43 @@ model PmtaVmta {
   configData   Json?
   status       String   @default("Activated")
   createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FrontendLog {
+  id        Int      @id @default(autoincrement())
+  message   String
+  url       String?
+  stack     String?
+  userId    Int?
+  createdAt DateTime @default(now())
+}
+
+model Blacklist {
+  id        Int      @id @default(autoincrement())
+  email     String?
+  domain    String?
+  reason    String?
+  dataListId Int?
+  dataList  DataList? @relation(fields: [dataListId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}
+
+model DomainBrand {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  status    String   @default("Activated")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DomainSubdomain {
+  id           Int      @id @default(autoincrement())
+  domainId     Int
+  domain       Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  subdomain    String
+  status       String   @default("Activated")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

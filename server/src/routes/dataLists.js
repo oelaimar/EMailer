@@ -20,4 +20,10 @@ router.delete('/:id', auth, roleCheck('data-lists', 'delete'), controller.remove
 router.post('/upload', auth, roleCheck('data-lists', 'write'), upload.single('file'), controller.upload);
 router.post('/bulk-action', auth, roleCheck('data-lists', 'delete'), controller.bulkAction);
 
+router.get('/blacklists', auth, roleCheck('data-lists', 'read'), controller.listBlacklists);
+router.post('/blacklists', auth, roleCheck('data-lists', 'write'), controller.createBlacklist);
+router.delete('/blacklists/:id', auth, roleCheck('data-lists', 'delete'), controller.deleteBlacklist);
+router.get('/:id/download', auth, roleCheck('data-lists', 'read'), controller.downloadList);
+router.post('/fetch-emails', auth, roleCheck('data-lists', 'write'), controller.fetchEmails);
+
 module.exports = router;

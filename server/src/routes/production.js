@@ -14,4 +14,11 @@ router.post('/:id/processes', auth, roleCheck('production', 'write'), controller
 router.put('/:id/processes/:processId', auth, roleCheck('production', 'write'), controller.updateProcess);
 router.delete('/:id/processes/:processId', auth, roleCheck('production', 'delete'), controller.removeProcess);
 
+router.get('/mta-drops', auth, roleCheck('production', 'read'), controller.listMtaDrops);
+router.get('/mta-tests', auth, roleCheck('production', 'read'), controller.listMtaTests);
+router.get('/smtp-drops', auth, roleCheck('production', 'read'), controller.listSmtpDrops);
+router.get('/smtp-tests', auth, roleCheck('production', 'read'), controller.listSmtpTests);
+router.post('/upload-images', auth, roleCheck('production', 'write'), controller.uploadImages);
+router.put('/:id/processes/:processId/action', auth, roleCheck('production', 'write'), controller.processAction);
+
 module.exports = router;

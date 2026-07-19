@@ -38,6 +38,11 @@ const menuItems = [
   { id: 'production', label: 'Production', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4', children: [
     { label: 'Production List', path: '/production' },
     { label: 'Add Production', path: '/production/add' },
+    { label: 'MTA Drops', path: '/production/mta-drops' },
+    { label: 'MTA Tests', path: '/production/mta-tests' },
+    { label: 'SMTP Drops', path: '/production/smtp-drops' },
+    { label: 'SMTP Tests', path: '/production/smtp-tests' },
+    { label: 'Upload Images', path: '/production/upload-images' },
   ]},
   { id: 'mta', label: 'MTA Servers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01', children: [
     { label: 'MTA Servers List', path: '/mta-servers' },
@@ -57,14 +62,21 @@ const menuItems = [
   { id: 'smtp-groups', label: 'SMTP Groups', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', children: [
     { label: 'SMTP Groups List', path: '/smtp-groups' },
     { label: 'Add SMTP Group', path: '/smtp-groups/add' },
+    { label: 'Send Process', path: '/smtp-groups/send-process' },
+    { label: 'Custom VMTAs', path: '/smtp-groups/custom-vmtas' },
   ]},
   { id: 'domains', label: 'Domains', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
     { label: 'Domains List', path: '/domains' },
     { label: 'Add Domain', path: '/domains/add' },
+    { label: 'Domain Brands', path: '/domains/brands' },
+    { label: 'Subdomains', path: '/domains/subdomains' },
   ]},
   { id: 'data-lists', label: 'Data Lists', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', children: [
     { label: 'Data Lists', path: '/data-lists' },
     { label: 'Add Data List', path: '/data-lists/add' },
+    { label: 'Blacklists', path: '/data-lists/blacklists' },
+    { label: 'Download List', path: '/data-lists/download' },
+    { label: 'Emails Fetch', path: '/data-lists/emails-fetch' },
   ]},
   { id: 'data-providers', label: 'Data Providers', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4', children: [
     { label: 'Providers List', path: '/data-providers' },
@@ -97,14 +109,23 @@ const menuItems = [
   { id: 'gmail', label: 'Gmail API', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Accounts List', path: '/gmail-accounts' },
     { label: 'Add Account', path: '/gmail-accounts/add' },
+    { label: 'Send Process', path: '/gmail-accounts/send-process' },
+    { label: 'Drops', path: '/gmail-accounts/drops' },
+    { label: 'Tests', path: '/gmail-accounts/tests' },
   ]},
   { id: 'gsuite', label: 'G Suite API', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Accounts List', path: '/gsuite-accounts' },
     { label: 'Add Account', path: '/gsuite-accounts/add' },
+    { label: 'Send Process', path: '/gsuite-accounts/send-process' },
+    { label: 'Drops', path: '/gsuite-accounts/drops' },
+    { label: 'Tests', path: '/gsuite-accounts/tests' },
   ]},
   { id: 'outlook', label: 'Outlook API', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', children: [
     { label: 'Accounts List', path: '/outlook-accounts' },
     { label: 'Add Account', path: '/outlook-accounts/add' },
+    { label: 'Send Process', path: '/outlook-accounts/send-process' },
+    { label: 'Drops', path: '/outlook-accounts/drops' },
+    { label: 'Tests', path: '/outlook-accounts/tests' },
   ]},
   { id: 'isps', label: 'ISPs', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9', children: [
     { label: 'ISPs List', path: '/isps' },
@@ -174,8 +195,14 @@ const menuItems = [
     { label: 'Scheduler', path: '/pmta/scheduler' },
     { label: 'Templates', path: '/pmta/templates' },
     { label: 'VMTAs', path: '/pmta/vmtas' },
+    { label: 'Configs', path: '/pmta/configs' },
+    { label: 'History', path: '/pmta/history' },
   ]},
   { id: 'audit-logs', label: 'Audit Logs', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', path: '/audit-logs' },
+  { id: 'logs', label: 'Logs', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', children: [
+    { label: 'Backend Logs', path: '/logs/backend' },
+    { label: 'Frontend Logs', path: '/logs/frontend' },
+  ]},
   { id: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', path: '/settings' },
 ];
 </script>

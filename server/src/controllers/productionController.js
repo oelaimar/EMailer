@@ -220,3 +220,129 @@ exports.removeProcess = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listMtaDrops = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: processSelect }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listMtaTests = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: processSelect }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listSmtpDrops = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: processSelect }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listSmtpTests = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, status, sort, order } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(search && { OR: [{ processName: { contains: search } }, { subject: { contains: search } }] }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'processName', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.sendProcess.findMany({ where, orderBy, skip, take: limit, select: processSelect }),
+      prisma.sendProcess.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.uploadImages = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    res.json({ message: 'Image uploaded successfully.', file: req.file.filename });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.processAction = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.processId, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+
+    const { action } = req.body;
+    if (!action || !['resume', 'pause', 'stop'].includes(action)) {
+      return res.status(400).json({ error: 'Valid action (resume, pause, stop) is required.' });
+    }
+
+    const statusMap = { resume: 'Running', pause: 'Paused', stop: 'Stopped' };
+
+    const process = await prisma.sendProcess.update({
+      where: { id },
+      data: { status: statusMap[action] },
+      select: processSelect,
+    });
+
+    res.json(process);
+  } catch (error) {
+    next(error);
+  }
+};

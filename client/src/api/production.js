@@ -9,3 +9,9 @@ export const getSendProcesses = (productionId, params) => client.get(`/productio
 export const createSendProcess = (productionId, data) => client.post(`/production/${productionId}/processes`, data);
 export const updateSendProcess = (productionId, processId, data) => client.put(`/production/${productionId}/processes/${processId}`, data);
 export const deleteSendProcess = (productionId, processId) => client.delete(`/production/${productionId}/processes/${processId}`);
+export const getMtaDrops = (params) => client.get('/production/mta-drops', { params });
+export const getMtaTests = (params) => client.get('/production/mta-tests', { params });
+export const getSmtpDrops = (params) => client.get('/production/smtp-drops', { params });
+export const getSmtpTests = (params) => client.get('/production/smtp-tests', { params });
+export const uploadProductionImages = (id, data) => client.post(`/production/${id}/upload-images`, data);
+export const executeProcessAction = (id, action) => client.post(`/production/processes/${id}/action`, { action });

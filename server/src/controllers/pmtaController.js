@@ -239,3 +239,75 @@ exports.deleteVmta = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listConfigs = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, sort, order } = req.query;
+
+    const where = {
+      ...(search && {
+        OR: [
+          { key: { contains: search } },
+        ],
+      }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'key']);
+
+    const [data, total] = await Promise.all([
+      prisma.setting.findMany({ where, orderBy, skip, take: limit }),
+      prisma.setting.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateConfig = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    const { value } = req.body;
+
+    const setting = await prisma.setting.update({
+      where: { id },
+      data: { value: value || undefined },
+    });
+
+    logAction(req.user?.email, 'PmtaConfig', 'update', setting.id, setting.key, req.user?.id).catch(() => {});
+    res.json(setting);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listHistory = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, sort, order } = req.query;
+
+    const where = {
+      recordType: { contains: 'Pmta' },
+      ...(search && {
+        OR: [
+          { actionBy: { contains: search } },
+          { recordName: { contains: search } },
+        ],
+      }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'actionBy', 'recordType', 'actionType', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.auditLog.findMany({ where, orderBy, skip, take: limit }),
+      prisma.auditLog.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};

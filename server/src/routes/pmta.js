@@ -21,4 +21,8 @@ router.get('/vmtas', auth, roleCheck('pmta', 'read'), controller.listVmtas);
 router.post('/vmtas', auth, roleCheck('pmta', 'write'), controller.createVmta);
 router.delete('/vmtas/:id', auth, roleCheck('pmta', 'delete'), controller.deleteVmta);
 
+router.get('/configs', auth, roleCheck('pmta', 'read'), controller.listConfigs);
+router.put('/configs/:id', auth, roleCheck('pmta', 'write'), controller.updateConfig);
+router.get('/history', auth, roleCheck('pmta', 'read'), controller.listHistory);
+
 module.exports = router;

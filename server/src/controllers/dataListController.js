@@ -173,3 +173,93 @@ exports.bulkAction = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listBlacklists = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, sort, order } = req.query;
+
+    const where = {
+      ...(search && {
+        OR: [
+          { email: { contains: search } },
+          { domain: { contains: search } },
+        ],
+      }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'email', 'domain', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.blacklist.findMany({ where, orderBy, skip, take: limit }),
+      prisma.blacklist.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.createBlacklist = async (req, res, next) => {
+  try {
+    const { email, domain, reason, dataListId } = req.body;
+
+    const item = await prisma.blacklist.create({
+      data: {
+        email: email || null,
+        domain: domain || null,
+        reason: reason || null,
+        dataListId: dataListId ? parseInt(dataListId, 10) : null,
+      },
+    });
+
+    logAction(req.user?.email, 'Blacklist', 'create', item.id, item.email || item.domain, req.user?.id).catch(() => {});
+    res.status(201).json(item);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteBlacklist = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    await prisma.blacklist.delete({ where: { id } });
+    logAction(req.user?.email, 'Blacklist', 'delete', id, null, req.user?.id).catch(() => {});
+    res.json({ message: 'Blacklist entry deleted.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.downloadList = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+
+    const list = await prisma.dataList.findUnique({ where: { id } });
+    if (!list) return res.status(404).json({ error: 'Data list not found.' });
+
+    const fs = require('fs');
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    const files = fs.readdirSync(uploadsDir).filter((f) => f.startsWith(String(id)) || f.includes(list.name));
+
+    if (!files.length) return res.status(404).json({ error: 'No file found for this data list.' });
+
+    const filePath = path.join(uploadsDir, files[0]);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${list.name}.csv"`);
+    fs.createReadStream(filePath).pipe(res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.fetchEmails = async (req, res, next) => {
+  try {
+    res.json({ message: 'Email fetch initiated. This feature requires IMAP server configuration.' });
+  } catch (error) {
+    next(error);
+  }
+};

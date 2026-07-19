@@ -11,4 +11,8 @@ router.put('/:id', auth, roleCheck('outlook-accounts', 'write'), controller.upda
 router.delete('/:id', auth, roleCheck('outlook-accounts', 'delete'), controller.remove);
 router.post('/bulk-action', auth, roleCheck('outlook-accounts', 'delete'), controller.bulkAction);
 
+router.get('/send-process-data', auth, roleCheck('outlook-accounts', 'read'), controller.sendProcessData);
+router.get('/drops', auth, roleCheck('outlook-accounts', 'read'), controller.listDrops);
+router.get('/tests', auth, roleCheck('outlook-accounts', 'read'), controller.listTests);
+
 module.exports = router;

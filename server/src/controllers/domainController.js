@@ -182,3 +182,109 @@ exports.setRecords = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listBrands = async (req, res, next) => {
+  try {
+    const domainBrands = await prisma.domainBrand.findMany({ orderBy: { createdAt: 'desc' } });
+    const domainBrandNames = domainBrands.map((b) => b.name);
+
+    const domainBrandsList = await prisma.domain.findMany({
+      where: { hasBrand: true },
+      select: { id: true, name: true },
+    });
+
+    const extraBrands = domainBrandsList
+      .filter((d) => !domainBrandNames.includes(d.name))
+      .map((d) => ({ id: `domain-${d.id}`, name: d.name, source: 'domain' }));
+
+    res.json([...domainBrands, ...extraBrands]);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.createBrand = async (req, res, next) => {
+  try {
+    const { name, status } = req.body;
+    if (!name) return res.status(400).json({ error: 'Brand name is required.' });
+
+    const brand = await prisma.domainBrand.create({
+      data: { name, status: status || 'Activated' },
+    });
+
+    logAction(req.user?.email, 'DomainBrand', 'create', brand.id, brand.name, req.user?.id).catch(() => {});
+    res.status(201).json(brand);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteBrand = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    await prisma.domainBrand.delete({ where: { id } });
+    logAction(req.user?.email, 'DomainBrand', 'delete', id, null, req.user?.id).catch(() => {});
+    res.json({ message: 'Brand deleted.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.listSubdomains = async (req, res, next) => {
+  try {
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
+    const { search, sort, order } = req.query;
+
+    const where = {
+      ...(search && {
+        OR: [
+          { subdomain: { contains: search } },
+        ],
+      }),
+    };
+
+    const orderBy = buildSort(sort, order, ['id', 'subdomain', 'status', 'createdAt']);
+
+    const [data, total] = await Promise.all([
+      prisma.domainSubdomain.findMany({ where, orderBy, skip, take: limit }),
+      prisma.domainSubdomain.count({ where }),
+    ]);
+
+    res.json({ data, total, page, limit });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.createSubdomain = async (req, res, next) => {
+  try {
+    const { domainId, subdomain, status } = req.body;
+    if (!domainId || !subdomain) return res.status(400).json({ error: 'Domain ID and subdomain are required.' });
+
+    const item = await prisma.domainSubdomain.create({
+      data: {
+        domainId: parseInt(domainId, 10),
+        subdomain,
+        status: status || 'Activated',
+      },
+    });
+
+    logAction(req.user?.email, 'DomainSubdomain', 'create', item.id, item.subdomain, req.user?.id).catch(() => {});
+    res.status(201).json(item);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteSubdomain = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
+    await prisma.domainSubdomain.delete({ where: { id } });
+    logAction(req.user?.email, 'DomainSubdomain', 'delete', id, null, req.user?.id).catch(() => {});
+    res.json({ message: 'Subdomain deleted.' });
+  } catch (error) {
+    next(error);
+  }
+};

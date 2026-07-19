@@ -38,5 +38,6 @@ router.use('/tools', require('./tools'));
 router.use('/geo-manager', require('./geoManager'));
 router.use('/statistics', require('./statistics'));
 router.use('/pmta', require('./pmta'));
+router.use('/logs', require('./logs'));
 
 module.exports = router;
