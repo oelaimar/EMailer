@@ -70,7 +70,6 @@ exports.create = async (req, res, next) => {
       res.status(201).json(created);
       return;
     }
-    }
 
     if (!name) return res.status(400).json({ error: 'Group name is required.' });
 
