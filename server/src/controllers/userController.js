@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate } = require('../utils/helpers');
 
 exports.list = async (req, res, next) => {
@@ -78,6 +79,7 @@ exports.create = async (req, res, next) => {
       },
     });
 
+    logAction(req.user?.email, 'User', 'create', user.id, user.email, req.user?.id).catch(() => {});
     res.status(201).json(user);
   } catch (error) {
     next(error);
@@ -140,6 +142,7 @@ exports.update = async (req, res, next) => {
       },
     });
 
+    logAction(req.user?.email, 'User', 'update', user.id, user.email, req.user?.id).catch(() => {});
     res.json(user);
   } catch (error) {
     next(error);
@@ -151,6 +154,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.user.delete({ where: { id } });
+    logAction(req.user?.email, 'User', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'User deleted.' });
   } catch (error) {
     next(error);

@@ -6,17 +6,17 @@ const stats = ref({});
 const loading = ref(true);
 
 const statCards = [
-  { key: 'activeServers', label: 'Active Servers', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '🌐' },
-  { key: 'activeSponsors', label: 'Active Sponsors', color: 'text-purple-600', bg: 'bg-purple-50', icon: '💼' },
-  { key: 'dailyTests', label: 'Daily Tests', color: 'text-green-600', bg: 'bg-green-50', icon: '🧩' },
+  { key: 'activeServers', label: 'Active SMTP Servers', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '🌐' },
+  { key: 'totalMtaServers', label: 'MTA Servers', color: 'text-blue-600', bg: 'bg-blue-50', icon: '🖥️' },
+  { key: 'activeOffers', label: 'Active Offers', color: 'text-purple-800', bg: 'bg-purple-50', icon: '🛒' },
+  { key: 'activeIPs', label: 'Active IPs', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '📋' },
+  { key: 'totalDomains', label: 'Domains', color: 'text-indigo-600', bg: 'bg-indigo-50', icon: '🔗' },
+  { key: 'totalMailboxes', label: 'Mailboxes', color: 'text-orange-600', bg: 'bg-orange-50', icon: '📬' },
+  { key: 'totalDataLists', label: 'Data Lists', color: 'text-teal-600', bg: 'bg-teal-50', icon: '📊' },
+  { key: 'totalUsers', label: 'Users', color: 'text-pink-600', bg: 'bg-pink-50', icon: '👥' },
   { key: 'dailySent', label: 'Daily Sent', color: 'text-green-700', bg: 'bg-green-50', icon: '✈️' },
   { key: 'dailyBounced', label: 'Daily Bounced', color: 'text-red-600', bg: 'bg-red-50', icon: '👎' },
   { key: 'monthlyLeads', label: 'Monthly Leads', color: 'text-purple-700', bg: 'bg-purple-50', icon: '👜' },
-  { key: 'activeIPs', label: 'Active IPs', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '📋' },
-  { key: 'activeOffers', label: 'Active Offers', color: 'text-purple-800', bg: 'bg-purple-50', icon: '🛒' },
-  { key: 'dailyDrops', label: 'Daily Drops', color: 'text-teal-600', bg: 'bg-teal-50', icon: '✉️' },
-  { key: 'dailyDelivered', label: 'Daily Delivered', color: 'text-blue-600', bg: 'bg-blue-50', icon: '↗️' },
-  { key: 'monthlyClicks', label: 'Monthly Clicks', color: 'text-blue-700', bg: 'bg-blue-50', icon: '🔗' },
   { key: 'monthlyEarnings', label: 'Monthly Earnings', color: 'text-green-600', bg: 'bg-green-50', icon: '💲' },
 ];
 

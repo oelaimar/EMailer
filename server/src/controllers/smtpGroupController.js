@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 
 const groupSelect = {
@@ -66,7 +67,8 @@ exports.create = async (req, res, next) => {
         }).catch(() => null);
         if (group) created.push(group);
       }
-      return res.status(201).json(created);
+      return logAction(req.user?.email, 'SmtpGroup', 'create', created.id, created.name, req.user?.id).catch(() => {});
+    res.status(201).json(created);
     }
 
     if (!name) return res.status(400).json({ error: 'Group name is required.' });
@@ -81,6 +83,7 @@ exports.create = async (req, res, next) => {
       select: groupSelect,
     });
 
+    logAction(req.user?.email, 'SmtpGroup', 'create', group.id, group.name, req.user?.id).catch(() => {});
     res.status(201).json(group);
   } catch (error) {
     next(error);
@@ -103,6 +106,7 @@ exports.update = async (req, res, next) => {
       select: groupSelect,
     });
 
+    logAction(req.user?.email, 'SmtpGroup', 'update', group.id, group.name, req.user?.id).catch(() => {});
     res.json(group);
   } catch (error) {
     next(error);
@@ -114,6 +118,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.smtpGroup.delete({ where: { id } });
+    logAction(req.user?.email, 'SmtpGroup', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'SMTP group deleted.' });
   } catch (error) {
     next(error);

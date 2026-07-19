@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { createCloudInstance } from '../../api/cloudInstances';
+import { useRouter, useRoute } from 'vue-router';
+import { getCloudInstance, createCloudInstance, updateCloudInstance } from '../../api/cloudInstances';
 import { getCloudAccountsByProvider } from '../../api/cloudAccounts';
 
 const router = useRouter();
+const route = useRoute();
 const loading = ref(false);
 const error = ref('');
+const isEdit = ref(false);
 
 const providers = [
   { value: 'aws', label: 'Amazon AWS' },
@@ -67,7 +69,29 @@ const loadAccounts = async () => {
   }
 };
 
-onMounted(loadAccounts);
+onMounted(async () => {
+  if (route.params.id) {
+    isEdit.value = true;
+    try {
+      const { data } = await getCloudInstance(route.params.id);
+      form.value = {
+        provider: data.provider || 'aws',
+        cloudAccountId: data.cloudAccountId || '',
+        numberOfInstances: data.numberOfInstances || 1,
+        regions: data.regions || [],
+        os: data.os || 'ubuntu-22.04',
+        instanceType: data.instanceType || 'T2Micro',
+        privateIps: data.privateIps || 1,
+        storage: data.storage || 10,
+      };
+      await loadAccounts();
+    } catch (e) {
+      error.value = 'Failed to load instance.';
+    }
+  } else {
+    loadAccounts();
+  }
+});
 
 const handleProviderChange = () => {
   form.value.instanceType = instanceTypes[form.value.provider]?.[0] || '';
@@ -80,10 +104,14 @@ const handleSubmit = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await createCloudInstance(form.value);
+    if (isEdit.value) {
+      await updateCloudInstance(route.params.id, form.value);
+    } else {
+      await createCloudInstance(form.value);
+    }
     router.push('/cloud-instances');
   } catch (e) {
-    error.value = e.response?.data?.error || 'Failed to create instance.';
+    error.value = e.response?.data?.error || 'Failed to save instance.';
   } finally {
     loading.value = false;
   }
@@ -93,7 +121,7 @@ const handleSubmit = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Create Cloud Instances</h1>
+      <h1 class="text-2xl font-bold text-gray-800">{{ isEdit ? 'Edit Cloud Instance' : 'Create Cloud Instances' }}</h1>
       <router-link to="/cloud-instances" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
         Back to List
       </router-link>
@@ -145,7 +173,7 @@ const handleSubmit = async () => {
 
         <div class="flex justify-end">
           <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
-            {{ loading ? 'Creating...' : 'Create Instances' }}
+            {{ loading ? 'Saving...' : (isEdit ? 'Update Instance' : 'Create Instances') }}
           </button>
         </div>
       </form>

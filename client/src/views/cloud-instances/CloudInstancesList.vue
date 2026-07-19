@@ -32,6 +32,7 @@ const columns = [
 ];
 
 const actions = [
+  { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/cloud-instances/${row.id}/edit`) },
   { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete this cloud instance?`;
     confirmAction.value = () => deleteCloudInstance(row.id).then(() => tableRef.value?.loadData());

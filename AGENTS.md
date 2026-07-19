@@ -38,7 +38,7 @@ cd client && npm run dev
 - **Database:** `vugex_v2`
 - **Connection:** `mysql://root:password@localhost:3307/vugex_v2`
 - **Prisma commands:** `npm run db:migrate`, `npm run db:seed`, `npm run db:studio`, `npm run db:reset`
-- **Latest migration:** `20260718225724_add_phase6_headers_providers_isps_management_mailboxes`
+- **Latest migration:** `20260719103840_add_phase7_teams_geo_settings_tools_stats_pmta_verticals_audit`
 
 ## API Style
 
@@ -47,9 +47,9 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — Phase 6 COMPLETE
+## Current State — Phase 7+8 COMPLETE
 
-### Database Models (32 total)
+### Database Models (42 total)
 
 | Model | Purpose |
 |---|---|
@@ -277,25 +277,25 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 
 Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/groups), MTA (servers/install/ips/etc), Domains, Production, Cloud Providers (AWS/Azure/DO/Hetzner/Linode/OVH/Scaleway/Vultr/Atlantic/IDCloud), Domain Registrars (Cloudflare/GoDaddy/Namecheap/Namecom/Dynadot/Spaceship), Gmail/GSuite/Outlook, Tools, Data Lists, Postmaster, ISPs, Headers, Data Providers, Mailboxes, Servers Providers, Management Servers, Proxies, Geo Manager, Sessions, Settings.
 
-## What's Next: Phase 7
+## What's Next: Phase 8 COMPLETE
 
-### Teams
-- Team CRUD, authorizations, user-to-team assignment
+All Phase 7 features are fully implemented:
+- **Teams:** CRUD, user assignment, per-user authorizations (MTA/SMTP/Offers/Data Lists) with full UI
+- **Verticals:** CRUD with bulk actions
+- **Settings:** Full application settings form (general, app, integrations, image hosting, notifications, production, firewall)
+- **Tools:** SPF Lookup, Blacklist Check (IP DNSBL), Value Extractor (IPs/emails/senders), Mailbox Extractor
+- **Statistics:** Full Report (paginated with date filters), Advanced Report (aggregated stats by status/MTA/offer)
+- **PMTA:** Commands, Scheduler, Templates (CRUD), VMTAs (4-tab: global/individual/smtp/route)
+- **Geo Manager:** Process CRUD with start/stop, logs viewer
+- **Audit Logs:** Read-only list with bulk delete
 
-### Geo Manager
-- Geographic routing/distribution of data lists by country
-
-### Settings
-- Application settings
-
-### Tools
-- SPF checker, Blacklist check, Mailbox extractor, Value extractor
-
-### Statistics
-- Full revenue reports, advanced analytics
-
-### PMTA
-- PowerMTA config, VMTAs (global/individual/SMTP/route), templates, commands, scheduler
+### Phase 8 Polish (also complete)
+- Sidebar `isActive` fixed: auto-expands active sections, highlights parent when child is active
+- Cloud Instances: edit route + edit mode added (was create-only)
+- Dashboard: 8 real stats from DB (active SMTP servers, MTA servers, offers, IPs, domains, mailboxes, data lists, users)
+- Audit logging: `logAction()` wired into all 30 controllers (~84 CRUD endpoints)
+- Team Authorizations: real checkbox UI with search, select all/clear for MTA/SMTP/Offers/Data Lists
+- Team ISPs: dynamically loaded from Isp model instead of hardcoded
 
 ## Project Files
 
@@ -303,7 +303,7 @@ Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/g
 |---|---|
 | docker-compose.yml | MySQL 8 container (port 3307) |
 | server/.env | DB URL, JWT secrets, CORS origin, port |
-| server/prisma/schema.prisma | 32 database models |
+| server/prisma/schema.prisma | 42 database models |
 | server/prisma/seed.js | Admin user + role with all permissions |
 | vugex-v2.postman_collection.json | 28 API requests for Postman |
 | ../vugex-full/PROJECT_PLAN.md | Full 14-phase plan (501 lines) |

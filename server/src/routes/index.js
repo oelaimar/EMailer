@@ -30,5 +30,13 @@ router.use('/isps', require('./isps'));
 router.use('/server-providers', require('./serverProviders'));
 router.use('/management-servers', require('./managementServers'));
 router.use('/mailboxes', require('./mailboxes'));
+router.use('/verticals', require('./verticals'));
+router.use('/teams', require('./teams'));
+router.use('/audit-logs', require('./auditLogs'));
+router.use('/settings', require('./settings'));
+router.use('/tools', require('./tools'));
+router.use('/geo-manager', require('./geoManager'));
+router.use('/statistics', require('./statistics'));
+router.use('/pmta', require('./pmta'));
 
 module.exports = router;

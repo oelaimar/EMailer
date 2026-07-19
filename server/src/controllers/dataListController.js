@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 const multer = require('multer');
 const path = require('path');
@@ -68,6 +69,7 @@ exports.create = async (req, res, next) => {
       select: dataListSelect,
     });
 
+    logAction(req.user?.email, 'DataList', 'create', list.id, list.name, req.user?.id).catch(() => {});
     res.status(201).json(list);
   } catch (error) {
     next(error);
@@ -93,6 +95,7 @@ exports.update = async (req, res, next) => {
       select: dataListSelect,
     });
 
+    logAction(req.user?.email, 'DataList', 'update', list.id, list.name, req.user?.id).catch(() => {});
     res.json(list);
   } catch (error) {
     next(error);
@@ -104,6 +107,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.dataList.delete({ where: { id } });
+    logAction(req.user?.email, 'DataList', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'Data list deleted.' });
   } catch (error) {
     next(error);
@@ -136,6 +140,7 @@ exports.upload = async (req, res, next) => {
       select: dataListSelect,
     });
 
+    logAction(req.user?.email, 'DataList', 'create', list.id, list.name, req.user?.id).catch(() => {});
     res.status(201).json(list);
   } catch (error) {
     next(error);

@@ -21,6 +21,7 @@ model User {
   updatedAt       DateTime  @updatedAt
   roles           UserRole[]
   sessions        Session[]
+  teamUsers       TeamUser[]
 }
 
 model Role {
@@ -465,4 +466,138 @@ model Mailbox {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+}
+
+model Vertical {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  status    String   @default("Activated")
+  isps      Json?
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     TeamUser[]
+  authorizations TeamAuthorization[]
+}
+
+model TeamUser {
+  id     Int  @id @default(autoincrement())
+  teamId Int
+  userId Int
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model TeamAuthorization {
+  id              Int  @id @default(autoincrement())
+  teamId          Int
+  userId          Int
+  mtaServers      Json?
+  smtpServers     Json?
+  offers          Json?
+  dataLists       Json?
+  team            Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  actionBy     String
+  userId       Int?
+  recordId     Int?
+  recordName   String?
+  recordType   String
+  actionType   String
+  actionTime   DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value Json?
+}
+
+model GeoManagerProcess {
+  id            Int      @id @default(autoincrement())
+  name          String
+  status        String   @default("Pending")
+  targetRows    Int?
+  targetGeos    Json?
+  batchSize     Int      @default(500)
+  tablePattern  String   @default("e_")
+  duplicateMode String   @default("delete")
+  scheduledAt   DateTime?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  logs          GeoManagerLog[]
+}
+
+model GeoManagerLog {
+  id        Int      @id @default(autoincrement())
+  processId Int
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+  process   GeoManagerProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
+}
+
+model PmtaCommand {
+  id           Int       @id @default(autoincrement())
+  serverName   String
+  command      String
+  target       String?
+  isps         String?
+  status       String    @default("Pending")
+  result       String?
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+}
+
+model PmtaSchedule {
+  id           Int       @id @default(autoincrement())
+  serverName   String
+  command      String
+  delay        Int       @default(0)
+  delayUnit    String    @default("seconds")
+  status       String    @default("Pending")
+  startTime    DateTime?
+  finishTime   DateTime?
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+}
+
+model PmtaTemplate {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  content   String   @db.Text
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PmtaVmta {
+  id           Int      @id @default(autoincrement())
+  serverName   String
+  vmtaType     String
+  configData   Json?
+  status       String   @default("Activated")
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

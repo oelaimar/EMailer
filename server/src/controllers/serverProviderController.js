@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSearch, buildSort } = require('../utils/helpers');
 
 const select = {
@@ -54,6 +55,7 @@ exports.create = async (req, res, next) => {
       select,
     });
 
+    logAction(req.user?.email, 'ServerProvider', 'create', item.id, item.name, req.user?.id).catch(() => {});
     res.status(201).json(item);
   } catch (error) {
     next(error);
@@ -75,6 +77,7 @@ exports.update = async (req, res, next) => {
       select,
     });
 
+    logAction(req.user?.email, 'ServerProvider', 'update', item.id, item.name, req.user?.id).catch(() => {});
     res.json(item);
   } catch (error) {
     next(error);
@@ -86,6 +89,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.serverProvider.delete({ where: { id } });
+    logAction(req.user?.email, 'ServerProvider', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'Server provider deleted.' });
   } catch (error) {
     next(error);

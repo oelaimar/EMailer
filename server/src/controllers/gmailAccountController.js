@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSearch, buildSort } = require('../utils/helpers');
 
 const model = 'gmailAccount';
@@ -53,6 +54,7 @@ exports.create = async (req, res, next) => {
       select,
     });
 
+    logAction(req.user?.email, 'GmailAccount', 'create', item.id, item.email, req.user?.id).catch(() => {});
     res.status(201).json(item);
   } catch (error) {
     next(error);
@@ -77,6 +79,7 @@ exports.update = async (req, res, next) => {
       select,
     });
 
+    logAction(req.user?.email, 'GmailAccount', 'update', item.id, item.email, req.user?.id).catch(() => {});
     res.json(item);
   } catch (error) {
     next(error);

@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 
 const domainSelect = {
@@ -67,6 +68,7 @@ exports.create = async (req, res, next) => {
       select: domainSelect,
     });
 
+    logAction(req.user?.email, 'Domain', 'create', domain.id, domain.name, req.user?.id).catch(() => {});
     res.status(201).json(domain);
   } catch (error) {
     next(error);
@@ -94,6 +96,7 @@ exports.update = async (req, res, next) => {
       select: domainSelect,
     });
 
+    logAction(req.user?.email, 'Domain', 'update', domain.id, domain.name, req.user?.id).catch(() => {});
     res.json(domain);
   } catch (error) {
     next(error);
@@ -105,6 +108,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.domain.delete({ where: { id } });
+    logAction(req.user?.email, 'Domain', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'Domain deleted.' });
   } catch (error) {
     next(error);

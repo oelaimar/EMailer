@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 const sshService = require('../services/sshService');
 
@@ -76,6 +77,7 @@ exports.create = async (req, res, next) => {
       select: mtaSelect,
     });
 
+    logAction(req.user?.email, 'MtaServer', 'create', server.id, server.name, req.user?.id).catch(() => {});
     res.status(201).json(server);
   } catch (error) {
     next(error);
@@ -106,6 +108,7 @@ exports.update = async (req, res, next) => {
       select: mtaSelect,
     });
 
+    logAction(req.user?.email, 'MtaServer', 'update', server.id, server.name, req.user?.id).catch(() => {});
     res.json(server);
   } catch (error) {
     next(error);
@@ -117,6 +120,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.mtaServer.delete({ where: { id } });
+    logAction(req.user?.email, 'MtaServer', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'MTA server deleted.' });
   } catch (error) {
     next(error);

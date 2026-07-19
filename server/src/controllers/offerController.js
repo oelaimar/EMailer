@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSearch, buildSort } = require('../utils/helpers');
 
 const offerSelect = {
@@ -56,6 +57,7 @@ exports.create = async (req, res, next) => {
       select: offerSelect,
     });
 
+    logAction(req.user?.email, 'Offer', 'create', offer.id, offer.name, req.user?.id).catch(() => {});
     res.status(201).json(offer);
   } catch (error) {
     next(error);
@@ -83,6 +85,7 @@ exports.update = async (req, res, next) => {
       select: offerSelect,
     });
 
+    logAction(req.user?.email, 'Offer', 'update', offer.id, offer.name, req.user?.id).catch(() => {});
     res.json(offer);
   } catch (error) {
     next(error);
@@ -94,6 +97,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.offer.delete({ where: { id } });
+    logAction(req.user?.email, 'Offer', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'Offer deleted.' });
   } catch (error) {
     next(error);
@@ -156,6 +160,7 @@ exports.addSuppression = async (req, res, next) => {
       },
     });
 
+    logAction(req.user?.email, 'Offer', 'create', suppression.id, suppression.name, req.user?.id).catch(() => {});
     res.status(201).json(suppression);
   } catch (error) {
     next(error);

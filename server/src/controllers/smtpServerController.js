@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
 
 const smtpSelect = {
@@ -76,6 +77,7 @@ exports.create = async (req, res, next) => {
       select: smtpSelect,
     });
 
+    logAction(req.user?.email, 'SmtpServer', 'create', server.id, server.name, req.user?.id).catch(() => {});
     res.status(201).json(server);
   } catch (error) {
     next(error);
@@ -120,6 +122,7 @@ exports.update = async (req, res, next) => {
       select: smtpSelect,
     });
 
+    logAction(req.user?.email, 'SmtpServer', 'update', server.id, server.name, req.user?.id).catch(() => {});
     res.json(server);
   } catch (error) {
     next(error);
@@ -131,6 +134,7 @@ exports.remove = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' });
     await prisma.smtpServer.delete({ where: { id } });
+    logAction(req.user?.email, 'SmtpServer', 'delete', id, null, req.user?.id).catch(() => {});
     res.json({ message: 'SMTP server deleted.' });
   } catch (error) {
     next(error);
