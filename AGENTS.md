@@ -38,7 +38,7 @@ cd client && npm run dev
 - **Database:** `vugex_v2`
 - **Connection:** `mysql://root:password@localhost:3307/vugex_v2`
 - **Prisma commands:** `npm run db:migrate`, `npm run db:seed`, `npm run db:studio`, `npm run db:reset`
-- **Latest migration:** `20260719182527_extend_geo_manager`
+- **Latest migration:** `20260719232835_add_virtual_list_processes_and_elastic_ips`
 
 ## API Style
 
@@ -47,9 +47,9 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — ALL PHASES COMPLETE (full legacy parity achieved)
+## Current State — ALL PHASES COMPLETE (full legacy parity achieved) + PRODUCTION HARDENED
 
-### Database Models (49 total)
+### Database Models (53 total)
 
 | Model | Purpose |
 |---|---|
@@ -77,6 +77,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | AutoResponder | Auto responder sequences |
 | AutoResponderList | Auto responder list associations |
 | VirtualList | Virtual data lists with filters |
+| VirtualListProcess | Virtual list background processing jobs |
 | Production | Campaign production entries |
 | SendProcess | Send processes linked to production |
 | GmailAccount | Gmail API accounts with OAuth tokens |
@@ -84,6 +85,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | OutlookAccount | Outlook API accounts with OAuth tokens |
 | CloudAccount | Cloud provider accounts (generic: provider field for 11 providers) |
 | CloudInstance | Cloud instances (generic: provider field, dynamic instance types) |
+| ElasticIp | AWS Elastic IP allocations linked to cloud instances |
 | RegistrarAccount | Domain registrar accounts (generic: registrar field for 6 registrars) |
 | PostmasterAccount | Postmaster accounts with IMAP/SMTP config for ISP inbox monitoring |
 | PostmasterMessage | Cached IMAP messages (unique per account+messageId) |
@@ -159,7 +161,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | controllers/teamController.js | CRUD + listUsers + addUser + removeUser + listAuthorizations + updateAuthorizations |
 | controllers/verticalController.js | CRUD + bulkAction |
 | controllers/settingController.js | get + update (key-value pairs) |
-| routes/ | 39 route files, all with auth + roleCheck middleware |
+| routes/ | 41 route files, all with auth + roleCheck middleware |
 
 ### Frontend (client/src/)
 
@@ -221,7 +223,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | verticals/ | 2 | List, Form |
 | virtual-lists/ | 2 | List, Form |
 
-### Sidebar Sections (30 total)
+### Sidebar Sections (36 total)
 
 1. Dashboard
 2. Production (List, Add, MTA Drops, MTA Tests, SMTP Drops, SMTP Tests, Upload Images)
@@ -330,16 +332,24 @@ Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/g
 
 ## Known Remaining Gaps
 
-None — all legacy features have been rebuilt.
+1. **Email tracking** — Bounce/click/open tracking not yet implemented. Statistics report shows `0` for deliveryRate, openRate, clickRate, unsubRate until tracking infrastructure (webhooks, open pixels, click redirects) is built.
+2. **DNSBL domain check** — `toolController.js` blacklist check only works for IPs; domain DNSBL lookup is `implemented:false`.
+3. **Mailbox extractor** — `toolController.js` mailbox extractor is `implemented:false`.
+4. **Emails fetch** — `dataListController.js` fetchEmails is `implemented:false`.
+5. **SMTP server expiration** — `expirationDate` field exists but no cron job to auto-disable expired servers.
 
 ## Project Files
 
 | File | Purpose |
 |---|---|
-| docker-compose.yml | MySQL 8 container (port 3307) |
+| docker-compose.yml | MySQL 8 + Backend + Frontend + Adminer (4 services) |
+| Dockerfile | Backend: Node 20 Alpine + Prisma + healthcheck |
+| client/Dockerfile | Frontend: Multi-stage build → nginx serve |
+| client/nginx.conf | SPA fallback, /api proxy, gzip, asset caching |
 | server/.env | DB URL, JWT secrets, CORS origin, port |
-| server/prisma/schema.prisma | 49 database models |
+| server/.env.example | Production environment template |
+| server/prisma/schema.prisma | 53 database models |
 | server/prisma/seed.js | Admin user + role with all permissions |
+| server/src/middleware/rateLimiter.js | Login (5/15min) + API (200/15min) rate limiting |
+| server/src/services/smtpCheckService.js | Real SMTP connectivity testing (net/tls) |
 | SPECIFICATION.md | Full application specification |
-| vugex-v2.postman_collection.json | 28 API requests for Postman |
-| ../vugex-full/PROJECT_PLAN.md | Full 14-phase plan (501 lines) |

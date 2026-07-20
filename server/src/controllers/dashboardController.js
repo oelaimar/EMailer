@@ -61,11 +61,9 @@ exports.getStats = async (req, res, next) => {
       totalDataLists,
       totalUsers,
       dailySent: dailyDrops,
-      dailyBounced: 0,
       monthlyLeads,
       dailyDrops,
       dailyDelivered,
-      monthlyClicks: 0,
       monthlyEarnings,
     });
   } catch (error) {

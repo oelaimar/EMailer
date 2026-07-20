@@ -92,15 +92,15 @@ exports.getFullReport = async (req, res, next) => {
       const speed = p.speed || 0;
       const offerPayout = p.offer?.payout || 0;
       const totalSent = Math.round(speed * 100);
-      const deliveryRate = Math.round(85 + Math.random() * 12);
-      const totalDelivered = Math.round(totalSent * deliveryRate / 100);
-      const totalBounced = totalSent - totalDelivered;
-      const openRate = Math.round(15 + Math.random() * 30);
-      const totalOpened = Math.round(totalDelivered * openRate / 100);
-      const clickRate = Math.round(2 + Math.random() * 8);
-      const totalClicked = Math.round(totalDelivered * clickRate / 100);
-      const unsubRate = Math.round(0.5 + Math.random() * 2);
-      const totalUnsubscribed = Math.round(totalDelivered * unsubRate / 100);
+      const deliveryRate = 0;
+      const totalDelivered = 0;
+      const totalBounced = 0;
+      const openRate = 0;
+      const totalOpened = 0;
+      const clickRate = 0;
+      const totalClicked = 0;
+      const unsubRate = 0;
+      const totalUnsubscribed = 0;
       const earnings = parseFloat((totalSent * offerPayout / 1000).toFixed(2));
       const revenuePerEmail = totalSent > 0 ? parseFloat((earnings / totalSent).toFixed(4)) : 0;
 
@@ -191,9 +191,9 @@ exports.getAdvancedReport = async (req, res, next) => {
     processes.forEach((p) => {
       const speed = p.speed || 0;
       const totalSent = Math.round(speed * 100);
-      const deliveryRate = 85 + Math.random() * 12;
-      const openRate = 15 + Math.random() * 30;
-      const clickRate = 2 + Math.random() * 8;
+      const deliveryRate = 0;
+      const openRate = 0;
+      const clickRate = 0;
       const offerPayout = p.offer?.payout || 0;
       const earnings = totalSent * offerPayout / 1000;
 

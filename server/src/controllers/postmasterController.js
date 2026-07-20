@@ -209,7 +209,7 @@ exports.deleteMessages = async (req, res, next) => {
       const senders = [...new Set(messages.map(m => m.from).filter(Boolean))];
       if (senders.length > 0) {
         await prisma.blacklist.createMany({
-          data: senders.map(email => ({ email, status: 'Activated' })),
+          data: senders.map(email => ({ email })),
           skipDuplicates: true,
         });
       }

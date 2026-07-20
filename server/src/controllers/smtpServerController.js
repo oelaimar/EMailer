@@ -1,6 +1,7 @@
 const prisma = require('../config/database');
 const { logAction } = require('./auditLogController');
 const { paginate, buildSort } = require('../utils/helpers');
+const { checkSmtpServer } = require('../services/smtpCheckService');
 
 const smtpSelect = {
   id: true,
@@ -148,12 +149,20 @@ exports.check = async (req, res, next) => {
     const server = await prisma.smtpServer.findUnique({ where: { id } });
     if (!server) return res.status(404).json({ error: 'SMTP server not found.' });
 
-    await prisma.smtpServer.update({
-      where: { id: server.id },
-      data: { status: 'Activated', lastChecked: new Date() },
+    const result = await checkSmtpServer({
+      host: server.host,
+      port: server.port,
+      encryption: server.encryption,
+      username: server.username,
+      password: server.password,
     });
 
-    res.json({ status: 'ok', message: 'SMTP server check completed.' });
+    await prisma.smtpServer.update({
+      where: { id: server.id },
+      data: { status: result.status, lastChecked: new Date() },
+    });
+
+    res.json({ status: result.status, message: result.message });
   } catch (error) {
     next(error);
   }
@@ -171,11 +180,18 @@ exports.bulkCheck = async (req, res, next) => {
         const parsedId = parseInt(id, 10);
         const server = await prisma.smtpServer.findUnique({ where: { id: parsedId } });
         if (server) {
+          const result = await checkSmtpServer({
+            host: server.host,
+            port: server.port,
+            encryption: server.encryption,
+            username: server.username,
+            password: server.password,
+          });
           await prisma.smtpServer.update({
             where: { id: server.id },
-            data: { status: 'Activated', lastChecked: new Date() },
+            data: { status: result.status, lastChecked: new Date() },
           });
-          return { id: server.id, name: server.name, status: 'ok' };
+          return { id: server.id, name: server.name, status: result.status, message: result.message };
         }
         return { id: parsedId, status: 'not_found' };
       })

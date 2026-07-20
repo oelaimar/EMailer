@@ -25,7 +25,6 @@ const statCards = [
   { key: 'totalDataLists', label: 'Data Lists', color: 'text-teal-600', bg: 'bg-teal-50', icon: '📊' },
   { key: 'totalUsers', label: 'Users', color: 'text-pink-600', bg: 'bg-pink-50', icon: '👥' },
   { key: 'dailySent', label: 'Daily Sent', color: 'text-green-700', bg: 'bg-green-50', icon: '✈️' },
-  { key: 'dailyBounced', label: 'Daily Bounced', color: 'text-red-600', bg: 'bg-red-50', icon: '👎' },
   { key: 'monthlyLeads', label: 'Monthly Leads', color: 'text-purple-700', bg: 'bg-purple-50', icon: '👜' },
   { key: 'monthlyEarnings', label: 'Monthly Earnings', color: 'text-green-600', bg: 'bg-green-50', icon: '💲' },
 ];

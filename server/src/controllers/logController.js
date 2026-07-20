@@ -2,7 +2,30 @@ const prisma = require('../config/database');
 const { logAction } = require('./auditLogController');
 const { paginate } = require('../utils/helpers');
 const fs = require('fs');
+const readline = require('readline');
 const path = require('path');
+
+const MAX_LINES = 5000;
+
+async function readLogLines(filePath, search) {
+  return new Promise((resolve) => {
+    try {
+      const lines = [];
+      const rl = readline.createInterface({
+        input: fs.createReadStream(filePath, { encoding: 'utf-8' }),
+        crlfDelay: Infinity,
+      });
+      rl.on('line', (line) => {
+        if (!search || line.toLowerCase().includes(search.toLowerCase())) {
+          lines.push({ source: path.basename(filePath), message: line });
+          if (lines.length > MAX_LINES * 2) lines.splice(0, lines.length - MAX_LINES);
+        }
+      });
+      rl.on('close', () => resolve(lines.slice(-MAX_LINES)));
+      rl.on('error', () => resolve([]));
+    } catch { resolve([]); }
+  });
+}
 
 exports.getBackendLogs = async (req, res, next) => {
   try {
@@ -13,24 +36,13 @@ exports.getBackendLogs = async (req, res, next) => {
       '/var/log/auth.log',
     ];
 
-    let allLines = [];
-    for (const file of logFiles) {
-      try {
-        const content = fs.readFileSync(file, 'utf-8');
-        const lines = content.split('\n').filter(Boolean).map(line => ({
-          source: path.basename(file),
-          message: line,
-        }));
-        allLines = allLines.concat(lines);
-      } catch { /* file not readable, skip */ }
-    }
+    const results = await Promise.all(
+      logFiles.map((file) => readLogLines(file, search))
+    );
 
-    if (search) {
-      const s = search.toLowerCase();
-      allLines = allLines.filter(l => l.message.toLowerCase().includes(s));
-    }
-
+    let allLines = results.flat();
     allLines.reverse();
+
     const total = allLines.length;
     const start = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const data = allLines.slice(start, start + parseInt(limit, 10));
