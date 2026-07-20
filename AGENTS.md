@@ -29,7 +29,7 @@ cd server && npm run dev
 cd client && npm run dev
 ```
 
-**Login:** `admin@app.com` / `password`
+**Login:** `admin@app.com` / `password` (set via seed.js; credentials are NOT hardcoded in the login form)
 
 ## Database
 
@@ -170,16 +170,19 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | App.vue | Calls fetchUser on init for fresh data |
 | router/index.js | ~90 routes + auth guards + 404 catch-all |
 | stores/auth.js | Pinia: login, logout, fetchUser |
+| stores/toast.js | Pinia: toast notifications (showToast, removeToast) |
+| stores/app.js | Pinia: sidebar state, mobile sidebar, loading state |
 | api/client.js | Axios with token inject + auto-refresh + store sync |
-| api/ | 43 API wrapper files covering all endpoints |
+| api/ | 45 API wrapper files covering all endpoints |
 | layouts/DefaultLayout.vue | Sidebar + Header + content |
 | layouts/AuthLayout.vue | Dark gradient login wrapper |
 | components/common/DataTable.vue | Server-side paginated table with search, select, group actions |
 | components/common/ConfirmDialog.vue | Reusable confirm modal |
-| components/layout/Sidebar.vue | Navigation sidebar with 30 collapsible sections |
-| components/layout/Header.vue | Top bar with user menu |
+| components/common/Toast.vue | Toast notification component (fixed bottom-right, auto-dismiss, color-coded) |
+| components/layout/Sidebar.vue | Navigation sidebar with 36 collapsible sections, mobile responsive (hamburger + backdrop) |
+| components/layout/Header.vue | Top bar with user menu, mobile hamburger button |
 
-### Frontend Views (116 files across 40 directories)
+### Frontend Views (126 files across 39 directories)
 
 | Directory | Files | Key Views |
 |---|---|---|
@@ -188,8 +191,8 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | auth/ | 1 | LoginView |
 | auto-responders/ | 2 | List, Form |
 | cloud-accounts/ | 2 | List, Form (11 providers) |
-| cloud-instances/ | 2 | List, Form |
-| dashboard/ | 1 | 12 real stat cards + 4 Chart.js charts (bar, doughnut, earnings) |
+| cloud-instances/ | 5 | List, Form, AzureProcesses, AzureDomainChange, ElasticIps |
+| dashboard/ | 1 | 11 stat cards + ECharts charts (bar, doughnut, earnings) |
 | data-lists/ | 5 | List, Form, Blacklists, Download, EmailsFetch |
 | data-providers/ | 2 | List, Form |
 | domains/ | 4 | List, Form, Brands, Subdomains |
@@ -216,12 +219,12 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | settings/ | 1 | Full settings form (40+ fields) |
 | smtp-groups/ | 4 | List, Form, SendProcess (with group dropdown), CustomVmtas (with group dropdown) |
 | smtp-servers/ | 3 | List, Form, BulkCheck |
-| statistics/ | 2 | FullReport, AdvancedReport |
+| statistics/ | 3 | FullReport, AdvancedReport, AdvancedAnalytics (ECharts) |
 | teams/ | 4 | List, Form, TeamUsers, TeamAuthorisations |
 | tools/ | 4 | SpfLookup, BlacklistCheck, ValueExtractor, MailboxExtractor |
 | users/ | 2 | List, Form |
 | verticals/ | 2 | List, Form |
-| virtual-lists/ | 2 | List, Form |
+| virtual-lists/ | 3 | List, Form, Processes |
 
 ### Sidebar Sections (36 total)
 
@@ -296,11 +299,18 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 - **Phase 7:** Audit Logs (read-only list with bulk delete, logAction in all controllers)
 - **Phase 9:** All sub-pages created (26 new views across 7 batches)
 - **Phase 10:** All crash bugs fixed (5) and stubs completed (8)
-- **Phase 11:** Dashboard charts (Chart.js + vue-chartjs, 4 real charts)
+- **Phase 11:** Dashboard charts (ECharts + vue-echarts, tree-shakeable, 3 charts + earnings display)
 - **Phase 11:** Postmaster monitoring (IMAP inbox, message viewer, reply accounts export, runs history, connection testing)
 - **Phase 11:** Gmail/GSuite/Outlook Drops Pause/Stop actions
 - **Phase 11:** Geo Manager full implementation (schema discovery, table selection, geo summary preview, background job runner with graceful stop)
 - **Routing fixes:** SMTP group send-process/custom-vmtas use dropdown selectors, PMTA back links fixed
+- **Virtual Lists:** VirtualListProcess model + Processes view (CRUD + start/stop)
+- **AWS Elastic IPs:** ElasticIp model + ElasticIps view (allocate/release)
+- **Production Send Page:** 5-step campaign launch wizard (Identity → Content → Targeting → Advanced → Launch)
+- **Advanced Analytics:** ECharts dashboard with 7 charts (pie, bar, line, scatter) + 6 KPI cards
+- **Revenue Report:** 33-column builder with CSV export, status/date/search filters
+- **Docker deployment:** Backend Dockerfile (Node 20 Alpine + Prisma), Frontend multi-stage (Node build → nginx serve), docker-compose.yml (4 services with healthchecks), /api/health endpoint, graceful shutdown (10s drain)
+- **Production hardening:** Toast notifications (all 76 console.error catches replaced), API rate limiting (login: 5/15min, API: 200/15min), mobile responsive design (sidebar hamburger + backdrop, responsive layout), removed hardcoded login defaults
 
 ## Conventions
 
