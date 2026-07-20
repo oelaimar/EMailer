@@ -6,6 +6,7 @@ import { BarChart, LineChart, PieChart, ScatterChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent, DataZoomComponent } from 'echarts/components';
 import VChart from 'vue-echarts';
 import { getAdvancedReport } from '../../api/statistics';
+import PageHeader from '../../components/common/PageHeader.vue';
 
 use([CanvasRenderer, BarChart, LineChart, PieChart, ScatterChart, TitleComponent, TooltipComponent, LegendComponent, GridComponent, DataZoomComponent]);
 
@@ -131,32 +132,32 @@ const earningsScatterOption = computed(() => {
 });
 
 const statusColor = (s) => {
-  if (s === 'Running') return 'bg-blue-100 text-blue-700';
-  if (s === 'Completed') return 'bg-emerald-100 text-emerald-700';
-  if (s === 'Failed') return 'bg-red-100 text-red-700';
-  return 'bg-gray-100 text-gray-600';
+  if (s === 'Running') return 'bg-primary-light text-primary';
+  if (s === 'Completed') return 'bg-success-light text-success';
+  if (s === 'Failed') return 'bg-danger-light text-danger';
+  return 'bg-surface-alt text-muted';
 };
 </script>
 
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Advanced Analytics Dashboard</h1>
+      <PageHeader title="Advanced Analytics Dashboard" />
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-4 mb-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-          <input v-model="dateFrom" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Date From</label>
+          <input v-model="dateFrom" type="date" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-          <input v-model="dateTo" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Date To</label>
+          <input v-model="dateTo" type="date" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
         <div class="flex items-end">
-          <button @click="handleSearch" :disabled="loading" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button @click="handleSearch" :disabled="loading" class="w-full px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Loading...' : 'Generate Dashboard' }}
           </button>
         </div>
@@ -165,78 +166,78 @@ const statusColor = (s) => {
 
     <div v-if="stats" class="space-y-6">
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div v-for="kpi in kpis" :key="kpi.label" class="bg-white rounded-xl border border-gray-200 p-4">
-          <div class="text-xs text-gray-500 mb-1">{{ kpi.label }}</div>
-          <div class="text-xl font-bold text-gray-800">{{ kpi.value }}</div>
+        <div v-for="kpi in kpis" :key="kpi.label" class="bg-surface rounded-xl border border-border p-4">
+          <div class="text-xs text-muted mb-1">{{ kpi.label }}</div>
+          <div class="text-xl font-bold text-fg">{{ kpi.value }}</div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">By Status</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">By Status</h3>
           <v-chart :option="statusChartOption" style="height: 280px" autoresize />
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">Daily Sent & Earnings</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">Daily Sent & Earnings</h3>
           <v-chart :option="dayChartOption" style="height: 280px" autoresize />
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">Top MTA Servers</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">Top MTA Servers</h3>
           <v-chart :option="mtaChartOption" style="height: 280px" autoresize />
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">Earnings by Offer</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">Earnings by Offer</h3>
           <v-chart :option="offerChartOption" style="height: 280px" autoresize />
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">Hourly Distribution</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">Hourly Distribution</h3>
           <v-chart :option="hourlyChartOption" style="height: 280px" autoresize />
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">Top SMTP Groups</h3>
+        <div class="bg-surface rounded-xl border border-border p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">Top SMTP Groups</h3>
           <v-chart :option="smtpChartOption" style="height: 280px" autoresize />
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Speed vs Earnings Scatter</h3>
+      <div class="bg-surface rounded-xl border border-border p-4">
+        <h3 class="text-sm font-semibold text-fg-secondary mb-2">Speed vs Earnings Scatter</h3>
         <v-chart :option="earningsScatterOption" style="height: 320px" autoresize />
       </div>
 
-      <div v-if="processes.length" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 font-medium text-gray-700 text-sm">Recent Processes ({{ processes.length }})</div>
+      <div v-if="processes.length" class="bg-surface rounded-xl border border-border overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-border font-medium text-fg-secondary text-sm">Recent Processes ({{ processes.length }})</div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="border-b border-gray-200">
+            <thead class="border-b border-border">
               <tr>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">ID</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Process</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Production</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">MTA</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Offer</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Status</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Speed</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-600">Created</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">ID</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Process</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Production</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">MTA</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Offer</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Status</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Speed</th>
+                <th class="px-4 py-3 text-left font-medium text-muted">Created</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              <tr v-for="p in processes.slice(0, 50)" :key="p.id" class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-gray-800">{{ p.id }}</td>
-                <td class="px-4 py-3 text-gray-800">{{ p.processName }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ p.production?.name || '-' }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ p.mtaServer?.name || '-' }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ p.offer?.name || '-' }}</td>
+              <tr v-for="p in processes.slice(0, 50)" :key="p.id" class="hover:bg-surface-alt">
+                <td class="px-4 py-3 text-fg">{{ p.id }}</td>
+                <td class="px-4 py-3 text-fg">{{ p.processName }}</td>
+                <td class="px-4 py-3 text-muted">{{ p.production?.name || '-' }}</td>
+                <td class="px-4 py-3 text-muted">{{ p.mtaServer?.name || '-' }}</td>
+                <td class="px-4 py-3 text-muted">{{ p.offer?.name || '-' }}</td>
                 <td class="px-4 py-3">
                   <span :class="['px-2 py-1 text-xs font-medium rounded-full', statusColor(p.status)]">{{ p.status }}</span>
                 </td>
-                <td class="px-4 py-3 text-gray-800">{{ p.speed || 0 }}</td>
-                <td class="px-4 py-3 text-gray-500">{{ new Date(p.createdAt).toLocaleDateString() }}</td>
+                <td class="px-4 py-3 text-fg">{{ p.speed || 0 }}</td>
+                <td class="px-4 py-3 text-muted">{{ new Date(p.createdAt).toLocaleDateString() }}</td>
               </tr>
             </tbody>
           </table>

@@ -4,6 +4,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import { getCloudInstances } from '../../api/cloudInstances';
 import { getDomains } from '../../api/domains';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -59,42 +60,42 @@ const handleApply = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Azure Domain Change</h1>
-      <router-link to="/cloud-instances" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to Instances</router-link>
+      <PageHeader title="Azure Domain Change" />
+      <router-link to="/cloud-instances" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to Instances</router-link>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
 
-      <p class="text-sm text-gray-600 mb-4">Point a domain to an Azure instance by updating its DNS records to match the instance's IP address.</p>
+      <p class="text-sm text-muted mb-4">Point a domain to an Azure instance by updating its DNS records to match the instance's IP address.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Azure Instance *</label>
-          <select v-model="selectedInstanceId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Azure Instance *</label>
+          <select v-model="selectedInstanceId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Select instance...</option>
             <option v-for="i in instances" :key="i.id" :value="i.id">{{ i.instanceName }} ({{ i.ipAddress || 'No IP' }})</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Target Domain *</label>
-          <select v-model="selectedDomainId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Target Domain *</label>
+          <select v-model="selectedDomainId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Select domain...</option>
             <option v-for="d in domains" :key="d.id" :value="d.id">{{ d.name }}</option>
           </select>
         </div>
         <div class="flex items-end">
-          <button @click="handleApply" :disabled="applying || !selectedInstanceId || !selectedDomainId" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button @click="handleApply" :disabled="applying || !selectedInstanceId || !selectedDomainId" class="w-full px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
             {{ applying ? 'Applying...' : 'Apply Domain Change' }}
           </button>
         </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-700">Azure Instances</h3>
+    <div class="bg-surface rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 bg-surface-alt border-b border-border">
+        <h3 class="text-sm font-semibold text-fg-secondary">Azure Instances</h3>
       </div>
       <DataTable
         ref="tableRef"
@@ -105,7 +106,7 @@ const handleApply = async () => {
         }"
       >
         <template #cell-status="{ value }">
-          <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Running' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+          <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Running' ? 'bg-success-light text-success' : 'bg-danger-light text-danger']">
             {{ value }}
           </span>
         </template>

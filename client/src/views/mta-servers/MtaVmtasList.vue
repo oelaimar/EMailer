@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
+import StatusBadge from '../../components/common/StatusBadge.vue';
 import { getMtaServers, bulkActionMtaServers } from '../../api/mtaServers';
 import { useToastStore } from '../../stores/toast';
 const toastStore = useToastStore();
@@ -45,24 +47,19 @@ const handleConfirm = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">VMTAs List</h1>
-      <router-link to="/mta-servers" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-        Back to List
-      </router-link>
-    </div>
+    <PageHeader title="VMTAs List" action-label="Back to List" action-to="/mta-servers" />
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">MTA Server</label>
-          <select v-model="selectedServerId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">MTA Server</label>
+          <select v-model="selectedServerId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option :value="null">All servers</option>
             <option v-for="s in servers" :key="s.id" :value="s.id">{{ s.name }} ({{ s.mainIp }})</option>
           </select>
         </div>
         <div>
-          <button @click="fetchVmtas" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+          <button @click="fetchVmtas" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
             Load VMTAs
           </button>
         </div>
@@ -80,7 +77,7 @@ const handleConfirm = async () => {
       }"
       :selectable="true"
       :group-actions="[
-        { label: 'Activate', action: 'activate', class: 'bg-green-100 text-green-700 border-green-300' },
+        { label: 'Activate', action: 'activate', class: 'bg-success-light text-success border-green-300' },
         { label: 'Inactivate', action: 'inactivate', class: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
       ]"
       @group-action="async ({ action, ids }) => {
@@ -90,19 +87,13 @@ const handleConfirm = async () => {
       }"
     >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Activated' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
-          {{ value }}
-        </span>
+        <StatusBadge :value="value" />
       </template>
       <template #cell-sshStatus="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Connected' ? 'bg-emerald-100 text-emerald-700' : value === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600']">
-          {{ value }}
-        </span>
+        <StatusBadge :value="value" />
       </template>
       <template #cell-installationStatus="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Installed' ? 'bg-emerald-100 text-emerald-700' : value === 'Installing' ? 'bg-yellow-100 text-yellow-700' : value === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600']">
-          {{ value }}
-        </span>
+        <StatusBadge :value="value" />
       </template>
     </DataTable>
 

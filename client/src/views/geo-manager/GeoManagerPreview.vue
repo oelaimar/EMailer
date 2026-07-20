@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
 import {
   getGeoManagerProcess, getGeoSummary, startGeoManagerProcess
 } from '../../api/geoManager';
@@ -52,9 +53,9 @@ const startProcess = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Preview: {{ process?.name || 'Loading...' }}</h1>
+      <PageHeader :title="`Preview: ${process?.name || 'Loading...'}`" />
       <div class="flex gap-2">
-        <router-link to="/geo-manager" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg">Back</router-link>
+        <router-link to="/geo-manager" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg">Back</router-link>
         <button @click="showConfirm = true" :disabled="loading || starting || process?.status === 'Running'"
           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg">
           {{ starting ? 'Starting...' : 'Start Process' }}
@@ -64,77 +65,77 @@ const startProcess = async () => {
 
     <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-400">Loading preview...</div>
+    <div v-if="loading" class="text-center py-12 text-muted">Loading preview...</div>
 
     <template v-else-if="process">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
           <p class="text-2xl font-bold text-blue-600">{{ summary?.totalRows?.toLocaleString() || 0 }}</p>
-          <p class="text-xs text-gray-500 mt-1">Total Rows</p>
+          <p class="text-xs text-muted mt-1">Total Rows</p>
         </div>
         <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
           <p class="text-2xl font-bold text-green-600">{{ summary?.eligibleRows?.toLocaleString() || 0 }}</p>
-          <p class="text-xs text-gray-500 mt-1">Eligible Rows</p>
+          <p class="text-xs text-muted mt-1">Eligible Rows</p>
         </div>
         <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
           <p class="text-2xl font-bold text-purple-600">{{ process.sourceTables?.length || 0 }}</p>
-          <p class="text-xs text-gray-500 mt-1">Source Tables</p>
+          <p class="text-xs text-muted mt-1">Source Tables</p>
         </div>
         <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
           <p class="text-2xl font-bold text-orange-600">{{ process.targetGeos?.length || 0 }}</p>
-          <p class="text-xs text-gray-500 mt-1">Target Geos</p>
+          <p class="text-xs text-muted mt-1">Target Geos</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-sm font-semibold text-gray-700">Source Tables</h3>
+        <div class="bg-surface rounded-xl border border-border overflow-hidden">
+          <div class="px-4 py-3 bg-surface-alt border-b border-border">
+            <h3 class="text-sm font-semibold text-fg-secondary">Source Tables</h3>
           </div>
           <table class="w-full text-sm">
-            <thead class="border-b border-gray-100">
+            <thead class="border-b border-border-light">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Table</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Total Rows</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-muted">Table</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-muted">Total Rows</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-              <tr v-for="t in summary?.tables || []" :key="t.name" class="hover:bg-gray-50">
-                <td class="px-4 py-2 text-gray-800 font-medium">{{ t.name }}</td>
-                <td class="px-4 py-2 text-gray-600 text-right">{{ t.totalRows.toLocaleString() }}</td>
+              <tr v-for="t in summary?.tables || []" :key="t.name" class="hover:bg-surface-alt">
+                <td class="px-4 py-2 text-fg font-medium">{{ t.name }}</td>
+                <td class="px-4 py-2 text-muted text-right">{{ t.totalRows.toLocaleString() }}</td>
               </tr>
               <tr v-if="!summary?.tables?.length">
-                <td colspan="2" class="px-4 py-4 text-center text-gray-400">No tables found</td>
+                <td colspan="2" class="px-4 py-4 text-center text-muted">No tables found</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-sm font-semibold text-gray-700">Per-Geo Current Counts</h3>
+        <div class="bg-surface rounded-xl border border-border overflow-hidden">
+          <div class="px-4 py-3 bg-surface-alt border-b border-border">
+            <h3 class="text-sm font-semibold text-fg-secondary">Per-Geo Current Counts</h3>
           </div>
           <table class="w-full text-sm">
-            <thead class="border-b border-gray-100">
+            <thead class="border-b border-border-light">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Geo</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Current</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-muted">Geo</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-muted">Current</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-              <tr v-for="g in summary?.geos || []" :key="g.geo" class="hover:bg-gray-50">
-                <td class="px-4 py-2 text-gray-800 font-medium">{{ g.geo }}</td>
-                <td class="px-4 py-2 text-gray-600 text-right">{{ g.current.toLocaleString() }}</td>
+              <tr v-for="g in summary?.geos || []" :key="g.geo" class="hover:bg-surface-alt">
+                <td class="px-4 py-2 text-fg font-medium">{{ g.geo }}</td>
+                <td class="px-4 py-2 text-muted text-right">{{ g.current.toLocaleString() }}</td>
               </tr>
               <tr v-if="!summary?.geos?.length">
-                <td colspan="2" class="px-4 py-4 text-center text-gray-400">No geo data</td>
+                <td colspan="2" class="px-4 py-4 text-center text-muted">No geo data</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 text-sm text-gray-600">
+      <div class="bg-surface-alt rounded-xl border border-border p-4 text-sm text-muted">
         <p><strong>Schema:</strong> {{ process.sourceSchema }}</p>
         <p><strong>Tables:</strong> {{ process.sourceTables?.join(', ') }}</p>
         <p><strong>Geos:</strong> {{ process.targetGeos?.join(', ') }}</p>

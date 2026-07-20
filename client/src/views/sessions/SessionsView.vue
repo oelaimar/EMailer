@@ -4,6 +4,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getSessions, forceDisconnectSessions } from '../../api/sessions';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -41,7 +42,7 @@ const confirmDisconnect = async () => {
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Sessions</h1>
+    <PageHeader title="Sessions" class="mb-6" />
 
     <DataTable
       ref="tableRef"
@@ -56,7 +57,7 @@ const confirmDisconnect = async () => {
         </button>
       </template>
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-alt text-muted']">
           {{ value }}
         </span>
       </template>

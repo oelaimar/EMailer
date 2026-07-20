@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
+import StatusBadge from '../../components/common/StatusBadge.vue';
 import { getSmtpServers, deleteSmtpServer, bulkActionSmtpServers } from '../../api/smtpServers';
 
 const router = useRouter();
@@ -21,14 +23,14 @@ const columns = [
 ];
 
 const groupActions = [
-  { label: 'Activate', action: 'activate', class: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+  { label: 'Activate', action: 'activate', class: 'bg-success-light text-success border-emerald-300' },
   { label: 'Inactivate', action: 'inactivate', class: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  { label: 'Delete', action: 'delete', class: 'bg-red-100 text-red-700 border-red-300' },
+  { label: 'Delete', action: 'delete', class: 'bg-danger-light text-danger border-red-300' },
 ];
 
 const actions = [
-  { label: 'Edit', class: 'bg-blue-100 text-blue-700', handler: (row) => router.push(`/smtp-servers/${row.id}/edit`) },
-  { label: 'Delete', class: 'bg-red-100 text-red-700', handler: (row) => { deleteDialog.value = { show: true, id: row.id }; } },
+  { label: 'Edit', class: 'bg-primary-light text-primary', handler: (row) => router.push(`/smtp-servers/${row.id}/edit`) },
+  { label: 'Delete', class: 'bg-danger-light text-danger', handler: (row) => { deleteDialog.value = { show: true, id: row.id }; } },
 ];
 
 const handleGroupAction = async ({ action, ids }) => {
@@ -55,12 +57,7 @@ const confirmDelete = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">SMTP Servers</h1>
-      <router-link to="/smtp-servers/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-        + Add New SMTP Server
-      </router-link>
-    </div>
+    <PageHeader title="SMTP Servers" action-label="Add New SMTP Server" action-to="/smtp-servers/add" />
 
     <DataTable
       ref="tableRef"
@@ -72,9 +69,7 @@ const confirmDelete = async () => {
       @group-action="handleGroupAction"
     >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Activated' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700']">
-          {{ value }}
-        </span>
+        <StatusBadge :value="value" />
       </template>
     </DataTable>
 

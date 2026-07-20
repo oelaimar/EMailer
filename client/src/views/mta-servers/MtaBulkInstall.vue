@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { getMtaServers, getMtaServerInfo, bulkInstallMta, getBulkInstallLogs } from '../../api/mtaServers';
+import PageHeader from '../../components/common/PageHeader.vue';
 
 const loading = ref(false);
 const error = ref('');
@@ -117,8 +118,8 @@ const startBulkInstall = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Bulk Install MTA Servers</h1>
-      <router-link to="/mta-servers" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="Bulk Install MTA Servers" />
+      <router-link to="/mta-servers" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">
         Back to List
       </router-link>
     </div>
@@ -127,38 +128,38 @@ const startBulkInstall = async () => {
 
     <div class="flex items-center gap-4 mb-6">
       <div v-for="s in 3" :key="s" class="flex items-center gap-2">
-        <div :class="['w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium', step >= s ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600']">{{ s }}</div>
-        <span :class="['text-sm font-medium', step >= s ? 'text-blue-600' : 'text-gray-500']">{{ s === 1 ? 'Select Servers' : s === 2 ? 'Per-Server Mapping' : 'Installation' }}</span>
-        <div v-if="s < 3" class="w-12 h-px bg-gray-300"></div>
+        <div :class="['w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium', step >= s ? 'bg-primary text-white' : 'bg-surface-alt text-muted']">{{ s }}</div>
+        <span :class="['text-sm font-medium', step >= s ? 'text-blue-600' : 'text-muted']">{{ s === 1 ? 'Select Servers' : s === 2 ? 'Per-Server Mapping' : 'Installation' }}</span>
+        <div v-if="s < 3" class="w-12 h-px bg-border"></div>
       </div>
     </div>
 
-    <div v-if="step === 1" class="bg-white rounded-xl border border-gray-200 p-6">
+    <div v-if="step === 1" class="bg-surface rounded-xl border border-border p-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold">Select Servers ({{ selectedIds.length }} selected)</h2>
         <div class="flex gap-2">
-          <button @click="selectAll" class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200">Select All</button>
-          <button @click="clearSelection" class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200">Clear</button>
+          <button @click="selectAll" class="px-3 py-1 bg-primary-light text-primary text-xs font-medium rounded-lg hover:bg-blue-200">Select All</button>
+          <button @click="clearSelection" class="px-3 py-1 bg-surface-alt text-fg-secondary text-xs font-medium rounded-lg hover:bg-border">Clear</button>
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        <label v-for="s in servers" :key="s.id" :class="['flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors', selectedIds.includes(s.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50']">
+        <label v-for="s in servers" :key="s.id" :class="['flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors', selectedIds.includes(s.id) ? 'border-blue-500 bg-blue-50' : 'border-border hover:bg-surface-alt']">
           <input type="checkbox" :checked="selectedIds.includes(s.id)" @change="toggleSelect(s.id)" class="rounded" />
           <div class="text-sm">
             <div class="font-medium">{{ s.name }}</div>
-            <div class="text-gray-500">{{ s.mainIp }} — {{ s.os }}</div>
+            <div class="text-muted">{{ s.mainIp }} — {{ s.os }}</div>
           </div>
         </label>
       </div>
       <div class="flex justify-end mt-6">
-        <button @click="loadSelectedServers" :disabled="selectedIds.length === 0 || loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+        <button @click="loadSelectedServers" :disabled="selectedIds.length === 0 || loading" class="px-6 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
           {{ loading ? 'Loading...' : 'Next →' }}
         </button>
       </div>
     </div>
 
     <div v-if="step === 2" class="space-y-6">
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="bg-surface rounded-xl border border-border p-6">
         <h2 class="text-lg font-semibold mb-4">Configuration</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
           <label class="flex items-center gap-2"><input type="checkbox" v-model="config.installServices" class="rounded" /> Install Services</label>
@@ -172,33 +173,33 @@ const startBulkInstall = async () => {
         </div>
       </div>
 
-      <div v-for="sid in selectedIds" :key="sid" class="bg-white rounded-xl border border-gray-200 p-6">
+      <div v-for="sid in selectedIds" :key="sid" class="bg-surface rounded-xl border border-border p-6">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-sm font-semibold">{{ serverInfos[sid]?.name }} ({{ serverInfos[sid]?.mainIp }})</h3>
-          <button @click="addMappingRow(sid)" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg hover:bg-blue-200">+ Add Mapping</button>
+          <button @click="addMappingRow(sid)" class="px-2 py-1 bg-primary-light text-primary text-xs rounded-lg hover:bg-blue-200">+ Add Mapping</button>
         </div>
         <div class="space-y-2">
           <div v-for="(m, i) in perServerMapping[sid]" :key="i" class="flex items-center gap-2 text-xs">
-            <input v-model="m.domainId" placeholder="domain.com" class="flex-1 px-2 py-1 border border-gray-300 rounded" />
-            <input v-model="m.ipsV4" placeholder="IPs comma separated" class="w-48 px-2 py-1 border border-gray-300 rounded" @input="m.ipsV4 = $event.target.value.split(',')" />
+            <input v-model="m.domainId" placeholder="domain.com" class="flex-1 px-2 py-1 border border-border rounded" />
+            <input v-model="m.ipsV4" placeholder="IPs comma separated" class="w-48 px-2 py-1 border border-border rounded" @input="m.ipsV4 = $event.target.value.split(',')" />
             <button @click="removeMappingRow(sid, i)" class="text-red-500 hover:text-red-700">✕</button>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end gap-3">
-        <button @click="step = 1" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200">← Back</button>
+        <button @click="step = 1" class="px-4 py-2 bg-surface-alt text-fg-secondary text-sm font-medium rounded-lg hover:bg-border">← Back</button>
         <button @click="startBulkInstall" :disabled="loading" class="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-medium rounded-lg transition-colors">
           Start Bulk Installation
         </button>
       </div>
     </div>
 
-    <div v-if="step === 3" class="bg-white rounded-xl border border-gray-200 p-6">
+    <div v-if="step === 3" class="bg-surface rounded-xl border border-border p-6">
       <h2 class="text-lg font-semibold mb-4">Bulk Installation Progress</h2>
       <pre class="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono h-96 overflow-y-auto whitespace-pre-wrap">{{ logs }}</pre>
       <div class="flex justify-end mt-4">
-        <button @click="step = 2; installRunning = false" :disabled="installRunning" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50">← Back to Config</button>
+        <button @click="step = 2; installRunning = false" :disabled="installRunning" class="px-4 py-2 bg-surface-alt text-fg-secondary text-sm font-medium rounded-lg hover:bg-border disabled:opacity-50">← Back to Config</button>
       </div>
     </div>
   </div>

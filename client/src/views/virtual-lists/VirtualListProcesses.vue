@@ -2,9 +2,10 @@
 import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
-import { getVirtualListProcesses, deleteVirtualListProcess, startVirtualListProcess, stopVirtualListProcess, bulkActionVirtualListProcesses } from '../../api/virtualListProcesses';
+import { getVirtualListProcesses, deleteVirtualListProcess, startVirtualListProcess, stopVirtualListProcess, bulkActionVirtualListProcesses, createVirtualListProcess } from '../../api/virtualListProcesses';
 import { getVirtualLists } from '../../api/virtualLists';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -90,28 +91,28 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Virtual List Processes</h1>
-      <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="Virtual List Processes" />
+      <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
         {{ showForm ? 'Cancel' : '+ New Process' }}
       </button>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">New Process</h2>
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
+      <h2 class="text-lg font-semibold text-fg mb-4">New Process</h2>
       <form @submit.prevent="handleAdd" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Virtual List *</label>
-          <select v-model="form.virtualListId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Virtual List *</label>
+          <select v-model="form.virtualListId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Select...</option>
             <option v-for="vl in virtualLists" :key="vl.id" :value="vl.id">{{ vl.name }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Process Name *</label>
-          <input v-model="form.processName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Process Name *</label>
+          <input v-model="form.processName" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
         <div class="flex items-end">
-          <button type="submit" :disabled="loading" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button type="submit" :disabled="loading" class="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Creating...' : 'Create' }}
           </button>
         </div>
@@ -129,11 +130,11 @@ const handleConfirm = async () => {
     >
       <template #cell-status="{ value }">
         <span :class="['px-2 py-1 text-xs font-medium rounded-full',
-          value === 'Running' ? 'bg-blue-100 text-blue-700' :
-          value === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
-          value === 'Failed' ? 'bg-red-100 text-red-700' :
+          value === 'Running' ? 'bg-primary-light text-primary' :
+          value === 'Completed' ? 'bg-success-light text-success' :
+          value === 'Failed' ? 'bg-danger-light text-danger' :
           value === 'Stopped' ? 'bg-yellow-100 text-yellow-700' :
-          'bg-gray-100 text-gray-600']">
+          'bg-surface-alt text-muted']">
           {{ value }}
         </span>
       </template>

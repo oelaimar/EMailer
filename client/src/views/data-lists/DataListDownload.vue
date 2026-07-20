@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import client from '../../api/client';
 import { getDataLists } from '../../api/dataLists';
+import PageHeader from '../../components/common/PageHeader.vue';
 
 const loading = ref(false);
 const error = ref('');
@@ -46,31 +47,31 @@ const handleDownload = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Download Data List</h1>
-      <router-link to="/data-lists" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to List</router-link>
+      <PageHeader title="Download Data List" />
+      <router-link to="/data-lists" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to List</router-link>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="bg-surface rounded-xl border border-border p-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Select Data List *</label>
-          <select v-model="selectedListId" @change="selectList" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Select Data List *</label>
+          <select v-model="selectedListId" @change="selectList" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option :value="null">Choose a list...</option>
             <option v-for="l in dataLists" :key="l.id" :value="l.id">{{ l.name }} ({{ l.emailCount }} emails)</option>
           </select>
         </div>
 
-        <div v-if="listInfo" class="bg-gray-50 rounded-lg p-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-2">List Details</h3>
+        <div v-if="listInfo" class="bg-surface-alt rounded-lg p-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-2">List Details</h3>
           <div class="text-sm space-y-1">
-            <div><span class="text-gray-500">Name:</span> {{ listInfo.name }}</div>
-            <div><span class="text-gray-500">Emails:</span> {{ listInfo.emailCount }}</div>
-            <div><span class="text-gray-500">Vertical:</span> {{ listInfo.vertical || 'N/A' }}</div>
-            <div><span class="text-gray-500">ISP:</span> {{ listInfo.isp || 'N/A' }}</div>
-            <div><span class="text-gray-500">Country:</span> {{ listInfo.country || 'N/A' }}</div>
+            <div><span class="text-muted">Name:</span> {{ listInfo.name }}</div>
+            <div><span class="text-muted">Emails:</span> {{ listInfo.emailCount }}</div>
+            <div><span class="text-muted">Vertical:</span> {{ listInfo.vertical || 'N/A' }}</div>
+            <div><span class="text-muted">ISP:</span> {{ listInfo.isp || 'N/A' }}</div>
+            <div><span class="text-muted">Country:</span> {{ listInfo.country || 'N/A' }}</div>
           </div>
         </div>
 

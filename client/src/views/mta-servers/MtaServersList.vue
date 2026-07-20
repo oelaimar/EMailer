@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import StatusBadge from '../../components/common/StatusBadge.vue';
 import { getMtaServers, deleteMtaServer, bulkActionMtaServers, checkMtaServer } from '../../api/mtaServers';
 import { useToastStore } from '../../stores/toast';
 const toastStore = useToastStore();
@@ -28,12 +29,12 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/mta-servers/${row.id}/edit`) },
+  { label: 'Edit', class: 'bg-primary-light text-primary hover:bg-blue-200', handler: (row) => router.push(`/mta-servers/${row.id}/edit`) },
   { label: 'Install', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: (row) => router.push(`/mta-servers/install/${row.id}`) },
   { label: 'Check', class: 'bg-purple-100 text-purple-700 hover:bg-purple-200', handler: async (row) => {
     try { await checkMtaServer(row.id); tableRef.value?.loadData(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   }},
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete MTA server "${row.name}"?`;
     confirmAction.value = () => deleteMtaServer(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -43,7 +44,7 @@ const actions = [
 const groupActions = [
   { label: 'Activate', action: 'activate', class: 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200' },
   { label: 'Inactivate', action: 'inactivate', class: 'bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200' },
-  { label: 'Delete', action: 'delete', class: 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200' },
+  { label: 'Delete', action: 'delete', class: 'bg-danger-light text-danger border-red-300 hover:bg-red-200' },
 ];
 
 const handleGroupAction = async ({ action, ids }) => {
@@ -63,7 +64,7 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">MTA Servers</h1>
+      <h1 class="text-2xl font-bold text-fg">MTA Servers</h1>
       <div class="flex items-center gap-2">
         <router-link to="/mta-servers/multi-add" class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
           Multi-Add
@@ -77,7 +78,7 @@ const handleConfirm = async () => {
         <router-link to="/mta-servers/vmtas" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
           VMTAs
         </router-link>
-        <router-link to="/mta-servers/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <router-link to="/mta-servers/add" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
           + Add New Server
         </router-link>
       </div>
@@ -93,12 +94,10 @@ const handleConfirm = async () => {
       @group-action="handleGroupAction"
     >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Activated' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
-          {{ value }}
-        </span>
+        <StatusBadge :value="value" />
       </template>
       <template #cell-sshStatus="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Connected' ? 'bg-emerald-100 text-emerald-700' : value === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Connected' ? 'bg-success-light text-success' : value === 'Failed' ? 'bg-danger-light text-danger' : 'bg-surface-alt text-muted']">
           {{ value }}
         </span>
       </template>

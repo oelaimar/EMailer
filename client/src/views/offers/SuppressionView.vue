@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { getOfferSuppressions, addOfferSuppression, deleteOfferSuppression } from '../../api/offers';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const route = useRoute();
@@ -66,64 +67,64 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Suppression Lists</h1>
+      <PageHeader title="Suppression Lists" />
       <div class="flex gap-2">
-        <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
           {{ showForm ? 'Cancel' : '+ Add Suppression' }}
         </button>
-        <router-link to="/offers" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <router-link to="/offers" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">
           Back to Offers
         </router-link>
       </div>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <form @submit.prevent="handleAdd">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input v-model="form.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Name *</label>
+            <input v-model="form.name" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select v-model="form.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Type</label>
+            <select v-model="form.type" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option value="Email">Email</option>
               <option value="Domain">Domain</option>
               <option value="IP">IP</option>
             </select>
           </div>
           <div class="md:col-span-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Data (one per line)</label>
-            <textarea v-model="form.data" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email1@example.com&#10;email2@example.com"></textarea>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Data (one per line)</label>
+            <textarea v-model="form.data" rows="6" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" placeholder="email1@example.com&#10;email2@example.com"></textarea>
           </div>
         </div>
         <div class="flex justify-end">
-          <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button type="submit" :disabled="loading" class="px-6 py-2 bg-primary hover:bg-primary-hover disabled:bg-primary-muted text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Adding...' : 'Add Suppression' }}
           </button>
         </div>
       </form>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200">
+    <div class="bg-surface rounded-xl border border-border">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-surface-alt border-b border-border">
             <tr>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">ID</th>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">Name</th>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">Type</th>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">Count</th>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">Created</th>
-              <th class="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">ID</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">Name</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">Type</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">Count</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">Created</th>
+              <th class="px-4 py-3 text-left font-medium text-muted">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-if="!suppressions.length">
-              <td colspan="6" class="px-4 py-8 text-center text-gray-400">No suppression lists found.</td>
+              <td colspan="6" class="px-4 py-8 text-center text-muted">No suppression lists found.</td>
             </tr>
-            <tr v-for="sup in suppressions" :key="sup.id" class="hover:bg-gray-50">
+            <tr v-for="sup in suppressions" :key="sup.id" class="hover:bg-surface-alt">
               <td class="px-4 py-3">{{ sup.id }}</td>
               <td class="px-4 py-3 font-medium">{{ sup.name }}</td>
               <td class="px-4 py-3">{{ sup.type }}</td>

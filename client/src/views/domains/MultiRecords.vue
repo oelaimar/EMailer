@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { getDomains, setMultiDomainsRecords } from '../../api/domains';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const loading = ref(false);
@@ -93,79 +94,79 @@ const handleApply = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Manage Multi Records</h1>
-      <router-link to="/domains" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to Domains</router-link>
+      <PageHeader title="Manage Multi Records" />
+      <router-link to="/domains" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to Domains</router-link>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Operation *</label>
-          <select v-model="operation" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Operation *</label>
+          <select v-model="operation" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="add">Add Records</option>
             <option value="edit">Edit (Update Matching)</option>
             <option value="delete">Delete (Remove Matching)</option>
           </select>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="text-xs text-muted mt-1">
             {{ operation === 'add' ? 'Append new records to selected domains' : operation === 'edit' ? 'Update records matching type+host' : 'Delete records matching type+host' }}
           </p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Account Filter</label>
-          <select v-model="selectedAccountId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Account Filter</label>
+          <select v-model="selectedAccountId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">All accounts</option>
             <option v-for="(_, name) in domainGroups" :key="name" :value="name">{{ name }}</option>
           </select>
         </div>
         <div class="flex items-end gap-2">
-          <button @click="selectAllDomains" class="px-3 py-2 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200">Select All</button>
-          <button @click="deselectAllDomains" class="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200">Deselect All</button>
-          <span class="text-sm text-gray-500 pb-2">{{ selectedDomainIds.length }} selected</span>
+          <button @click="selectAllDomains" class="px-3 py-2 bg-primary-light text-primary text-sm rounded-lg hover:bg-blue-200">Select All</button>
+          <button @click="deselectAllDomains" class="px-3 py-2 bg-surface-alt text-fg-secondary text-sm rounded-lg hover:bg-border">Deselect All</button>
+          <span class="text-sm text-muted pb-2">{{ selectedDomainIds.length }} selected</span>
         </div>
       </div>
 
-      <div class="mb-4 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+      <div class="mb-4 max-h-48 overflow-y-auto border border-border rounded-lg p-3">
         <label v-for="d in filteredDomains()" :key="d.id" class="flex items-center gap-2 text-sm cursor-pointer py-0.5">
           <input type="checkbox" :checked="selectedDomainIds.includes(d.id)" @change="toggleDomain(d.id)" class="rounded" />
           <span>{{ d.name }}</span>
-          <span class="text-xs text-gray-400">{{ d.accountName || '' }}</span>
+          <span class="text-xs text-muted">{{ d.accountName || '' }}</span>
         </label>
-        <div v-if="filteredDomains().length === 0" class="text-sm text-gray-400 py-2">No domains found.</div>
+        <div v-if="filteredDomains().length === 0" class="text-sm text-muted py-2">No domains found.</div>
       </div>
 
-      <h3 class="text-sm font-semibold text-gray-700 mb-2">
+      <h3 class="text-sm font-semibold text-fg-secondary mb-2">
         {{ operation === 'add' ? 'Records to Add' : operation === 'edit' ? 'Match & Update' : 'Records to Delete' }}
       </h3>
       <div class="overflow-x-auto mb-4">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-surface-alt border-b border-border">
             <tr>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-28">Type</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ operation === 'delete' ? 'Match Host' : 'Host' }}</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ operation === 'edit' ? 'New Value' : operation === 'delete' ? 'Match Value (optional)' : 'Value' }}</th>
-              <th v-if="operation !== 'delete'" class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-24">TTL</th>
-              <th v-if="operation !== 'delete'" class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-20">Proxy</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted w-28">Type</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted">{{ operation === 'delete' ? 'Match Host' : 'Host' }}</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted">{{ operation === 'edit' ? 'New Value' : operation === 'delete' ? 'Match Value (optional)' : 'Value' }}</th>
+              <th v-if="operation !== 'delete'" class="px-3 py-2 text-left text-xs font-medium text-muted w-24">TTL</th>
+              <th v-if="operation !== 'delete'" class="px-3 py-2 text-center text-xs font-medium text-muted w-20">Proxy</th>
               <th class="px-3 py-2 w-12"></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="(r, idx) in records" :key="idx" class="hover:bg-gray-50">
+            <tr v-for="(r, idx) in records" :key="idx" class="hover:bg-surface-alt">
               <td class="px-3 py-2">
-                <select v-model="r.type" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                <select v-model="r.type" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                   <option v-for="t in RECORD_TYPES" :key="t" :value="t">{{ t }}</option>
                 </select>
               </td>
               <td class="px-3 py-2">
-                <input v-model="r.name" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="@ or subdomain" />
+                <input v-model="r.name" type="text" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="@ or subdomain" />
               </td>
               <td class="px-3 py-2">
-                <input v-model="r.value" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="IP or target" />
+                <input v-model="r.value" type="text" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="IP or target" />
               </td>
               <td v-if="operation !== 'delete'" class="px-3 py-2">
-                <select v-model.number="r.ttl" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                <select v-model.number="r.ttl" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                   <option v-for="t in TTL_OPTIONS" :key="t" :value="t">{{ t }}</option>
                 </select>
               </td>
@@ -181,7 +182,7 @@ const handleApply = async () => {
       </div>
 
       <div class="flex justify-between items-center">
-        <button @click="addRecord" class="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200">+ Add Row</button>
+        <button @click="addRecord" class="px-3 py-1.5 bg-primary-light text-primary text-sm rounded-lg hover:bg-blue-200">+ Add Row</button>
         <button @click="handleApply" :disabled="saving || selectedDomainIds.length === 0" :class="['px-6 py-2 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50', operationClass()]">
           {{ saving ? 'Applying...' : operationLabel() }}
         </button>

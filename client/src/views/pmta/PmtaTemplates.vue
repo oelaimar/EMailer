@@ -5,6 +5,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPmtaTemplates, deletePmtaTemplate } from '../../api/pmta';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const router = useRouter();
@@ -23,8 +24,8 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/pmta/templates/${row.id}/edit`) },
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Edit', class: 'bg-primary-light text-primary hover:bg-blue-200', handler: (row) => router.push(`/pmta/templates/${row.id}/edit`) },
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete template "${row.name}"?`;
     confirmAction.value = () => deletePmtaTemplate(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -39,16 +40,16 @@ const handleConfirm = async () => {
 };
 
 const statusColor = (s) => {
-  if (s === 'Activated') return 'bg-emerald-100 text-emerald-700';
-  return 'bg-gray-100 text-gray-600';
+  if (s === 'Activated') return 'bg-success-light text-success';
+  return 'bg-surface-alt text-muted';
 };
 </script>
 
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">PMTA Templates</h1>
-      <router-link to="/pmta/templates/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="PMTA Templates" />
+      <router-link to="/pmta/templates/add" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
         + Add Template
       </router-link>
     </div>

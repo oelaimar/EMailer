@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 import {
   getPostmasterSources,
   getPostmasterMessages,
@@ -189,10 +190,10 @@ onMounted(() => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Postmaster Inbox Monitor</h1>
+      <PageHeader title="Postmaster Inbox Monitor" />
       <div class="flex gap-2">
-        <router-link to="/postmaster-accounts" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Accounts</router-link>
-        <router-link to="/postmaster/runs" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Runs</router-link>
+        <router-link to="/postmaster-accounts" class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt">Accounts</router-link>
+        <router-link to="/postmaster/runs" class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt">Runs</router-link>
       </div>
     </div>
 
@@ -202,22 +203,22 @@ onMounted(() => {
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
       <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Provider</label>
-        <select v-model="selectedProvider" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-xs font-medium text-muted mb-1">Provider</label>
+        <select v-model="selectedProvider" class="w-full border border-border rounded-lg px-3 py-2 text-sm">
           <option value="">All providers</option>
           <option v-for="p in providers" :key="p" :value="p">{{ p }}</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Server</label>
-        <select v-model="selectedServer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-xs font-medium text-muted mb-1">Server</label>
+        <select v-model="selectedServer" class="w-full border border-border rounded-lg px-3 py-2 text-sm">
           <option value="">All servers</option>
           <option v-for="s in servers" :key="s" :value="s">{{ s }}</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Domain</label>
-        <select v-model="selectedAccountId" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-xs font-medium text-muted mb-1">Domain</label>
+        <select v-model="selectedAccountId" class="w-full border border-border rounded-lg px-3 py-2 text-sm">
           <option value="">Select a domain...</option>
           <option v-for="d in filteredDomains" :key="d.id" :value="d.id">
             {{ d.domain }} | {{ d.serverName || '-' }} | {{ d.providerName || '-' }}
@@ -225,8 +226,8 @@ onMounted(() => {
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Limit</label>
-        <select v-model="messageLimit" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-xs font-medium text-muted mb-1">Limit</label>
+        <select v-model="messageLimit" class="w-full border border-border rounded-lg px-3 py-2 text-sm">
           <option :value="25">25</option>
           <option :value="50">50</option>
           <option :value="100">100</option>
@@ -237,16 +238,16 @@ onMounted(() => {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-      <input v-model="searchText" type="text" placeholder="Search by sender, subject, or message id..." class="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-      <input v-model="dateFrom" type="date" placeholder="YYYY-MM-DD" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-      <input v-model="dateTo" type="date" placeholder="YYYY-MM-DD" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+      <input v-model="searchText" type="text" placeholder="Search by sender, subject, or message id..." class="md:col-span-2 border border-border rounded-lg px-3 py-2 text-sm" />
+      <input v-model="dateFrom" type="date" placeholder="YYYY-MM-DD" class="border border-border rounded-lg px-3 py-2 text-sm" />
+      <input v-model="dateTo" type="date" placeholder="YYYY-MM-DD" class="border border-border rounded-lg px-3 py-2 text-sm" />
     </div>
 
     <div class="flex gap-2 mb-6">
-      <button @click="loadMessages" :disabled="!selectedAccountId || loading" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+      <button @click="loadMessages" :disabled="!selectedAccountId || loading" class="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg disabled:opacity-50">
         {{ loading ? 'Loading...' : 'Apply Filters' }}
       </button>
-      <button @click="clearFilters" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Clear</button>
+      <button @click="clearFilters" class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt">Clear</button>
       <button @click="refreshMailbox" :disabled="!selectedAccountId || refreshing" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
         {{ refreshing ? 'Refreshing...' : 'Refresh Mailbox' }}
       </button>
@@ -258,49 +259,49 @@ onMounted(() => {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-blue-600">{{ summary.messageCount || 0 }}</p>
-        <p class="text-xs text-gray-500 mt-1">Total Messages</p>
+        <p class="text-xs text-muted mt-1">Total Messages</p>
       </div>
       <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-green-600">{{ summary.uniqueSenders || 0 }}</p>
-        <p class="text-xs text-gray-500 mt-1">Unique Senders</p>
+        <p class="text-xs text-muted mt-1">Unique Senders</p>
       </div>
       <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-red-600">{{ summary.blacklistedCount || 0 }}</p>
-        <p class="text-xs text-gray-500 mt-1">Blacklisted Senders</p>
+        <p class="text-xs text-muted mt-1">Blacklisted Senders</p>
       </div>
       <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
         <p class="text-sm font-bold text-purple-600">{{ formatDate(summary.lastRefreshAt) }}</p>
-        <p class="text-xs text-gray-500 mt-1">Last Refresh</p>
+        <p class="text-xs text-muted mt-1">Last Refresh</p>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-surface rounded-xl border border-border overflow-hidden">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-surface-alt border-b border-border">
           <tr>
-            <th class="px-4 py-3 text-left font-medium text-gray-600 w-[14%]">Date</th>
-            <th class="px-4 py-3 text-left font-medium text-gray-600 w-[24%]">From</th>
-            <th class="px-4 py-3 text-left font-medium text-gray-600">Subject</th>
-            <th class="px-4 py-3 text-left font-medium text-gray-600 w-[10%]">Actions</th>
+            <th class="px-4 py-3 text-left font-medium text-muted w-[14%]">Date</th>
+            <th class="px-4 py-3 text-left font-medium text-muted w-[24%]">From</th>
+            <th class="px-4 py-3 text-left font-medium text-muted">Subject</th>
+            <th class="px-4 py-3 text-left font-medium text-muted w-[10%]">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr v-if="messages.length === 0">
-            <td colspan="4" class="px-4 py-8 text-center text-gray-400">
+            <td colspan="4" class="px-4 py-8 text-center text-muted">
               {{ selectedAccountId ? 'No messages found' : 'Select a domain to view messages' }}
             </td>
           </tr>
-          <tr v-for="msg in messages" :key="msg.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-gray-600">{{ formatDate(msg.date) }}</td>
-            <td class="px-4 py-3 text-gray-800 font-medium">{{ msg.from }}</td>
-            <td class="px-4 py-3 text-gray-600 truncate max-w-xs" :title="msg.subject">{{ truncate(msg.subject, 80) }}</td>
+          <tr v-for="msg in messages" :key="msg.id" class="hover:bg-surface-alt">
+            <td class="px-4 py-3 text-muted">{{ formatDate(msg.date) }}</td>
+            <td class="px-4 py-3 text-fg font-medium">{{ msg.from }}</td>
+            <td class="px-4 py-3 text-muted truncate max-w-xs" :title="msg.subject">{{ truncate(msg.subject, 80) }}</td>
             <td class="px-4 py-3">
               <div class="flex gap-1">
-                <button @click="openDetail(msg, 'body')" class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="View Body">Body</button>
-                <button @click="openDetail(msg, 'headers')" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200" title="View Headers">Headers</button>
+                <button @click="openDetail(msg, 'body')" class="px-2 py-1 text-xs bg-primary-light text-primary rounded hover:bg-blue-200" title="View Body">Body</button>
+                <button @click="openDetail(msg, 'headers')" class="px-2 py-1 text-xs bg-surface-alt text-fg-secondary rounded hover:bg-blue-200" title="View Headers">Headers</button>
                 <button @click="openDetail(msg, 'raw')" class="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200" title="View Raw">Raw</button>
                 <button @click="confirmDelete(msg, false)" class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200" title="Delete">Del</button>
-                <button @click="confirmDelete(msg, true)" class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200" title="Delete + Blacklist">Ban</button>
+                <button @click="confirmDelete(msg, true)" class="px-2 py-1 text-xs bg-danger-light text-danger rounded hover:bg-red-200" title="Delete + Blacklist">Ban</button>
               </div>
             </td>
           </tr>
@@ -310,25 +311,25 @@ onMounted(() => {
 
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showModal = false">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900 truncate">{{ detailMessage?.subject || 'Message Details' }}</h3>
-            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        <div class="bg-surface rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+            <h3 class="text-lg font-semibold text-fg truncate">{{ detailMessage?.subject || 'Message Details' }}</h3>
+            <button @click="showModal = false" class="text-muted hover:text-muted text-xl">&times;</button>
           </div>
-          <div class="flex border-b border-gray-200 px-6">
-            <button @click="detailTab = 'body'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'body' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700']">Body</button>
-            <button @click="detailTab = 'headers'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'headers' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700']">Headers</button>
-            <button @click="detailTab = 'raw'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'raw' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700']">Raw Source</button>
+          <div class="flex border-b border-border px-6">
+            <button @click="detailTab = 'body'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'body' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-fg-secondary']">Body</button>
+            <button @click="detailTab = 'headers'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'headers' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-fg-secondary']">Headers</button>
+            <button @click="detailTab = 'raw'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', detailTab === 'raw' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-fg-secondary']">Raw Source</button>
           </div>
           <div class="flex-1 overflow-auto p-6">
-            <div v-if="detailLoading" class="flex items-center justify-center py-12 text-gray-400">Loading...</div>
+            <div v-if="detailLoading" class="flex items-center justify-center py-12 text-muted">Loading...</div>
             <div v-else>
               <div v-if="detailTab === 'body'" class="prose prose-sm max-w-none" style="max-height: 60vh; overflow: auto;">
                 <div v-if="detailMessage?.bodyHtml" v-html="detailMessage.bodyHtml"></div>
-                <pre v-else class="whitespace-pre-wrap text-sm text-gray-700">{{ detailMessage?.bodyText || 'No body content' }}</pre>
+                <pre v-else class="whitespace-pre-wrap text-sm text-fg-secondary">{{ detailMessage?.bodyText || 'No body content' }}</pre>
               </div>
-              <pre v-if="detailTab === 'headers'" class="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded" style="max-height: 60vh; overflow: auto;">{{ detailMessage?.rawHeaders || 'No headers' }}</pre>
-              <pre v-if="detailTab === 'raw'" class="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded" style="max-height: 60vh; overflow: auto;">{{ detailMessage?.rawHeaders || 'No raw source' }}</pre>
+              <pre v-if="detailTab === 'headers'" class="whitespace-pre-wrap text-sm text-fg-secondary bg-surface-alt p-4 rounded" style="max-height: 60vh; overflow: auto;">{{ detailMessage?.rawHeaders || 'No headers' }}</pre>
+              <pre v-if="detailTab === 'raw'" class="whitespace-pre-wrap text-sm text-fg-secondary bg-surface-alt p-4 rounded" style="max-height: 60vh; overflow: auto;">{{ detailMessage?.rawHeaders || 'No raw source' }}</pre>
             </div>
           </div>
         </div>
@@ -337,13 +338,13 @@ onMounted(() => {
 
     <Teleport to="body">
       <div v-if="showExportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showExportModal = false">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Export Reply Accounts</h3>
-          <p class="text-sm text-gray-600 mb-4">Enter the Postmaster export password.</p>
-          <input v-model="exportPassword" type="password" placeholder="Export Password" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4" />
+        <div class="bg-surface rounded-xl shadow-2xl w-full max-w-sm p-6">
+          <h3 class="text-lg font-semibold text-fg mb-4">Export Reply Accounts</h3>
+          <p class="text-sm text-muted mb-4">Enter the Postmaster export password.</p>
+          <input v-model="exportPassword" type="password" placeholder="Export Password" class="w-full border border-border rounded-lg px-3 py-2 text-sm mb-4" />
           <div class="flex justify-end gap-3">
-            <button @click="showExportModal = false" class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button @click="executeExport" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Export</button>
+            <button @click="showExportModal = false" class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt">Cancel</button>
+            <button @click="executeExport" class="px-4 py-2 text-sm bg-success-light text-success rounded-lg hover:bg-green-700">Export</button>
           </div>
         </div>
       </div>

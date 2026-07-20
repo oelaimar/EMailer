@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
 import { getAuditLogs, deleteAuditLog, bulkActionAuditLogs } from '../../api/auditLogs';
 import { useToastStore } from '../../stores/toast';
 const toastStore = useToastStore();
@@ -23,7 +24,7 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete audit log #${row.id}?`;
     confirmAction.value = () => deleteAuditLog(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -31,7 +32,7 @@ const actions = [
 ];
 
 const groupActions = [
-  { label: 'Delete', action: 'delete', class: 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200' },
+  { label: 'Delete', action: 'delete', class: 'bg-danger-light text-danger border-red-300 hover:bg-red-200' },
 ];
 
 const handleGroupAction = async ({ action, ids }) => {
@@ -50,9 +51,7 @@ const handleConfirm = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Audit Logs</h1>
-    </div>
+    <PageHeader title="Audit Logs" />
 
     <DataTable
       ref="tableRef"

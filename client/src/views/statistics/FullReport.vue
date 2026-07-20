@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import { getFullReport, getReportColumns } from '../../api/statistics';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -100,14 +101,14 @@ const statusColor = (s) => {
   if (s === 'Completed') return 'bg-emerald-100 text-emerald-700';
   if (s === 'Failed') return 'bg-red-100 text-red-700';
   if (s === 'Paused') return 'bg-yellow-100 text-yellow-700';
-  return 'bg-gray-100 text-gray-600';
+  return 'bg-surface-alt text-muted';
 };
 </script>
 
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Full Revenue Report</h1>
+      <PageHeader title="Full Revenue Report" />
       <div class="flex gap-2">
         <button @click="showColumnBuilder = !showColumnBuilder" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
           {{ showColumnBuilder ? 'Hide Columns' : 'Customize Columns' }}
@@ -116,40 +117,40 @@ const statusColor = (s) => {
       </div>
     </div>
 
-    <div v-if="showColumnBuilder" class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+    <div v-if="showColumnBuilder" class="bg-surface rounded-xl border border-border p-4 mb-6">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-semibold text-gray-700">Select Columns ({{ selectedColumns.length }} selected)</h3>
+        <h3 class="text-sm font-semibold text-fg-secondary">Select Columns ({{ selectedColumns.length }} selected)</h3>
         <div class="flex gap-2">
-          <button @click="resetColumns" class="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">Reset All</button>
-          <button @click="applyColumns" class="px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700">Apply</button>
+          <button @click="resetColumns" class="px-3 py-1 text-xs bg-surface-alt text-muted rounded-lg hover:bg-surface-alt">Reset All</button>
+          <button @click="applyColumns" class="px-3 py-1 text-xs bg-primary text-white rounded-lg hover:bg-primary-hover">Apply</button>
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-64 overflow-y-auto">
-        <label v-for="col in availableColumns" :key="col.key" class="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-gray-50 cursor-pointer">
+        <label v-for="col in availableColumns" :key="col.key" class="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-surface-alt cursor-pointer">
           <input type="checkbox" :checked="selectedColumns.includes(col.key)" @change="toggleColumn(col.key)" class="rounded" />
-          <span class="text-gray-700">{{ col.label }}</span>
-          <span class="text-xs text-gray-400">{{ col.type }}</span>
+          <span class="text-fg-secondary">{{ col.label }}</span>
+          <span class="text-xs text-muted">{{ col.type }}</span>
         </label>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input v-model="search" type="text" placeholder="Process, subject, email..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Search</label>
+          <input v-model="search" type="text" placeholder="Process, subject, email..." class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-          <input v-model="dateFrom" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Date From</label>
+          <input v-model="dateFrom" type="date" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-          <input v-model="dateTo" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Date To</label>
+          <input v-model="dateTo" type="date" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select v-model="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Status</label>
+          <select v-model="statusFilter" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
             <option value="">All</option>
             <option value="Pending">Pending</option>
             <option value="Running">Running</option>
@@ -160,16 +161,16 @@ const statusColor = (s) => {
           </select>
         </div>
         <div class="flex items-end">
-          <button @click="applyFilters" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">Apply</button>
+          <button @click="applyFilters" class="w-full px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">Apply</button>
         </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+    <div class="bg-surface rounded-xl border border-border overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="border-b border-gray-200 bg-gray-50">
+        <thead class="border-b border-border bg-surface-alt">
           <tr>
-            <th v-for="col in columns" :key="col.key" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">{{ col.label }}</th>
+            <th v-for="col in columns" :key="col.key" class="px-4 py-3 text-left text-xs font-medium text-muted uppercase whitespace-nowrap">{{ col.label }}</th>
           </tr>
         </thead>
       </table>

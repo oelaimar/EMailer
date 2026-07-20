@@ -6,6 +6,7 @@ import { getMtaServers } from '../../api/mtaServers';
 import { getSmtpServers } from '../../api/smtpServers';
 import { getOffers } from '../../api/offers';
 import { getDataLists } from '../../api/dataLists';
+import PageHeader from '../../components/common/PageHeader.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -120,45 +121,45 @@ const selectedCounts = computed(() => ({
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Manage Authorizations - {{ teamName }}</h1>
-      <router-link to="/teams" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader :title="`Manage Authorizations - ${teamName}`" />
+      <router-link to="/teams" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">
         Back to List
       </router-link>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200">
-      <div v-if="error" class="p-4 border-b border-gray-200 bg-red-50 text-red-700 text-sm">{{ error }}</div>
+    <div class="bg-surface rounded-xl border border-border">
+      <div v-if="error" class="p-4 border-b border-border bg-red-50 text-red-700 text-sm">{{ error }}</div>
 
-      <div class="border-b border-gray-200">
+      <div class="border-b border-border">
         <nav class="flex gap-0">
           <button v-for="(tab, i) in tabs" :key="i" @click="activeTab = i; search = ''"
-            :class="['py-3 px-5 text-sm font-medium border-b-2 transition-colors', activeTab === i ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700']">
+            :class="['py-3 px-5 text-sm font-medium border-b-2 transition-colors', activeTab === i ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-fg-secondary']">
             {{ tab }}
-            <span v-if="[selectedCounts.mta, selectedCounts.smtp, selectedCounts.offers, selectedCounts.dataLists][i]" class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
+            <span v-if="[selectedCounts.mta, selectedCounts.smtp, selectedCounts.offers, selectedCounts.dataLists][i]" class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-primary-light text-primary">
               {{ [selectedCounts.mta, selectedCounts.smtp, selectedCounts.offers, selectedCounts.dataLists][i] }}
             </span>
           </button>
         </nav>
       </div>
 
-      <div class="p-4 border-b border-gray-200 flex items-center gap-3">
-        <input v-model="search" type="text" placeholder="Search..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-        <button @click="selectAll" class="px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Select All</button>
-        <button @click="clearAll" class="px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 rounded-lg transition-colors">Clear</button>
+      <div class="p-4 border-b border-border flex items-center gap-3">
+        <input v-model="search" type="text" placeholder="Search..." class="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
+        <button @click="selectAll" class="px-3 py-2 text-xs font-medium text-primary hover:bg-primary-light rounded-lg transition-colors">Select All</button>
+        <button @click="clearAll" class="px-3 py-2 text-xs font-medium text-muted hover:bg-surface-alt rounded-lg transition-colors">Clear</button>
       </div>
 
       <div class="p-4 max-h-96 overflow-y-auto">
-        <div v-if="currentItems.length === 0" class="text-center text-gray-400 text-sm py-8">No items found.</div>
-        <label v-for="item in currentItems" :key="item.id" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-          <input type="checkbox" :checked="isSelected(item.id)" @change="toggleItem(item.id)" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-          <span class="text-sm text-gray-800">{{ item.name || item.host || item.email || `#${item.id}` }}</span>
-          <span v-if="item.status" :class="['ml-auto px-2 py-0.5 text-xs rounded-full', item.status === 'Activated' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500']">{{ item.status }}</span>
+        <div v-if="currentItems.length === 0" class="text-center text-muted text-sm py-8">No items found.</div>
+        <label v-for="item in currentItems" :key="item.id" class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-alt cursor-pointer">
+          <input type="checkbox" :checked="isSelected(item.id)" @change="toggleItem(item.id)" class="w-4 h-4 text-primary border-border rounded focus:ring-blue-500" />
+          <span class="text-sm text-fg">{{ item.name || item.host || item.email || `#${item.id}` }}</span>
+          <span v-if="item.status" :class="['ml-auto px-2 py-0.5 text-xs rounded-full', item.status === 'Activated' ? 'bg-success-light text-success' : 'bg-surface-alt text-muted']">{{ item.status }}</span>
         </label>
       </div>
 
-      <div class="p-4 border-t border-gray-200 flex justify-end gap-3">
-        <router-link to="/teams" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Cancel</router-link>
-        <button @click="handleSave" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+      <div class="p-4 border-t border-border flex justify-end gap-3">
+        <router-link to="/teams" class="px-4 py-2 bg-surface-alt hover:bg-surface-alt text-fg-secondary text-sm font-medium rounded-lg transition-colors">Cancel</router-link>
+        <button @click="handleSave" :disabled="loading" class="px-6 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
           {{ loading ? 'Saving...' : 'Update Authorizations' }}
         </button>
       </div>

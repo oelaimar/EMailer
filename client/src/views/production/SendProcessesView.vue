@@ -10,6 +10,7 @@ import { getMtaServers } from '../../api/mtaServers';
 import { getOffers } from '../../api/offers';
 import { getVirtualLists } from '../../api/virtualLists';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const route = useRoute();
@@ -72,7 +73,7 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete process "${row.processName}"?`;
     confirmAction.value = () => deleteSendProcess(productionId, row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -111,60 +112,60 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Send Processes — {{ productionName }}</h1>
+      <PageHeader title="Send Processes — {{ productionName }}" />
       <div class="flex gap-2">
-        <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
           {{ showForm ? 'Cancel' : '+ New Process' }}
         </button>
-        <router-link to="/production" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <router-link to="/production" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">
           Back to Production
         </router-link>
       </div>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">New Send Process</h2>
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
+      <h2 class="text-lg font-semibold text-fg mb-4">New Send Process</h2>
       <form @submit.prevent="handleAdd">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Process Name *</label>
-            <input v-model="form.processName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Process Name *</label>
+            <input v-model="form.processName" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-            <input v-model="form.subject" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Subject</label>
+            <input v-model="form.subject" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From Name</label>
-            <input v-model="form.fromName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">From Name</label>
+            <input v-model="form.fromName" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From Email</label>
-            <input v-model="form.fromEmail" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">From Email</label>
+            <input v-model="form.fromEmail" type="email" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Reply To</label>
-            <input v-model="form.replyTo" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Reply To</label>
+            <input v-model="form.replyTo" type="email" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sender Score</label>
-            <input v-model="form.senderScore" type="number" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Sender Score</label>
+            <input v-model="form.senderScore" type="number" min="0" max="100" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Throttle</label>
-            <input v-model.number="form.throttle" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Throttle</label>
+            <input v-model.number="form.throttle" type="number" min="0" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Speed (%)</label>
-            <input v-model.number="form.speed" type="number" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Speed (%)</label>
+            <input v-model.number="form.speed" type="number" min="0" max="100" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Schedule</label>
-            <input v-model="form.scheduleAt" type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Schedule</label>
+            <input v-model="form.scheduleAt" type="datetime-local" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Repeat</label>
-            <select v-model="form.repeat" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Repeat</label>
+            <select v-model="form.repeat" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -172,56 +173,56 @@ const handleConfirm = async () => {
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Data List</label>
-            <select v-model="form.dataListId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Data List</label>
+            <select v-model="form.dataListId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option v-for="dl in dataLists" :key="dl.id" :value="dl.id">{{ dl.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Group</label>
-            <select v-model="form.smtpGroupId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">SMTP Group</label>
+            <select v-model="form.smtpGroupId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option v-for="g in smtpGroups" :key="g.id" :value="g.id">{{ g.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">MTA Server</label>
-            <select v-model="form.mtaServerId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">MTA Server</label>
+            <select v-model="form.mtaServerId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option v-for="m in mtaServers" :key="m.id" :value="m.id">{{ m.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Offer</label>
-            <select v-model="form.offerId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Offer</label>
+            <select v-model="form.offerId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option v-for="o in offers" :key="o.id" :value="o.id">{{ o.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Virtual List</label>
-            <select v-model="form.virtualListId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Virtual List</label>
+            <select v-model="form.virtualListId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="">None</option>
               <option v-for="v in virtualLists" :key="v.id" :value="v.id">{{ v.name }}</option>
             </select>
           </div>
         </div>
 
-        <div class="border-t border-gray-200 pt-4 mb-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-3">Advanced Send Options</h3>
+        <div class="border-t border-border pt-4 mb-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-3">Advanced Send Options</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Batch Size</label>
-              <input v-model.number="form.batchSize" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Batch Size</label>
+              <input v-model.number="form.batchSize" type="number" min="1" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Batch Delay (sec)</label>
-              <input v-model.number="form.batchDelay" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Batch Delay (sec)</label>
+              <input v-model.number="form.batchDelay" type="number" min="0" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">VMTA Rotation</label>
-              <select v-model="form.rotationType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <label class="block text-sm font-medium text-fg-secondary mb-1">VMTA Rotation</label>
+              <select v-model="form.rotationType" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="round-robin">Round Robin</option>
                 <option value="random">Random</option>
                 <option value="weighted">Weighted</option>
@@ -229,12 +230,12 @@ const handleConfirm = async () => {
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Return Path</label>
-              <input v-model="form.returnPath" type="text" placeholder="bounces@domain.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Return Path</label>
+              <input v-model="form.returnPath" type="text" placeholder="bounces@domain.com" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Content Encoding</label>
-              <select v-model="form.contentEncoding" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Content Encoding</label>
+              <select v-model="form.contentEncoding" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="none">None</option>
                 <option value="7bit">7bit</option>
                 <option value="8bit">8bit</option>
@@ -245,40 +246,40 @@ const handleConfirm = async () => {
             <div class="flex items-end gap-4">
               <label class="flex items-center gap-2 text-sm">
                 <input v-model="form.headersRotation" type="checkbox" class="rounded" />
-                <span class="text-gray-700">Headers Rotation</span>
+                <span class="text-fg-secondary">Headers Rotation</span>
               </label>
               <label class="flex items-center gap-2 text-sm">
                 <input v-model="form.bodyRotation" type="checkbox" class="rounded" />
-                <span class="text-gray-700">Body Rotation</span>
+                <span class="text-fg-secondary">Body Rotation</span>
               </label>
               <label class="flex items-center gap-2 text-sm">
                 <input v-model="form.rcptRotation" type="checkbox" class="rounded" />
-                <span class="text-gray-700">RCPT Rotation</span>
+                <span class="text-fg-secondary">RCPT Rotation</span>
               </label>
             </div>
           </div>
         </div>
 
-        <div v-if="form.headersRotation || form.bodyRotation || form.rcptRotation" class="border-t border-gray-200 pt-4 mb-4">
-          <h3 class="text-sm font-semibold text-gray-700 mb-3">Rotation Lists (one per line)</h3>
+        <div v-if="form.headersRotation || form.bodyRotation || form.rcptRotation" class="border-t border-border pt-4 mb-4">
+          <h3 class="text-sm font-semibold text-fg-secondary mb-3">Rotation Lists (one per line)</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div v-if="form.headersRotation">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Headers (JSON or text)</label>
-              <textarea v-model="form.headersList" rows="5" placeholder='{"From": "name <email>"}' class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Headers (JSON or text)</label>
+              <textarea v-model="form.headersList" rows="5" placeholder='{"From": "name <email>"}' class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
             </div>
             <div v-if="form.bodyRotation">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Body Variants</label>
-              <textarea v-model="form.bodiesList" rows="5" placeholder="HTML content per line..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+              <label class="block text-sm font-medium text-fg-secondary mb-1">Body Variants</label>
+              <textarea v-model="form.bodiesList" rows="5" placeholder="HTML content per line..." class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
             </div>
             <div v-if="form.rcptRotation">
-              <label class="block text-sm font-medium text-gray-700 mb-1">RCPT Values</label>
-              <textarea v-model="form.rcptList" rows="5" placeholder="One value per line..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+              <label class="block text-sm font-medium text-fg-secondary mb-1">RCPT Values</label>
+              <textarea v-model="form.rcptList" rows="5" placeholder="One value per line..." class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
             </div>
           </div>
         </div>
 
         <div class="flex justify-end">
-          <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button type="submit" :disabled="loading" class="px-6 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Creating...' : 'Create Process' }}
           </button>
         </div>
@@ -292,10 +293,10 @@ const handleConfirm = async () => {
     >
       <template #cell-status="{ value }">
         <span :class="['px-2 py-1 text-xs font-medium rounded-full',
-          value === 'Running' ? 'bg-blue-100 text-blue-700' :
-          value === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
-          value === 'Failed' ? 'bg-red-100 text-red-700' :
-          'bg-gray-100 text-gray-600']">
+          value === 'Running' ? 'bg-primary-light text-primary' :
+          value === 'Completed' ? 'bg-success-light text-success' :
+          value === 'Failed' ? 'bg-danger-light text-danger' :
+          'bg-surface-alt text-muted']">
           {{ value }}
         </span>
       </template>

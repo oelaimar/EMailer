@@ -2,6 +2,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getRole, createRole, updateRole } from '../../api/roles';
+import PageHeader from '../../components/common/PageHeader.vue';
+import FormCard from '../../components/common/FormCard.vue';
+import FormActions from '../../components/common/FormActions.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -234,47 +237,44 @@ const handleSubmit = async () => {
 
 <template>
   <div class="max-w-4xl">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">{{ isEdit ? 'Edit Role' : 'Add New Role' }}</h1>
-      <router-link to="/roles" class="px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">Back to List</router-link>
-    </div>
+    <PageHeader :title="isEdit ? 'Edit Role' : 'Add New Role'" />
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">Loading...</div>
+    <div v-if="loading" class="text-center py-12 text-muted">Loading...</div>
 
     <form v-else @submit.prevent="handleSubmit">
-      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <FormCard class="mb-6">
         <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{{ error }}</div>
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Role Name *</label>
-            <input v-model="form.name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Role Name *</label>
+            <input v-model="form.name" required class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select v-model="form.status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Status</label>
+            <select v-model="form.status" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option>Activated</option>
               <option>Inactivated</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select v-model="form.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Type</label>
+            <select v-model="form.type" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option>Team Based Role</option>
             </select>
           </div>
         </div>
-      </div>
+      </FormCard>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <h3 class="text-sm font-semibold text-gray-700 uppercase mb-4">Permissions</h3>
+      <FormCard class="mb-6">
+        <h3 class="text-sm font-semibold text-fg-secondary uppercase mb-4">Permissions</h3>
 
-        <div v-for="section in permissionSections" :key="section.id" class="border border-gray-200 rounded-lg mb-3">
-          <button type="button" @click="toggleSection(section.id)" class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
+        <div v-for="section in permissionSections" :key="section.id" class="border border-border rounded-lg mb-3">
+          <button type="button" @click="toggleSection(section.id)" class="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-alt transition-colors">
             <div class="flex items-center gap-2">
               <span class="font-medium text-sm">{{ section.label }}</span>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" @click.stop="toggleAllSection(section)" :class="['text-xs px-2 py-1 rounded', isAllChecked(section) ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
+              <button type="button" @click.stop="toggleAllSection(section)" :class="['text-xs px-2 py-1 rounded', isAllChecked(section) ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-alt text-muted']">
                 {{ isAllChecked(section) ? 'All Selected' : 'Select All' }}
               </button>
               <svg :class="['w-4 h-4 transition-transform', openSections.includes(section.id) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,21 +284,15 @@ const handleSubmit = async () => {
           </button>
 
           <div v-if="openSections.includes(section.id)" class="px-4 pb-3 grid grid-cols-3 gap-2">
-            <label v-for="item in section.items" :key="item.key" class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded">
+            <label v-for="item in section.items" :key="item.key" class="flex items-center gap-2 text-sm text-fg-secondary cursor-pointer hover:bg-surface-alt p-1 rounded">
               <input type="checkbox" :checked="form.permissions[item.key]?.read" @change="togglePermission(item.key)" class="rounded" />
               {{ item.label }}
             </label>
           </div>
         </div>
-      </div>
+      </FormCard>
 
-      <button type="submit" :disabled="saving" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
-        <svg v-if="saving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        {{ saving ? 'Saving...' : 'Save' }}
-      </button>
+      <FormActions back-to="/roles" :saving="saving" submit-label="Save" />
     </form>
   </div>
 </template>

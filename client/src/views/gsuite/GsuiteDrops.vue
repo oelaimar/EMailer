@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
 import { getGsuiteDrops } from '../../api/gsuiteProduction';
 import { executeProcessAction } from '../../api/production';
 import { useToastStore } from '../../stores/toast';
@@ -53,8 +54,8 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">GSuite Drops</h1>
-      <router-link to="/gsuite-accounts" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back</router-link>
+      <PageHeader title="GSuite Drops" />
+      <router-link to="/gsuite-accounts" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back</router-link>
     </div>
 
     <DataTable
@@ -65,7 +66,7 @@ const handleConfirm = async () => {
       :actions="actions"
     >
       <template #cell-status="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-blue-100 text-blue-700' : value === 'Completed' ? 'bg-emerald-100 text-emerald-700' : value === 'Paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'In Progress' ? 'bg-primary-light text-primary' : value === 'Completed' ? 'bg-success-light text-success' : value === 'Paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-danger-light text-danger']">
           {{ value }}
         </span>
       </template>

@@ -5,6 +5,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import client from '../../api/client';
 import { getDataLists } from '../../api/dataLists';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -26,7 +27,7 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete blacklist entry?`;
     confirmAction.value = () => client.delete(`/data-lists/blacklists/${row.id}`).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -60,28 +61,28 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Blacklists</h1>
+      <PageHeader title="Blacklists" />
       <div class="flex items-center gap-2">
-        <router-link to="/data-lists" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Data Lists</router-link>
-        <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <router-link to="/data-lists" class="px-3 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Data Lists</router-link>
+        <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
           {{ showForm ? 'Cancel' : '+ Add Entry' }}
         </button>
       </div>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input v-model="form.email" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="user@example.com" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Email</label>
+          <input v-model="form.email" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="user@example.com" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Domain</label>
-          <input v-model="form.domain" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="example.com" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Domain</label>
+          <input v-model="form.domain" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="example.com" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-          <input v-model="form.reason" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Optional reason" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Reason</label>
+          <input v-model="form.reason" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Optional reason" />
         </div>
         <div class="flex items-end">
           <button @click="handleCreate" :disabled="loading" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">

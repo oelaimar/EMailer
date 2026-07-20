@@ -5,6 +5,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import client from '../../api/client';
 import { getDomains } from '../../api/domains';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -26,7 +27,7 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete subdomain "${row.subdomain}"?`;
     confirmAction.value = () => client.delete(`/domains/subdomains/${row.id}`).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -60,32 +61,32 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Subdomains</h1>
+      <PageHeader title="Subdomains" />
       <div class="flex items-center gap-2">
-        <router-link to="/domains" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Domains List</router-link>
-        <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <router-link to="/domains" class="px-3 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Domains List</router-link>
+        <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
           {{ showForm ? 'Cancel' : '+ Add Subdomain' }}
         </button>
       </div>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
       <h2 class="text-lg font-semibold mb-4">Add Subdomain</h2>
       <div class="flex items-end gap-4">
         <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Parent Domain *</label>
-          <select v-model="form.domainId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Parent Domain *</label>
+          <select v-model="form.domainId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Select domain...</option>
             <option v-for="d in domains" :key="d.id" :value="d.id">{{ d.name }}</option>
           </select>
         </div>
         <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Subdomain *</label>
-          <input v-model="form.subdomain" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. mail.example.com" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Subdomain *</label>
+          <input v-model="form.subdomain" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. mail.example.com" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select v-model="form.status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Status</label>
+          <select v-model="form.status" class="px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="Activated">Activated</option>
             <option value="Inactivated">Inactivated</option>
           </select>

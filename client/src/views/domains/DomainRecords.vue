@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { getDomains, getDomainRecords, setDomainRecords } from '../../api/domains';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const loading = ref(false);
@@ -72,22 +73,22 @@ const saveRecords = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Manage Domain Records</h1>
-      <router-link to="/domains" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to Domains</router-link>
+      <PageHeader title="Manage Domain Records" />
+      <router-link to="/domains" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to Domains</router-link>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div class="bg-surface rounded-xl border border-border p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Account</label>
-          <select v-model="selectedAccountId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Account</label>
+          <select v-model="selectedAccountId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">All accounts</option>
             <option v-for="(_, name) in domainGroups" :key="name" :value="name">{{ name }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Domain *</label>
-          <select v-model="selectedDomainId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Domain *</label>
+          <select v-model="selectedDomainId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">Select domain...</option>
             <template v-if="selectedAccountId && domainGroups[selectedAccountId]">
               <option v-for="d in domainGroups[selectedAccountId]" :key="d.id" :value="d.id">{{ d.name }}</option>
@@ -100,53 +101,53 @@ const saveRecords = async () => {
       </div>
     </div>
 
-    <div v-if="selectedDomainId" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <h3 class="text-sm font-semibold text-gray-700">DNS Records ({{ records.length }})</h3>
+    <div v-if="selectedDomainId" class="bg-surface rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 bg-surface-alt border-b border-border flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-fg-secondary">DNS Records ({{ records.length }})</h3>
         <div class="flex gap-2">
-          <button @click="addRecord" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">+ Add Record</button>
-          <button @click="removeAllRecords" class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg">Clear All</button>
+          <button @click="addRecord" class="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-medium rounded-lg">+ Add Record</button>
+          <button @click="removeAllRecords" class="px-3 py-1.5 bg-danger-light hover:bg-red-200 text-danger text-xs font-medium rounded-lg">Clear All</button>
         </div>
       </div>
 
       <div v-if="error" class="mx-4 mt-3 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
       <div v-if="success" class="mx-4 mt-3 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
 
-      <div v-if="loading" class="p-8 text-center text-gray-400 text-sm">Loading records...</div>
+      <div v-if="loading" class="p-8 text-center text-muted text-sm">Loading records...</div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-surface-alt border-b border-border">
             <tr>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-28">Type</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Host</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Value</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-24">TTL</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-20">Priority</th>
-              <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-20">Proxy</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted w-28">Type</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted">Host</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted">Value</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted w-24">TTL</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted w-20">Priority</th>
+              <th class="px-3 py-2 text-center text-xs font-medium text-muted w-20">Proxy</th>
               <th class="px-3 py-2 w-12"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr v-for="(r, idx) in records" :key="idx" class="hover:bg-gray-50">
+          <tbody class="divide-y divide-border-light">
+            <tr v-for="(r, idx) in records" :key="idx" class="hover:bg-surface-alt">
               <td class="px-3 py-2">
-                <select v-model="r.type" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                <select v-model="r.type" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                   <option v-for="t in RECORD_TYPES" :key="t" :value="t">{{ t }}</option>
                 </select>
               </td>
               <td class="px-3 py-2">
-                <input v-model="r.name" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="@ or subdomain" />
+                <input v-model="r.name" type="text" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="@ or subdomain" />
               </td>
               <td class="px-3 py-2">
-                <input v-model="r.value" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="IP or target" />
+                <input v-model="r.value" type="text" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="IP or target" />
               </td>
               <td class="px-3 py-2">
-                <select v-model.number="r.ttl" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
+                <select v-model.number="r.ttl" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none">
                   <option v-for="t in TTL_OPTIONS" :key="t" :value="t">{{ t }}</option>
                 </select>
               </td>
               <td class="px-3 py-2">
-                <input v-model.number="r.priority" type="number" class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="-" />
+                <input v-model.number="r.priority" type="number" class="w-full px-2 py-1 border border-border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" placeholder="-" />
               </td>
               <td class="px-3 py-2 text-center">
                 <input type="checkbox" v-model="r.proxied" class="rounded" />
@@ -157,11 +158,11 @@ const saveRecords = async () => {
             </tr>
           </tbody>
         </table>
-        <div v-if="records.length === 0" class="p-8 text-center text-gray-400 text-sm">No records. Click "Add Record" to start.</div>
+        <div v-if="records.length === 0" class="p-8 text-center text-muted text-sm">No records. Click "Add Record" to start.</div>
       </div>
 
-      <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
-        <button @click="saveRecords" :disabled="saving" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-sm font-medium rounded-lg transition-colors">
+      <div class="px-4 py-3 bg-surface-alt border-t border-border flex justify-end">
+        <button @click="saveRecords" :disabled="saving" class="px-6 py-2 bg-success hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
           {{ saving ? 'Saving...' : 'Save Records' }}
         </button>
       </div>

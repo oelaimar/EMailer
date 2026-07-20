@@ -5,6 +5,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getGeoManagerProcesses, deleteGeoManagerProcess, startGeoManagerProcess, stopGeoManagerProcess, bulkActionGeoManager } from '../../api/geoManager';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const router = useRouter();
@@ -32,7 +33,7 @@ const columns = [
 const actions = [
   { label: 'Preview', class: 'bg-teal-100 text-teal-700 hover:bg-teal-200', handler: (row) => router.push(`/geo-manager/${row.id}/preview`) },
   { label: 'Logs', class: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200', handler: (row) => router.push(`/geo-manager/${row.id}/logs`) },
-  { label: 'Start', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: (row) => {
+  { label: 'Start', class: 'bg-success-light text-success hover:bg-green-200', handler: (row) => {
     confirmMessage.value = `Start process "${row.name}"?`;
     confirmAction.value = () => startGeoManagerProcess(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -42,7 +43,7 @@ const actions = [
     confirmAction.value = () => stopGeoManagerProcess(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
   }},
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete process "${row.name}"?`;
     confirmAction.value = () => deleteGeoManagerProcess(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -50,7 +51,7 @@ const actions = [
 ];
 
 const groupActions = [
-  { label: 'Delete', action: 'delete', class: 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200' },
+  { label: 'Delete', action: 'delete', class: 'bg-danger-light text-danger border-red-300 hover:bg-red-200' },
 ];
 
 const handleGroupAction = async ({ action, ids }) => {
@@ -67,18 +68,18 @@ const handleConfirm = async () => {
 };
 
 const statusColor = (s) => {
-  if (s === 'Running') return 'bg-emerald-100 text-emerald-700';
-  if (s === 'Stopped') return 'bg-red-100 text-red-700';
-  if (s === 'Completed') return 'bg-blue-100 text-blue-700';
-  return 'bg-gray-100 text-gray-600';
+  if (s === 'Running') return 'bg-success-light text-success';
+  if (s === 'Stopped') return 'bg-danger-light text-danger';
+  if (s === 'Completed') return 'bg-primary-light text-primary';
+  return 'bg-surface-alt text-muted';
 };
 </script>
 
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Geo Manager</h1>
-      <router-link to="/geo-manager/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="Geo Manager" />
+      <router-link to="/geo-manager/add" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
         + Add New Process
       </router-link>
     </div>
@@ -96,10 +97,10 @@ const statusColor = (s) => {
         <span :class="['px-2 py-1 text-xs font-medium rounded-full', statusColor(value)]">{{ value }}</span>
       </template>
       <template #cell-sourceTables="{ value }">
-        <span class="text-xs text-gray-500">{{ Array.isArray(value) ? value.length + ' tables' : '-' }}</span>
+        <span class="text-xs text-muted">{{ Array.isArray(value) ? value.length + ' tables' : '-' }}</span>
       </template>
       <template #cell-targetGeos="{ value }">
-        <span class="text-xs text-gray-500">{{ Array.isArray(value) ? value.join(', ') : '-' }}</span>
+        <span class="text-xs text-muted">{{ Array.isArray(value) ? value.join(', ') : '-' }}</span>
       </template>
       <template #cell-movedRows="{ value }">
         <span class="text-xs font-medium text-blue-600">{{ value?.toLocaleString() || 0 }}</span>
@@ -111,10 +112,10 @@ const statusColor = (s) => {
         <span class="text-xs font-medium text-yellow-600">{{ value?.toLocaleString() || 0 }}</span>
       </template>
       <template #cell-startedAt="{ value }">
-        <span class="text-xs text-gray-500">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
+        <span class="text-xs text-muted">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
       </template>
       <template #cell-finishedAt="{ value }">
-        <span class="text-xs text-gray-500">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
+        <span class="text-xs text-muted">{{ value ? new Date(value).toLocaleString() : '-' }}</span>
       </template>
       <template #cell-createdAt="{ value }">
         {{ new Date(value).toLocaleDateString() }}

@@ -1,6 +1,7 @@
 <script setup>
 import DataTable from '../../components/common/DataTable.vue';
 import client from '../../api/client';
+import PageHeader from '../../components/common/PageHeader.vue';
 
 const columns = [
   { key: 'id', label: 'ID' },
@@ -15,8 +16,8 @@ const columns = [
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">PMTA History</h1>
-      <router-link to="/pmta/commands" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
+      <PageHeader title="PMTA History" />
+      <router-link to="/pmta/commands" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to PMTA</router-link>
     </div>
 
     <DataTable
@@ -24,7 +25,7 @@ const columns = [
       :fetch-data="async (params) => (await client.get('/pmta/history', { params })).data"
     >
       <template #cell-action="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'create' ? 'bg-emerald-100 text-emerald-700' : value === 'delete' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'create' ? 'bg-success-light text-success' : value === 'delete' ? 'bg-danger-light text-danger' : 'bg-primary-light text-primary']">
           {{ value }}
         </span>
       </template>

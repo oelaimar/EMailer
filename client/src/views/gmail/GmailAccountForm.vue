@@ -2,6 +2,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getGmailAccount, createGmailAccount, updateGmailAccount } from '../../api/gmailAccounts';
+import PageHeader from '../../components/common/PageHeader.vue';
+import FormCard from '../../components/common/FormCard.vue';
+import FormActions from '../../components/common/FormActions.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -51,43 +54,36 @@ const handleSubmit = async () => {
 
 <template>
   <div class="max-w-3xl">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">{{ isEdit ? 'Edit Gmail Account' : 'Add New Gmail Account' }}</h1>
-      <router-link to="/gmail-accounts" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to List</router-link>
-    </div>
+    <PageHeader :title="isEdit ? 'Edit Gmail Account' : 'Add New Gmail Account'" />
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">Loading...</div>
+    <div v-if="loading" class="text-center py-12 text-muted">Loading...</div>
 
-    <form v-else @submit.prevent="handleSubmit" class="bg-white rounded-xl border border-gray-200 p-6">
-      <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
+    <form v-else @submit.prevent="handleSubmit">
+      <FormCard>
+        <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
 
-      <h3 class="text-sm font-semibold text-gray-700 uppercase mb-4">Account Info</h3>
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input v-model="form.email" type="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        <h3 class="text-sm font-semibold text-fg-secondary uppercase mb-4">Account Info</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Email *</label>
+            <input v-model="form.email" type="email" required class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Client ID</label>
+            <input v-model="form.clientId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Client Secret</label>
+            <input v-model="form.clientSecret" type="password" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Refresh Token</label>
+            <input v-model="form.refreshToken" type="password" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
-          <input v-model="form.clientId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
-          <input v-model="form.clientSecret" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Refresh Token</label>
-          <input v-model="form.refreshToken" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-        </div>
-      </div>
 
-      <button type="submit" :disabled="saving" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
-        <svg v-if="saving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        {{ saving ? 'Saving...' : 'Save' }}
-      </button>
+        <FormActions back-to="/gmail-accounts" :saving="saving" submit-label="Save" />
+      </FormCard>
     </form>
   </div>
 </template>

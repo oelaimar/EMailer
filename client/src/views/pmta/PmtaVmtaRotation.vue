@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPmtaServerNames, createPmtaVmtaRotation, resetPmtaVmtas, getPmtaVmtas } from '../../api/pmta';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const loading = ref(false);
@@ -90,47 +91,47 @@ const handleReset = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">SMTP VMTA Rotation</h1>
-      <router-link to="/pmta/vmtas" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to VMTAs</router-link>
+      <PageHeader title="SMTP VMTA Rotation" />
+      <router-link to="/pmta/vmtas" class="px-4 py-2 border border-border bg-surface text-fg hover:bg-surface-alt text-sm font-medium rounded-lg transition-colors">Back to VMTAs</router-link>
     </div>
 
     <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
     <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{{ success }}</div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-      <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Select PMTA Servers</h3>
+      <div class="lg:col-span-2 bg-surface rounded-xl border border-border p-6">
+        <h3 class="text-sm font-semibold text-fg-secondary mb-3">Select PMTA Servers</h3>
         <div class="flex items-center gap-2 mb-3">
-          <input v-model="filterText" type="text" placeholder="Filter servers..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-          <button @click="selectAll" class="px-3 py-2 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200">Select All</button>
-          <button @click="deselectAll" class="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200">Clear</button>
+          <input v-model="filterText" type="text" placeholder="Filter servers..." class="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <button @click="selectAll" class="px-3 py-2 bg-primary-light text-primary text-sm rounded-lg hover:bg-blue-200">Select All</button>
+          <button @click="deselectAll" class="px-3 py-2 bg-surface-alt text-fg-secondary text-sm rounded-lg hover:bg-border">Clear</button>
         </div>
-        <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-          <label v-for="s in filteredServers()" :key="s.id" class="flex items-center gap-3 px-3 py-2 border-b border-gray-50 hover:bg-gray-50 cursor-pointer text-sm">
+        <div class="max-h-64 overflow-y-auto border border-border rounded-lg">
+          <label v-for="s in filteredServers()" :key="s.id" class="flex items-center gap-3 px-3 py-2 border-b border-border-light hover:bg-surface-alt cursor-pointer text-sm">
             <input type="checkbox" :checked="selectedServers.includes(s.name)" @change="toggleServer(s.name)" class="rounded" />
-            <span class="font-medium text-gray-800">{{ s.name }}</span>
-            <span class="text-xs text-gray-400">{{ s.mainIp || '' }}</span>
+            <span class="font-medium text-fg">{{ s.name }}</span>
+            <span class="text-xs text-muted">{{ s.mainIp || '' }}</span>
           </label>
-          <div v-if="filteredServers().length === 0" class="p-4 text-center text-gray-400 text-sm">No servers found.</div>
+          <div v-if="filteredServers().length === 0" class="p-4 text-center text-muted text-sm">No servers found.</div>
         </div>
-        <p class="text-xs text-gray-500 mt-2">{{ selectedServers.length }} server(s) selected</p>
+        <p class="text-xs text-muted mt-2">{{ selectedServers.length }} server(s) selected</p>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Settings</h3>
+      <div class="bg-surface rounded-xl border border-border p-6">
+        <h3 class="text-sm font-semibold text-fg-secondary mb-3">Settings</h3>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
-          <select v-model="encryption" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Encryption</label>
+          <select v-model="encryption" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="none">None</option>
             <option value="ssl">SSL</option>
             <option value="tls">TLS</option>
           </select>
         </div>
 
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">SMTP Entries</h3>
-        <p class="text-xs text-gray-500 mb-2">Format: host port username password (one per line)</p>
-        <textarea v-model="smtpsText" rows="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder="mail1.example.com 587 user1 pass1&#10;mail2.example.com 587 user2 pass2"></textarea>
-        <p class="text-xs text-gray-400 mt-1">{{ smtpsText.split('\n').filter(l => l.trim()).length }} entries</p>
+        <h3 class="text-sm font-semibold text-fg-secondary mb-2">SMTP Entries</h3>
+        <p class="text-xs text-muted mb-2">Format: host port username password (one per line)</p>
+        <textarea v-model="smtpsText" rows="10" class="w-full px-3 py-2 border border-border rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder="mail1.example.com 587 user1 pass1&#10;mail2.example.com 587 user2 pass2"></textarea>
+        <p class="text-xs text-muted mt-1">{{ smtpsText.split('\n').filter(l => l.trim()).length }} entries</p>
 
         <div class="flex gap-2 mt-4">
           <button @click="handleCreate" :disabled="creating || selectedServers.length === 0" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-sm font-medium rounded-lg transition-colors">
@@ -143,27 +144,27 @@ const handleReset = async () => {
       </div>
     </div>
 
-    <div v-if="existingVmtas.length" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-700">Existing SMTP VMTAs ({{ existingVmtas.length }})</h3>
+    <div v-if="existingVmtas.length" class="bg-surface rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 bg-surface-alt border-b border-border">
+        <h3 class="text-sm font-semibold text-fg-secondary">Existing SMTP VMTAs ({{ existingVmtas.length }})</h3>
       </div>
       <table class="w-full text-sm">
-        <thead class="border-b border-gray-200">
+        <thead class="border-b border-border">
           <tr>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Server</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Type</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Encryption</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">SMTPs</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Created</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-muted">Server</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-muted">Type</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-muted">Encryption</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-muted">SMTPs</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-muted">Created</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
-          <tr v-for="v in existingVmtas" :key="v.id" class="hover:bg-gray-50">
-            <td class="px-4 py-2 font-medium text-gray-800">{{ v.serverName }}</td>
-            <td class="px-4 py-2 text-gray-600">{{ v.vmtaType }}</td>
-            <td class="px-4 py-2 text-gray-600">{{ v.configData?.encryption || 'none' }}</td>
-            <td class="px-4 py-2 text-gray-600">{{ v.configData?.smtps?.length || 0 }}</td>
-            <td class="px-4 py-2 text-gray-500 text-xs">{{ new Date(v.createdAt).toLocaleString() }}</td>
+          <tr v-for="v in existingVmtas" :key="v.id" class="hover:bg-surface-alt">
+            <td class="px-4 py-2 font-medium text-fg">{{ v.serverName }}</td>
+            <td class="px-4 py-2 text-muted">{{ v.vmtaType }}</td>
+            <td class="px-4 py-2 text-muted">{{ v.configData?.encryption || 'none' }}</td>
+            <td class="px-4 py-2 text-muted">{{ v.configData?.smtps?.length || 0 }}</td>
+            <td class="px-4 py-2 text-muted text-xs">{{ new Date(v.createdAt).toLocaleString() }}</td>
           </tr>
         </tbody>
       </table>

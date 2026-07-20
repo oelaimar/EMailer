@@ -4,6 +4,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import client from '../../api/client';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -23,7 +24,7 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete brand "${row.name}"?`;
     confirmAction.value = () => client.delete(`/domains/brands/${row.id}`).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -53,22 +54,22 @@ const handleConfirm = async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Domain Brands</h1>
-      <button @click="showForm = !showForm" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="Domain Brands" />
+      <button @click="showForm = !showForm" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
         {{ showForm ? 'Cancel' : '+ Add Brand' }}
       </button>
     </div>
 
-    <div v-if="showForm" class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div v-if="showForm" class="bg-surface rounded-xl border border-border p-6 mb-6">
       <h2 class="text-lg font-semibold mb-4">Add Brand</h2>
       <div class="flex items-end gap-4">
         <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name *</label>
-          <input v-model="form.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter brand name" />
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Brand Name *</label>
+          <input v-model="form.name" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter brand name" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select v-model="form.status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium text-fg-secondary mb-1">Status</label>
+          <select v-model="form.status" class="px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="Activated">Activated</option>
             <option value="Inactivated">Inactivated</option>
           </select>

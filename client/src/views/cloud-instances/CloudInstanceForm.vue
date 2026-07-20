@@ -3,6 +3,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getCloudInstance, createCloudInstance, updateCloudInstance } from '../../api/cloudInstances';
 import { getCloudAccountsByProvider } from '../../api/cloudAccounts';
+import PageHeader from '../../components/common/PageHeader.vue';
+import FormCard from '../../components/common/FormCard.vue';
+import FormActions from '../../components/common/FormActions.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -120,63 +123,54 @@ const handleSubmit = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">{{ isEdit ? 'Edit Cloud Instance' : 'Create Cloud Instances' }}</h1>
-      <router-link to="/cloud-instances" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-        Back to List
-      </router-link>
-    </div>
+    <PageHeader :title="isEdit ? 'Edit Cloud Instance' : 'Create Cloud Instances'" />
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
+    <FormCard>
+      <div v-if="error" class="mb-4 p-3 bg-danger-light border border-red-200 text-danger text-sm rounded-lg">{{ error }}</div>
 
       <form @submit.prevent="handleSubmit">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Provider *</label>
-            <select v-model="form.provider" @change="handleProviderChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Provider *</label>
+            <select v-model="form.provider" @change="handleProviderChange" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option v-for="p in providers" :key="p.value" :value="p.value">{{ p.label }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Cloud Account</label>
-            <select v-model="form.cloudAccountId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Cloud Account</label>
+            <select v-model="form.cloudAccountId" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option value="">None</option>
               <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Number of Instances</label>
-            <input v-model.number="form.numberOfInstances" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Number of Instances</label>
+            <input v-model.number="form.numberOfInstances" type="number" min="1" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Instance Type *</label>
-            <select v-model="form.instanceType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Instance Type *</label>
+            <select v-model="form.instanceType" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option v-for="t in instanceTypes[form.provider] || []" :key="t" :value="t">{{ t }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Operating System</label>
-            <select v-model="form.os" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Operating System</label>
+            <select v-model="form.os" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option v-for="o in osOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Private IPs</label>
-            <input v-model.number="form.privateIps" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Private IPs</label>
+            <input v-model.number="form.privateIps" type="number" min="1" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Storage (GB)</label>
-            <input v-model.number="form.storage" type="number" min="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Storage (GB)</label>
+            <input v-model.number="form.storage" type="number" min="10" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
         </div>
 
-        <div class="flex justify-end">
-          <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
-            {{ loading ? 'Saving...' : (isEdit ? 'Update Instance' : 'Create Instances') }}
-          </button>
-        </div>
+        <FormActions back-to="/cloud-instances" :saving="loading" :submit-label="isEdit ? 'Update Instance' : 'Create Instances'" />
       </form>
-    </div>
+    </FormCard>
   </div>
 </template>

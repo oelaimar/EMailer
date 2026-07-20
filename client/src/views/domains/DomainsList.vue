@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import PageHeader from '../../components/common/PageHeader.vue';
 import { getDomains, deleteDomain, bulkActionDomains } from '../../api/domains';
 import { useToastStore } from '../../stores/toast';
 const toastStore = useToastStore();
@@ -28,8 +29,8 @@ const columns = [
 ];
 
 const actions = [
-  { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/domains/${row.id}/edit`) },
-  { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
+  { label: 'Edit', class: 'bg-primary-light text-primary hover:bg-blue-200', handler: (row) => router.push(`/domains/${row.id}/edit`) },
+  { label: 'Delete', class: 'bg-danger-light text-danger hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete domain "${row.name}"?`;
     confirmAction.value = () => deleteDomain(row.id).then(() => tableRef.value?.loadData());
     confirmDialog.value = true;
@@ -41,7 +42,7 @@ const groupActions = [
   { label: 'Set Special', action: 'special', class: 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200' },
   { label: 'Set Privat', action: 'privat', class: 'bg-indigo-100 text-indigo-700 border-indigo-300 hover:bg-indigo-200' },
   { label: 'Inactivate', action: 'inactivate', class: 'bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200' },
-  { label: 'Delete', action: 'delete', class: 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200' },
+  { label: 'Delete', action: 'delete', class: 'bg-danger-light text-danger border-red-300 hover:bg-red-200' },
 ];
 
 const handleGroupAction = async ({ action, ids }) => {
@@ -60,12 +61,7 @@ const handleConfirm = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Domains</h1>
-      <router-link to="/domains/add" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-        + Add Domain
-      </router-link>
-    </div>
+    <PageHeader title="Domains" action-label="Add Domain" action-to="/domains/add" />
 
     <DataTable
       ref="tableRef"
@@ -78,20 +74,20 @@ const handleConfirm = async () => {
     >
       <template #cell-status="{ value }">
         <span :class="['px-2 py-1 text-xs font-medium rounded-full',
-          value === 'Activated' ? 'bg-emerald-100 text-emerald-700' :
+          value === 'Activated' ? 'bg-success-light text-success' :
           value === 'Special' ? 'bg-purple-100 text-purple-700' :
           value === 'Privat' ? 'bg-indigo-100 text-indigo-700' :
-          'bg-gray-100 text-gray-600']">
+          'bg-surface-alt text-muted']">
           {{ value }}
         </span>
       </template>
       <template #cell-availability="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Available' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value === 'Available' ? 'bg-success-light text-success' : 'bg-danger-light text-danger']">
           {{ value }}
         </span>
       </template>
       <template #cell-hasBrand="{ value }">
-        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600']">
+        <span :class="['px-2 py-1 text-xs font-medium rounded-full', value ? 'bg-success-light text-success' : 'bg-surface-alt text-muted']">
           {{ value ? 'Yes' : 'No' }}
         </span>
       </template>

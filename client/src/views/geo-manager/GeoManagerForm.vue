@@ -6,6 +6,9 @@ import {
   getGeoManagerProcess, createGeoManagerProcess,
   getGeoSchemas, getGeoSourceTables
 } from '../../api/geoManager';
+import PageHeader from '../../components/common/PageHeader.vue';
+import FormCard from '../../components/common/FormCard.vue';
+import FormActions from '../../components/common/FormActions.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -130,28 +133,25 @@ const handleSubmit = async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">{{ isEdit ? 'Edit' : 'Add New' }} Geo Manager Process</h1>
-      <router-link to="/geo-manager" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">Back to List</router-link>
-    </div>
+    <PageHeader :title="isEdit ? 'Edit Geo Manager Process' : 'Add New Geo Manager Process'" />
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <FormCard>
       <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
 
       <form @submit.prevent="handleSubmit">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Process Info</h3>
+        <h3 class="text-sm font-semibold text-fg-secondary mb-3">Process Info</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input v-model="form.name" type="text" placeholder="e.g. US Distribution" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Name *</label>
+            <input v-model="form.name" type="text" placeholder="e.g. US Distribution" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Batch Size</label>
-            <input v-model.number="form.batchSize" type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Batch Size</label>
+            <input v-model.number="form.batchSize" type="number" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Duplicate Mode</label>
-            <select v-model="form.duplicateMode" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Duplicate Mode</label>
+            <select v-model="form.duplicateMode" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option value="delete">Delete Existing Duplicates</option>
               <option value="keep">Keep Existing Duplicates</option>
               <option value="flag">Flag Duplicates</option>
@@ -159,19 +159,19 @@ const handleSubmit = async () => {
           </div>
         </div>
 
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Source Selection</h3>
+        <h3 class="text-sm font-semibold text-fg-secondary mb-3">Source Selection</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Source Schema *</label>
-            <select v-model="form.sourceSchema" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Source Schema *</label>
+            <select v-model="form.sourceSchema" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none">
               <option value="">Select schema...</option>
               <option v-for="s in schemas" :key="s" :value="s">{{ s }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Table Pattern</label>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Table Pattern</label>
             <div class="flex gap-2">
-              <input v-model="form.tablePattern" type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input v-model="form.tablePattern" type="text" class="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
               <button type="button" @click="selectMatchingTables" class="px-3 py-2 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200">Select Matching</button>
             </div>
           </div>
@@ -179,45 +179,41 @@ const handleSubmit = async () => {
 
         <div v-if="form.sourceSchema" class="mb-6">
           <div class="flex items-center justify-between mb-2">
-            <label class="block text-sm font-medium text-gray-700">Source Tables * ({{ form.sourceTables.length }} selected)</label>
-            <button type="button" @click="selectAllTables" class="text-xs text-blue-600 hover:underline">Select All</button>
+            <label class="block text-sm font-medium text-fg-secondary">Source Tables * ({{ form.sourceTables.length }} selected)</label>
+            <button type="button" @click="selectAllTables" class="text-xs text-primary hover:underline">Select All</button>
           </div>
-          <div v-if="loadingTables" class="text-sm text-gray-400 py-2">Loading tables...</div>
-          <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+          <div v-if="loadingTables" class="text-sm text-muted py-2">Loading tables...</div>
+          <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto border border-border rounded-lg p-3">
             <label v-for="t in tables" :key="t.name" class="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" :checked="form.sourceTables.includes(t.name)" @change="toggleTable(t.name)" class="rounded" />
               <span class="truncate">{{ t.name }}</span>
-              <span class="text-xs text-gray-400">({{ t.rowCount.toLocaleString() }})</span>
+              <span class="text-xs text-muted">({{ t.rowCount.toLocaleString() }})</span>
             </label>
           </div>
         </div>
 
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Target Geos</h3>
+        <h3 class="text-sm font-semibold text-fg-secondary mb-3">Target Geos</h3>
         <div class="mb-2">
-          <label class="block text-sm text-gray-600 mb-1">Enter country codes, one per line (e.g. US, UK, CA)</label>
-          <textarea v-model="geoText" rows="6" placeholder="US&#10;UK&#10;CA" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"></textarea>
+          <label class="block text-sm text-muted mb-1">Enter country codes, one per line (e.g. US, UK, CA)</label>
+          <textarea v-model="geoText" rows="6" placeholder="US&#10;UK&#10;CA" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none font-mono"></textarea>
         </div>
         <div class="flex flex-wrap gap-1 mb-6">
           <button v-for="code in COUNTRY_CODES" :key="code" type="button"
             @click="geoText += (geoText ? '\n' : '') + code"
-            class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200">
+            class="px-2 py-0.5 text-xs bg-surface-alt text-muted rounded hover:bg-surface">
             {{ code }}
           </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Schedule At (optional)</label>
-            <input v-model="form.scheduledAt" type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Schedule At (optional)</label>
+            <input v-model="form.scheduledAt" type="datetime-local" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" />
           </div>
         </div>
 
-        <div class="flex justify-end">
-          <button type="submit" :disabled="loading" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
-            {{ loading ? 'Saving...' : 'Create Process' }}
-          </button>
-        </div>
+        <FormActions back-to="/geo-manager" :saving="loading" submit-label="Create Process" />
       </form>
-    </div>
+    </FormCard>
   </div>
 </template>

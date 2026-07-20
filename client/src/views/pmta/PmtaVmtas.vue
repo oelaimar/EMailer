@@ -4,6 +4,7 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPmtaVmtas, createPmtaVmta, deletePmtaVmta } from '../../api/pmta';
 import { useToastStore } from '../../stores/toast';
+import PageHeader from '../../components/common/PageHeader.vue';
 const toastStore = useToastStore();
 
 const tableRef = ref(null);
@@ -78,7 +79,7 @@ const handleConfirm = async () => {
 const typeColor = (t) => {
   if (t === 'global') return 'bg-purple-100 text-purple-700';
   if (t === 'individual') return 'bg-blue-100 text-blue-700';
-  if (t === 'smtp') return 'bg-emerald-100 text-emerald-700';
+  if (t === 'smtp') return 'bg-success-light text-success';
   return 'bg-orange-100 text-orange-700';
 };
 </script>
@@ -86,17 +87,17 @@ const typeColor = (t) => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">PMTA VMTAs</h1>
-      <button @click="showModal = true; form.serverName = ''; form.configData = '{}'" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <PageHeader title="PMTA VMTAs" />
+      <button @click="showModal = true; form.serverName = ''; form.configData = '{}'" class="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition-colors">
         + Add VMTA
       </button>
     </div>
 
-    <div class="flex border-b border-gray-200 mb-6">
+    <div class="flex border-b border-border mb-6">
       <button
         v-for="tab in tabs" :key="tab.key"
         @click="switchTab(tab.key)"
-        :class="['px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px', activeTab === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700']"
+        :class="['px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px', activeTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-fg-secondary']"
       >
         {{ tab.label }}
       </button>
@@ -112,33 +113,33 @@ const typeColor = (t) => {
         <span :class="['px-2 py-1 text-xs font-medium rounded-full', typeColor(value)]">{{ value }}</span>
       </template>
       <template #cell-configData="{ value }">
-        <span class="text-xs font-mono text-gray-500 truncate block max-w-[200px]" :title="typeof value === 'object' ? JSON.stringify(value) : value">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</span>
+        <span class="text-xs font-mono text-muted truncate block max-w-[200px]" :title="typeof value === 'object' ? JSON.stringify(value) : value">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</span>
       </template>
       <template #cell-createdAt="{ value }">
         {{ new Date(value).toLocaleDateString() }}
       </template>
       <template #cell-actions="{ row }">
-        <button @click="handleDelete(row)" class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200 transition-colors">Delete</button>
+        <button @click="handleDelete(row)" class="px-2 py-1 bg-danger-light text-danger text-xs font-medium rounded hover:bg-red-200 transition-colors">Delete</button>
       </template>
     </DataTable>
 
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl border border-gray-200 p-6 w-full max-w-lg mx-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Add {{ tabs.find(t => t.key === activeTab)?.label }}</h3>
+      <div class="bg-surface rounded-xl border border-border p-6 w-full max-w-lg mx-4">
+        <h3 class="text-lg font-semibold text-fg mb-4">Add {{ tabs.find(t => t.key === activeTab)?.label }}</h3>
         <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{{ error }}</div>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Server Name *</label>
-            <input v-model="form.serverName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="pmta-server-1" />
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Server Name *</label>
+            <input v-model="form.serverName" type="text" class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:border-primary outline-none" placeholder="pmta-server-1" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Config Data (JSON)</label>
-            <textarea v-model="form.configData" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder='{"key": "value"}'></textarea>
+            <label class="block text-sm font-medium text-fg-secondary mb-1">Config Data (JSON)</label>
+            <textarea v-model="form.configData" rows="6" class="w-full px-3 py-2 border border-border rounded-lg text-sm font-mono focus:border-primary outline-none" placeholder='{"key": "value"}'></textarea>
           </div>
         </div>
         <div class="flex justify-end gap-3 mt-6">
-          <button @click="showModal = false; error = ''" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Cancel</button>
-          <button @click="handleCreate" :disabled="loading || !form.serverName.trim()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
+          <button @click="showModal = false; error = ''" class="px-4 py-2 bg-surface-alt hover:bg-surface-alt text-fg-secondary text-sm font-medium rounded-lg transition-colors">Cancel</button>
+          <button @click="handleCreate" :disabled="loading || !form.serverName.trim()" class="px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-blue-300 text-white text-sm font-medium rounded-lg transition-colors">
             {{ loading ? 'Creating...' : 'Create VMTA' }}
           </button>
         </div>
