@@ -12,20 +12,30 @@ Vugex V2 is a **full rebuild** of the Vugex Solution email marketing infrastruct
 | Database | MySQL 8 + Prisma ORM | Prisma 6.x (NOT 7) |
 | Auth | JWT (access + refresh) + bcryptjs | |
 | Frontend | Vue 3 (Composition API) + Vite 8 | |
-| Styling | Tailwind CSS 4.x | |
+| Styling | Tailwind CSS 4.x (CSS-first config, `@theme` block) | |
 | State | Pinia 4.x | |
 | HTTP | Axios with interceptors | |
+| Fonts | Inter + JetBrains Mono (loaded via Google Fonts) | |
 
 ## Quick Start
 
 ```bash
-# Start MySQL (Docker)
-cd vugex-v2 && docker compose up -d
+# Full stack (Docker)
+cd vugex-v2
+docker compose up -d
 
-# Start Backend (port 3000)
+# Frontend: http://localhost:81
+# Backend:  http://localhost:3000
+# Adminer:  http://localhost:8080
+# MySQL:    localhost:3307
+```
+
+Or dev mode:
+```bash
+# Backend (port 3000)
 cd server && npm run dev
 
-# Start Frontend (port 5173)
+# Frontend (port 5173)
 cd client && npm run dev
 ```
 
@@ -34,11 +44,20 @@ cd client && npm run dev
 ## Database
 
 - **Docker MySQL:** `vugex-mysql` container, port **3307** (3306 is taken by system MySQL)
-- **Root password:** `password`
+- **Root password:** from `MYSQL_ROOT_PASSWORD` env var (default: `password`)
 - **Database:** `vugex_v2`
 - **Connection:** `mysql://root:password@localhost:3307/vugex_v2`
 - **Prisma commands:** `npm run db:migrate`, `npm run db:seed`, `npm run db:studio`, `npm run db:reset`
-- **Latest migration:** `20260719232835_add_virtual_list_processes_and_elastic_ips`
+- **Latest migration:** `20260720194251_add_indexes` (14 performance indexes)
+
+## Environment Variables
+
+Backend secrets are loaded via `.env` file (gitignored). See `.env.example` for template:
+- `JWT_SECRET` — JWT access token secret (validated at server startup)
+- `JWT_REFRESH_SECRET` — JWT refresh token secret (validated at server startup)
+- `MYSQL_ROOT_PASSWORD` — MySQL root password
+- `CORS_ORIGIN` — Allowed CORS origin
+- `NODE_ENV` — Set to `production` in Docker
 
 ## API Style
 
@@ -47,7 +66,16 @@ cd client && npm run dev
 All protected routes use `Authorization: Bearer <token>` header.
 All routes have `roleCheck(section, action)` middleware for RBAC.
 
-## Current State — ALL PHASES COMPLETE (full legacy parity achieved) + PRODUCTION HARDENED
+## Current State — ALL PHASES COMPLETE + PRODUCTION HARDENED + UI REDESIGNED
+
+### Design System
+
+- **OKLCH color tokens** defined in `client/src/style.css` `@theme` block
+- **Token classes:** `text-fg`, `text-fg-secondary`, `text-muted`, `bg-surface`, `bg-surface-alt`, `bg-primary`, `bg-primary-hover`, `bg-success`, `bg-danger`, `bg-danger-light`, etc.
+- **No legacy Tailwind colors** — zero `bg-gray-*`, `text-gray-*`, `border-gray-*` in views
+- **Sidebar:** dark `oklch(13% 0.012 250)`, collapsible, section labels, active indicator bar
+- **Layout:** `flex h-screen` app-shell, `lg:relative` sidebar on desktop
+- **Inter + JetBrains Mono** fonts loaded via Google Fonts
 
 ### Database Models (53 total)
 
@@ -56,13 +84,13 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | User | Users with email, password, status, superUserStatus |
 | Role | Named roles with JSON permissions (94 sections x read/write/delete) |
 | UserRole | Many-to-many join (user <-> role) with cascade delete |
-| Session | JWT sessions with token, refreshToken, isActive, expiresAt |
-| SmtpServer | SMTP servers with host, port, encryption, proxy support |
+| Session | JWT sessions with token, refreshToken, isActive, expiresAt (+ indexes) |
+| SmtpServer | SMTP servers with host, port, encryption, proxy support (+ indexes) |
 | ServerProvider | Server provider names with status |
-| MtaServer | MTA servers with SSH config, OS, IPs, installation status |
-| Domain | Domains with status, flags, availability, brand |
-| DomainRecord | DNS records (A, MX, TXT, etc.) linked to domains |
-| DataList | Email data lists with vertical, ISP, country |
+| MtaServer | MTA servers with SSH config, OS, IPs, installation status (+ indexes) |
+| Domain | Domains with status, flags, availability, brand (+ index) |
+| DomainRecord | DNS records (A, MX, TXT, etc.) linked to domains (+ index) |
+| DataList | Email data lists with vertical, ISP, country (+ index) |
 | DataProvider | Data provider names |
 | Header | Email headers with name + header (Text) |
 | Isp | ISP names |
@@ -71,7 +99,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | SmtpGroup | SMTP groups with encryption, bulk create |
 | CustomVmta | Custom VMTAs linked to SMTP groups (name, ip, port) |
 | Proxy | HTTP/SOCKS proxy servers |
-| Offer | Offers with name, payout, cap, vertical |
+| Offer | Offers with name, payout, cap, vertical (+ index) |
 | Suppression | Suppression lists linked to offers |
 | AffiliateNetwork | Affiliate networks with postback config |
 | AutoResponder | Auto responder sequences |
@@ -79,13 +107,13 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | VirtualList | Virtual data lists with filters |
 | VirtualListProcess | Virtual list background processing jobs |
 | Production | Campaign production entries |
-| SendProcess | Send processes linked to production |
+| SendProcess | Send processes linked to production (+ indexes) |
 | GmailAccount | Gmail API accounts with OAuth tokens |
 | GSuiteAccount | G Suite API accounts with OAuth tokens |
 | OutlookAccount | Outlook API accounts with OAuth tokens |
 | CloudAccount | Cloud provider accounts (generic: provider field for 11 providers) |
 | CloudInstance | Cloud instances (generic: provider field, dynamic instance types) |
-| ElasticIp | AWS Elastic IP allocations linked to cloud instances |
+| ElasticIp | AWS Elastic IP allocations linked to cloud instances (+ index) |
 | RegistrarAccount | Domain registrar accounts (generic: registrar field for 6 registrars) |
 | PostmasterAccount | Postmaster accounts with IMAP/SMTP config for ISP inbox monitoring |
 | PostmasterMessage | Cached IMAP messages (unique per account+messageId) |
@@ -103,7 +131,7 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | Team | Teams for user grouping |
 | TeamUser | Team membership |
 | TeamAuthorization | Per-user authorizations (MTA/SMTP/Offers/DataLists) |
-| AuditLog | Audit trail for all CRUD operations |
+| AuditLog | Audit trail for all CRUD operations (+ indexes) |
 | Setting | Application settings (key-value) |
 | Vertical | Vertical/niche categories |
 
@@ -111,56 +139,20 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 
 | File | What It Does |
 |---|---|
-| index.js | Express entry: helmet, cors, morgan, routes, 404 handler, error handler |
+| index.js | Express entry: helmet, cors, morgan, routes, 404 handler, error handler. Validates JWT_SECRET at startup. |
 | config/database.js | PrismaClient singleton + graceful shutdown |
 | middleware/auth.js | JWT verification, session lookup, excludes password from user query |
 | middleware/roleCheck.js | RBAC: checks role.permissions[section][action] |
 | middleware/errorHandler.js | P2002/P2003/P2025 handling, production-safe errors |
+| middleware/rateLimiter.js | Login (5/15min), API (200/15min), refresh (10/15min) rate limiting |
 | utils/helpers.js | paginate(), buildSearch(), buildSort() |
-| services/sshService.js | SSH remote execution (checkServer, executeCommand, getServerIps, getServerInfo, configureAdditionalIps, executeServersCommand) |
-| services/imapService.js | IMAP connection via imapflow + mailparser (testConnection, fetchMessageSummaries, fetchMessageDetail, deleteMessage) |
-| services/geoDbService.js | MySQL pool + cross-schema queries (getSchemas, getTables, getGeoSummary, moveRows) |
-| services/geoJobRunner.js | In-memory background job manager (startJob, stopJob, graceful stop) |
-| controllers/authController.js | login, logout, refresh, me (with merged permissions) |
-| controllers/userController.js | CRUD, no superUserStatus on create |
-| controllers/roleController.js | CRUD + affectRoleToUsers + affectRolesToUser (transactions) |
-| controllers/smtpServerController.js | CRUD + check + bulkCheck + bulkAction, passwords hidden |
-| controllers/sessionsController.js | list + forceDisconnect |
-| controllers/dashboardController.js | Real stats from DB (activeIPs parsed from string, daily/monthly stats from SendProcess) + real 7-day chart data with earnings from Offer payouts |
-| controllers/mtaServerController.js | CRUD + check + bulkCheck + bulkAction + install + configureIps + extractRdns + generateDkim + bulkAdd + getServerInfo + configureAdditionalIps + executeServersCommand + bulkInstall (SSH wired) + getBulkInstallationLogs (SSH wired) |
-| controllers/domainController.js | CRUD + bulkAction + getRecords + setRecords + listBrands + createBrand + deleteBrand + listSubdomains + createSubdomain + deleteSubdomain |
-| controllers/dataListController.js | CRUD + upload (multer) + bulkAction + listBlacklists + createBlacklist + deleteBlacklist + downloadList + fetchEmails (implemented:false) |
-| controllers/smtpGroupController.js | CRUD + bulkAction + bulk create + listCustomVmtas + addCustomVmta + deleteCustomVmta |
-| controllers/productionController.js | CRUD + bulkAction + addProcess + processAction + listMtaDrops + listMtaTests + listSmtpDrops + listSmtpTests + uploadImages |
-| controllers/offerController.js | CRUD + bulkAction + suppression list management |
-| controllers/suppressionController.js | CRUD + bulkAction + upload for suppression lists |
-| controllers/affiliateNetworkController.js | CRUD + bulkAction for affiliate networks |
-| controllers/autoResponderController.js | CRUD + bulkAction + addList for auto responders |
-| controllers/virtualListController.js | CRUD + bulkAction for virtual lists |
-| controllers/gmailAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
-| controllers/gSuiteAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
-| controllers/outlookAccountController.js | CRUD + bulkAction + sendProcessData + listDrops + listTests |
-| controllers/cloudAccountController.js | CRUD + bulkAction + listByProvider for cloud accounts |
-| controllers/cloudInstanceController.js | CRUD + bulkAction for cloud instances |
-| controllers/registrarAccountController.js | CRUD + bulkAction + listByRegistrar for registrar accounts |
-| controllers/proxyController.js | CRUD + bulkAction + listByType for proxy servers |
-| controllers/postmasterAccountController.js | CRUD + bulkAction for postmaster accounts |
-| controllers/postmasterController.js | 9 endpoints: getSources, getMessages, refreshMailbox, getMessageDetail, deleteMessages, exportReplyAccounts, getRuns, getRunLogs, testConnection |
-| controllers/headerController.js | CRUD + bulkAction for email headers |
-| controllers/dataProviderController.js | CRUD + bulkAdd + bulkAction for data providers |
-| controllers/ispController.js | CRUD + bulkAdd + bulkAction for ISPs |
-| controllers/serverProviderController.js | CRUD + bulkAdd + bulkAction for server providers |
-| controllers/managementServerController.js | CRUD + bulkAction for management servers (SSH config) |
-| controllers/mailboxController.js | CRUD + bulkAction + listDomains for mailboxes |
-| controllers/logController.js | Backend logs (read /var/log/syslog, mail.log, auth.log) + Frontend logs (CRUD from DB) |
-| controllers/pmtaController.js | Commands CRUD + Schedules CRUD + Templates CRUD + VMTAs (4 types) + Configs read/update + History |
-| controllers/geoManagerController.js | CRUD + start/stop (fully implemented with background jobs) + logs + bulkAction + getSourceTables + getSchemas + getGeoSummary |
-| controllers/statisticsController.js | Full report (paginated) + Advanced report (aggregated by status/MTA/offer) |
-| controllers/toolController.js | SPF check, Blacklist check (DNSBL for IPs, implemented:false for domains), Value extractor, Mailbox extractor (implemented:false) |
-| controllers/auditLogController.js | logAction() helper + list + bulkDelete |
-| controllers/teamController.js | CRUD + listUsers + addUser + removeUser + listAuthorizations + updateAuthorizations |
-| controllers/verticalController.js | CRUD + bulkAction |
-| controllers/settingController.js | get + update (key-value pairs) |
+| utils/validation.js | validateEmail(), validatePassword(), validatePort(), validateStringLength() |
+| services/sshService.js | SSH remote execution |
+| services/imapService.js | IMAP connection via imapflow + mailparser |
+| services/geoDbService.js | MySQL pool + cross-schema queries (reads DATABASE_URL env) |
+| services/geoJobRunner.js | In-memory background job manager |
+| services/smtpCheckService.js | Real SMTP connectivity testing (net/tls) |
+| controllers/ | 41 controller files, all with batched DB queries (no N+1 patterns) |
 | routes/ | 41 route files, all with auth + roleCheck middleware |
 
 ### Frontend (client/src/)
@@ -168,63 +160,28 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 | File | What It Does |
 |---|---|
 | App.vue | Calls fetchUser on init for fresh data |
-| router/index.js | ~90 routes + auth guards + 404 catch-all |
-| stores/auth.js | Pinia: login, logout, fetchUser |
-| stores/toast.js | Pinia: toast notifications (showToast, removeToast) |
-| stores/app.js | Pinia: sidebar state, mobile sidebar, loading state |
-| api/client.js | Axios with token inject + auto-refresh + store sync |
+| router/index.js | ~90 routes + auth guards + scroll-to-top + 404 catch-all |
+| stores/auth.js | Pinia: login (with mutex), logout (with guard), fetchUser (JWT expiry check) |
+| stores/toast.js | Pinia: toast notifications (max 5 simultaneous, auto-dismiss) |
+| stores/app.js | Pinia: sidebar state, mobile sidebar |
+| style.css | Tailwind v4 `@theme` block with OKLCH design tokens |
+| api/client.js | Axios with token inject + auto-refresh (mutex/queue for race condition) |
 | api/ | 45 API wrapper files covering all endpoints |
-| layouts/DefaultLayout.vue | Sidebar + Header + content |
-| layouts/AuthLayout.vue | Dark gradient login wrapper |
+| layouts/DefaultLayout.vue | `flex h-screen` app-shell with sidebar + header + content |
+| layouts/AuthLayout.vue | Dark gradient + grid pattern + radial glow |
 | components/common/DataTable.vue | Server-side paginated table with search, select, group actions |
-| components/common/ConfirmDialog.vue | Reusable confirm modal |
-| components/common/Toast.vue | Toast notification component (fixed bottom-right, auto-dismiss, color-coded) |
-| components/layout/Sidebar.vue | Navigation sidebar with 36 collapsible sections, mobile responsive (hamburger + backdrop) |
-| components/layout/Header.vue | Top bar with user menu, mobile hamburger button |
+| components/common/ConfirmDialog.vue | Reusable confirm modal (blur backdrop, scale transition, escape key) |
+| components/common/Toast.vue | Toast notification (shadow-lg, OKLCH colors) |
+| components/common/PageHeader.vue | Shared page header with title |
+| components/common/StatusBadge.vue | Status badge with OKLCH colors |
+| components/common/FormCard.vue | Form section wrapper |
+| components/common/FormActions.vue | Form submit/cancel button group |
+| components/layout/Sidebar.vue | 36 collapsible sections, `lg:relative` on desktop, section labels, active indicator |
+| components/layout/Header.vue | Search bar, breadcrumbs, notification bell, user avatar |
 
 ### Frontend Views (126 files across 39 directories)
 
-| Directory | Files | Key Views |
-|---|---|---|
-| affiliate-networks/ | 2 | List, Form |
-| audit-logs/ | 1 | List (read-only, bulk delete) |
-| auth/ | 1 | LoginView |
-| auto-responders/ | 2 | List, Form |
-| cloud-accounts/ | 2 | List, Form (11 providers) |
-| cloud-instances/ | 5 | List, Form, AzureProcesses, AzureDomainChange, ElasticIps |
-| dashboard/ | 1 | 11 stat cards + ECharts charts (bar, doughnut, earnings) |
-| data-lists/ | 5 | List, Form, Blacklists, Download, EmailsFetch |
-| data-providers/ | 2 | List, Form |
-| domains/ | 4 | List, Form, Brands, Subdomains |
-| geo-manager/ | 4 | Processes, Form, Logs, Preview |
-| gmail/ | 5 | List, Form, SendProcess, Drops, Tests |
-| gsuite/ | 5 | List, Form, SendProcess, Drops, Tests |
-| headers/ | 2 | List, Form |
-| isps/ | 2 | List, Form |
-| logs/ | 2 | BackendLogs, FrontendLogs |
-| mailboxes/ | 2 | List, Form |
-| management-servers/ | 2 | List, Form |
-| mta-servers/ | 8 | List, Form, MultiAdd, InstallWizard, BulkInstall, AdditionalIps, ServerActions, VmtasList |
-| offers/ | 3 | List, Form, SuppressionView |
-| outlook/ | 5 | List, Form, SendProcess, Drops, Tests |
-| pmta/ | 7 | Commands, Scheduler, Templates, TemplateForm, Vmtas, Configs, History |
-| postmaster-accounts/ | 2 | List, Form |
-| postmaster/ | 2 | Inbox, Runs |
-| production/ | 8 | List, Form, SendProcessesView, MtaDrops, MtaTests, SmtpDrops, SmtpTests, UploadImages |
-| proxies/ | 2 | List, Form |
-| registrar-accounts/ | 2 | List, Form |
-| roles/ | 4 | List, Form (304 lines), RoleAffect, RoleUsers |
-| server-providers/ | 2 | List, Form |
-| sessions/ | 1 | Session list with force disconnect |
-| settings/ | 1 | Full settings form (40+ fields) |
-| smtp-groups/ | 4 | List, Form, SendProcess (with group dropdown), CustomVmtas (with group dropdown) |
-| smtp-servers/ | 3 | List, Form, BulkCheck |
-| statistics/ | 3 | FullReport, AdvancedReport, AdvancedAnalytics (ECharts) |
-| teams/ | 4 | List, Form, TeamUsers, TeamAuthorisations |
-| tools/ | 4 | SpfLookup, BlacklistCheck, ValueExtractor, MailboxExtractor |
-| users/ | 2 | List, Form |
-| verticals/ | 2 | List, Form |
-| virtual-lists/ | 3 | List, Form, Processes |
+All views use OKLCH design tokens. Zero legacy gray-* classes.
 
 ### Sidebar Sections (36 total)
 
@@ -265,53 +222,6 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 35. Logs (Backend, Frontend)
 36. Settings
 
-### Verified Working
-
-- **Phase 1:** Login/logout, JWT, RBAC, Users, Roles, Sessions, SMTP Servers
-- **Phase 2:** MTA Servers (SSH check, install, configure IPs, RDNS, DKIM, multi-add, bulk install, server actions, VMTAs)
-- **Phase 2:** Domains (CRUD, bulk actions, DNS records, brands, subdomains)
-- **Phase 2:** Data Lists (CRUD, file upload with email counting, blacklists, download, emails fetch)
-- **Phase 2:** SMTP Groups (CRUD, bulk create, send process, custom VMTAs)
-- **Phase 3:** Production (CRUD, send processes, MTA/SMTP drops/tests, upload images)
-- **Phase 3:** Offers (CRUD, suppression lists)
-- **Phase 3:** Affiliate Networks (CRUD)
-- **Phase 3:** Auto Responders (CRUD, list associations)
-- **Phase 3:** Virtual Lists (CRUD, filters)
-- **Phase 3:** Gmail/GSuite/Outlook Accounts (CRUD + send process + drops + tests)
-- **Phase 4:** Cloud Accounts (CRUD, 11 providers via generic model)
-- **Phase 4:** Cloud Instances (CRUD, dynamic instance types per provider)
-- **Phase 4:** Registrar Accounts (CRUD, 6 registrars via generic model)
-- **Phase 5:** Proxies (CRUD, HTTP/SOCKS5 types, bulk actions)
-- **Phase 5:** Postmaster Accounts (CRUD, IMAP/SMTP config, bulk actions)
-- **Phase 6:** Headers (CRUD, email header content management)
-- **Phase 6:** Data Providers (CRUD, bulk add from newline-separated names)
-- **Phase 6:** ISPs (CRUD, bulk add from newline-separated names)
-- **Phase 6:** Server Providers (CRUD, bulk add from newline-separated names)
-- **Phase 6:** Management Servers (CRUD, SSH config with user-pass/PEM)
-- **Phase 6:** Mailboxes (CRUD, linked to domains with IMAP/SMTP config)
-- **Phase 7:** Teams (CRUD, user assignment, per-user authorizations with full UI)
-- **Phase 7:** Verticals (CRUD with bulk actions)
-- **Phase 7:** Settings (Full application settings form)
-- **Phase 7:** Tools (SPF Lookup, Blacklist Check, Value Extractor, Mailbox Extractor)
-- **Phase 7:** Statistics (Full Report with date filters, Advanced Report with aggregation)
-- **Phase 7:** PMTA (Commands, Scheduler, Templates, VMTAs with 4 types, Configs, History)
-- **Phase 7:** Geo Manager (Process CRUD, logs viewer, schema/table discovery, geo summary, background job start/stop, preview page, progress tracking)
-- **Phase 7:** Audit Logs (read-only list with bulk delete, logAction in all controllers)
-- **Phase 9:** All sub-pages created (26 new views across 7 batches)
-- **Phase 10:** All crash bugs fixed (5) and stubs completed (8)
-- **Phase 11:** Dashboard charts (ECharts + vue-echarts, tree-shakeable, 3 charts + earnings display)
-- **Phase 11:** Postmaster monitoring (IMAP inbox, message viewer, reply accounts export, runs history, connection testing)
-- **Phase 11:** Gmail/GSuite/Outlook Drops Pause/Stop actions
-- **Phase 11:** Geo Manager full implementation (schema discovery, table selection, geo summary preview, background job runner with graceful stop)
-- **Routing fixes:** SMTP group send-process/custom-vmtas use dropdown selectors, PMTA back links fixed
-- **Virtual Lists:** VirtualListProcess model + Processes view (CRUD + start/stop)
-- **AWS Elastic IPs:** ElasticIp model + ElasticIps view (allocate/release)
-- **Production Send Page:** 5-step campaign launch wizard (Identity → Content → Targeting → Advanced → Launch)
-- **Advanced Analytics:** ECharts dashboard with 7 charts (pie, bar, line, scatter) + 6 KPI cards
-- **Revenue Report:** 33-column builder with CSV export, status/date/search filters
-- **Docker deployment:** Backend Dockerfile (Node 20 Alpine + Prisma), Frontend multi-stage (Node build → nginx serve), docker-compose.yml (4 services with healthchecks), /api/health endpoint, graceful shutdown (10s drain)
-- **Production hardening:** Toast notifications (all 76 console.error catches replaced), API rate limiting (login: 5/15min, API: 200/15min), mobile responsive design (sidebar hamburger + backdrop, responsive layout), removed hardcoded login defaults
-
 ## Conventions
 
 ### Backend
@@ -323,18 +233,25 @@ All routes have `roleCheck(section, action)` middleware for RBAC.
 - **parseInt** always with radix 10: `parseInt(val, 10)`
 - **Passwords** never in API responses (use `select` clause)
 - **ID validation**: `if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID parameter.' })`
+- **Bulk operations**: always batch DB reads with `findMany({ where: { id: { in: ids } } })` — NEVER loop with `findUnique`
+- **Input validation**: use `utils/validation.js` for email, password strength, port range
+- **Environment secrets**: loaded from `.env` file, validated at startup
 - **Implemented features** return real DB data
 - **Not-yet-implemented features** return `{ implemented: false, message: '...' }` — NOT fake status toggles
 
 ### Frontend
 - **Vue 3 Composition API** (`<script setup>`)
-- **Tailwind CSS** utility classes — NO Bootstrap, NO custom CSS files
+- **Tailwind CSS 4** with OKLCH design tokens — NO Bootstrap, NO custom CSS files
+- **Design token classes:** `text-fg`, `text-fg-secondary`, `text-muted`, `bg-surface`, `bg-surface-alt`, `bg-primary`, `bg-primary-hover`, `border-border`, `border-border-light`
+- **Status badges:** `bg-primary-light text-primary` (blue), `bg-success-light text-success` (green), `bg-danger-light text-danger` (red)
+- **Back buttons:** `border border-border bg-surface text-fg hover:bg-surface-alt` (NOT `bg-gray-600`)
+- **Page headers:** use `<PageHeader title="..." />` component
 - **Pinia** for state — NOT Vuex
 - **Lazy-loaded routes** via `() => import(...)`
 - **DataTable** component for all list views (server-side pagination)
 - **ConfirmDialog** for all destructive actions — NO `window.confirm()`
-- **Try/catch** on all async operations in `onMounted`
-- **API wrappers** used consistently (no direct `client.get/post` in views)
+- **Try/catch** on all async operations
+- **No unused imports** — keep imports clean
 
 ### Permission Sections (94 total)
 
@@ -352,14 +269,29 @@ Organized in groups: Dashboard, Users, Roles, Teams, SMTP (add/list/bulk-check/g
 
 | File | Purpose |
 |---|---|
-| docker-compose.yml | MySQL 8 + Backend + Frontend + Adminer (4 services) |
+| docker-compose.yml | MySQL 8 + Backend + Frontend + Adminer (4 services with healthchecks) |
 | Dockerfile | Backend: Node 20 Alpine + Prisma + healthcheck |
-| client/Dockerfile | Frontend: Multi-stage build → nginx serve |
+| client/Dockerfile | Frontend: Multi-stage build (Node → nginx) |
 | client/nginx.conf | SPA fallback, /api proxy, gzip, asset caching |
-| server/.env | DB URL, JWT secrets, CORS origin, port |
-| server/.env.example | Production environment template |
-| server/prisma/schema.prisma | 53 database models |
+| .env | Backend secrets (gitignored, loaded by docker-compose + server) |
+| .env.example | Environment variable template |
+| server/prisma/schema.prisma | 53 database models with performance indexes |
 | server/prisma/seed.js | Admin user + role with all permissions |
-| server/src/middleware/rateLimiter.js | Login (5/15min) + API (200/15min) rate limiting |
-| server/src/services/smtpCheckService.js | Real SMTP connectivity testing (net/tls) |
+| server/src/utils/validation.js | Email, password, port, string length validation |
+| server/src/middleware/rateLimiter.js | Login (5/15min) + API (200/15min) + refresh (10/15min) rate limiting |
 | SPECIFICATION.md | Full application specification |
+
+## Git History
+
+| Commit | Description |
+|---|---|
+| `e557d1b` | Fix frontend container unhealthy: use 127.0.0.1 in healthcheck |
+| `3379c94` | Fix remaining N+1 queries: batch findMany in all bulk operations |
+| `197d5b5` | Fix docker compose down: replace :? required vars with env_file approach |
+| `d8d75b7` | Frontend cleanup: fix 2 runtime bugs, remove unused imports, dead code |
+| `1e2bfd0` | Frontend UX polish: scroll-to-top, toast limit |
+| `54f2bcd` | Backend quality: fix N+1 queries, add validation, DB indexes |
+| `3ae1819` | Migrate all 126 views to design tokens: zero gray-* classes remaining |
+| `1ea4a5d` | Fix 5 security issues: hardcoded creds, exposed API keys, weak JWT, missing rate limit |
+| `f273de8` | Fix 5 critical bugs: token refresh race, logout recursion, DataTable search, ConfirmDialog |
+| `19ecd36` | Redesign UI: Linear/Vercel-inspired design system with OKLCH tokens |
