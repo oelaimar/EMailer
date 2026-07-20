@@ -53,6 +53,12 @@ services:
       - backend
     networks:
       - vugex-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
 
   adminer:
     image: adminer:latest
