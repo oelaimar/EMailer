@@ -4,7 +4,7 @@ const { paginate, buildSearch, buildSort } = require('../utils/helpers');
 
 const select = {
   id: true, provider: true, name: true, status: true,
-  apiKey: true, proxyIp: true, proxyPort: true, proxyUsername: true,
+  proxyIp: true, proxyPort: true, proxyUsername: true,
   providerConfig: true, createdBy: true, createdAt: true, updatedAt: true,
   _count: { select: { instances: true } },
 };

@@ -455,8 +455,9 @@ exports.getBulkInstallationLogs = async (req, res, next) => {
       intIds.map(async (id) => {
         const server = await prisma.mtaServer.findUnique({ where: { id }, select: { id: true, name: true, installationStatus: true, mainIp: true, sshPort: true, username: true, password: true } });
         if (!server) return { id, name: `Server #${id}`, logs: 'Server not found' };
+        const serverPassword = server.password;
         try {
-          const result = await sshService.executeCommand(server.mainIp, server.sshPort, server.username, server.password, 'cat /var/log/install.log 2>/dev/null || echo "No logs available"', 10000);
+          const result = await sshService.executeCommand(server.mainIp, server.sshPort, server.username, serverPassword, 'cat /var/log/install.log 2>/dev/null || echo "No logs available"', 10000);
           return { id: server.id, name: server.name, status: server.installationStatus, logs: result.stdout };
         } catch {
           return { id: server.id, name: server.name, status: server.installationStatus, logs: 'Unable to fetch logs.' };

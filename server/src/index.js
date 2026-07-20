@@ -7,6 +7,11 @@ const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const prisma = require('./config/database');
 
+if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+  console.error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET environment variables are required.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,7 +27,7 @@ app.get('/api/health', async (req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.json({ status: 'ok', database: 'connected', uptime: process.uptime() });
   } catch (error) {
-    res.status(503).json({ status: 'error', database: 'disconnected', error: error.message });
+    res.status(503).json({ status: 'error', database: 'disconnected' });
   }
 });
 

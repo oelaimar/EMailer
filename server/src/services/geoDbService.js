@@ -2,14 +2,24 @@ const mysql = require('mysql2/promise');
 
 let pool = null;
 
+function parseDatabaseUrl() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL environment variable is required');
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname || 'localhost',
+    port: parseInt(parsed.port, 10) || 3306,
+    user: parsed.username || 'root',
+    password: parsed.password || '',
+    database: parsed.pathname.replace('/', '') || 'vugex_v2',
+  };
+}
+
 function getPool() {
   if (!pool) {
+    const config = parseDatabaseUrl();
     pool = mysql.createPool({
-      host: 'localhost',
-      port: 3307,
-      user: 'root',
-      password: 'password',
-      database: 'vugex_v2',
+      ...config,
       waitForConnections: true,
       connectionLimit: 5,
       queueLimit: 0,
@@ -28,7 +38,8 @@ async function getSchemas() {
 async function getTables(schema) {
   const safe = schema.replace(/[^a-zA-Z0-9_]/g, '');
   const [rows] = await getPool().query(
-    `SELECT TABLE_NAME, TABLE_ROWS FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${safe}' ORDER BY TABLE_NAME`
+    'SELECT TABLE_NAME, TABLE_ROWS FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? ORDER BY TABLE_NAME',
+    [safe]
   );
   return rows.map(r => ({ name: r.TABLE_NAME, rowCount: r.TABLE_ROWS || 0 }));
 }
@@ -41,7 +52,7 @@ async function getGeoSummary(schema, tables, geos) {
   for (const table of tables) {
     const safeTable = table.replace(/[^a-zA-Z0-9_]/g, '');
     try {
-      const [countRows] = await pool.query(`SELECT COUNT(*) as cnt FROM \`${safeSchema}\`.\`${safeTable}\``);
+      const [countRows] = await pool.query('SELECT COUNT(*) as cnt FROM `' + safeSchema + '`.`' + safeTable + '`');
       const total = countRows[0]?.cnt || 0;
       result.totalRows += total;
       result.tables.push({ name: safeTable, totalRows: total, eligibleRows: total });
@@ -58,9 +69,9 @@ async function getGeoSummary(schema, tables, geos) {
     for (const table of tables) {
       const safeTable = table.replace(/[^a-zA-Z0-9_]/g, '');
       try {
-        const destTable = `${safeTable}_${safeGeo}`;
+        const destTable = safeTable + '_' + safeGeo;
         const [rows] = await pool.query(
-          `SELECT COUNT(*) as cnt FROM \`${safeSchema}\`.\`${destTable}\``
+          'SELECT COUNT(*) as cnt FROM `' + safeSchema + '`.`' + destTable + '`'
         );
         geoCount += rows[0]?.cnt || 0;
       } catch {}
@@ -78,7 +89,7 @@ async function moveRows(schema, sourceTable, targetGeos, batchSize, duplicateMod
   const stats = { moved: 0, deleted: 0, skipped: 0 };
 
   try {
-    const [totalRows] = await pool.query(`SELECT COUNT(*) as cnt FROM \`${safeSchema}\`.\`${safeTable}\``);
+    const [totalRows] = await pool.query('SELECT COUNT(*) as cnt FROM `' + safeSchema + '`.`' + safeTable + '`');
     const total = totalRows[0]?.cnt || 0;
     let offset = 0;
 
@@ -86,7 +97,7 @@ async function moveRows(schema, sourceTable, targetGeos, batchSize, duplicateMod
       if (stopFlag && stopFlag.stopped) break;
 
       const [batch] = await pool.query(
-        `SELECT * FROM \`${safeSchema}\`.\`${safeTable}\` LIMIT ${batchSize} OFFSET ${offset}`
+        'SELECT * FROM `' + safeSchema + '`.`' + safeTable + '` LIMIT ' + batchSize + ' OFFSET ' + offset
       );
       if (!batch || batch.length === 0) break;
 
@@ -99,20 +110,20 @@ async function moveRows(schema, sourceTable, targetGeos, batchSize, duplicateMod
           continue;
         }
 
-        const destTable = `${safeTable}_${geoCode.replace(/[^a-zA-Z0-9_]/g, '')}`;
+        const destTable = safeTable + '_' + geoCode.replace(/[^a-zA-Z0-9_]/g, '');
         try {
           if (duplicateMode === 'delete') {
             const email = row.email || row.email_address;
             if (email) {
               await pool.query(
-                `DELETE FROM \`${safeSchema}\`.\`${destTable}\` WHERE email = ? OR email_address = ?`,
+                'DELETE FROM `' + safeSchema + '`.`' + destTable + '` WHERE email = ? OR email_address = ?',
                 [email, email]
               );
-              const [affected] = await pool.query(`SELECT ROW_COUNT() as affected`);
+              const [affected] = await pool.query('SELECT ROW_COUNT() as affected');
               stats.deleted += affected[0]?.affected || 0;
             }
           }
-          await pool.query(`INSERT INTO \`${safeSchema}\`.\`${destTable}\` SET ?`, [row]);
+          await pool.query('INSERT INTO `' + safeSchema + '`.`' + destTable + '` SET ?', [row]);
           stats.moved++;
         } catch {
           stats.skipped++;
