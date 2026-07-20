@@ -5,7 +5,7 @@ const props = defineProps({
   message: { type: String, default: 'Are you sure?' },
   confirmText: { type: String, default: 'Confirm' },
   cancelText: { type: String, default: 'Cancel' },
-  confirmClass: { type: String, default: 'bg-danger hover:bg-danger-light text-white' },
+  confirmClass: { type: String, default: 'bg-danger hover:bg-danger-hover text-white' },
 });
 
 const emit = defineEmits(['confirm', 'cancel']);
@@ -14,17 +14,15 @@ const emit = defineEmits(['confirm', 'cancel']);
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm" @click.self="emit('cancel')">
-        <Transition name="modal">
-          <div class="dialog-card bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold text-fg tracking-tight mb-1">{{ title }}</h3>
-            <p class="text-sm text-muted mb-6">{{ message }}</p>
-            <div class="flex justify-end gap-3">
-              <button @click="emit('cancel')" class="px-4 py-2 text-sm font-medium border border-border rounded-lg bg-surface text-fg hover:bg-surface-alt transition-all">{{ cancelText }}</button>
-              <button @click="emit('confirm')" :class="['px-4 py-2 text-sm rounded-lg font-medium', confirmClass]">{{ confirmText }}</button>
-            </div>
+      <div v-if="show" class="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm" @click.self="emit('cancel')" @keydown.esc="emit('cancel')" tabindex="0">
+        <div class="dialog-card bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6">
+          <h3 class="text-lg font-semibold text-fg tracking-tight mb-1">{{ title }}</h3>
+          <p class="text-sm text-muted mb-6">{{ message }}</p>
+          <div class="flex justify-end gap-3">
+            <button @click="emit('cancel')" class="px-4 py-2 text-sm font-medium border border-border rounded-lg bg-surface text-fg hover:bg-surface-alt transition-all">{{ cancelText }}</button>
+            <button @click="emit('confirm')" :class="['px-4 py-2 text-sm rounded-lg font-medium', confirmClass]">{{ confirmText }}</button>
           </div>
-        </Transition>
+        </div>
       </div>
     </Transition>
   </Teleport>

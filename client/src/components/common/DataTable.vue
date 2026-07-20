@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 
 const props = defineProps({
   columns: { type: Array, required: true },
@@ -18,29 +18,37 @@ const limit = ref(25);
 const loading = ref(true);
 const search = ref('');
 const selected = ref([]);
-const filters = ref({});
 
 const loadData = async () => {
   loading.value = true;
   try {
-    const params = { page: page.value, limit: limit.value, search: search.value, ...filters.value };
+    const params = { page: page.value, limit: limit.value, search: search.value };
     const result = await props.fetchData(params);
     data.value = result.data;
     total.value = result.total;
   } catch (e) {
-    console.error(e);
+    data.value = [];
+    total.value = 0;
   } finally {
     loading.value = false;
   }
 };
 
 watch(page, loadData);
-watch(search, () => { page.value = 1; });
+watch(search, () => { page.value = 1; loadData(); });
 watch(selected, (val) => { emit('update:selected', [...val]); }, { deep: true });
 onMounted(loadData);
 
-const totalPages = () => Math.ceil(total.value / limit.value);
+const totalPages = computed(() => Math.ceil(total.value / limit.value));
 const selectAll = ref(false);
+
+watch(data, () => {
+  if (data.value.length > 0 && selected.value.length > 0) {
+    selectAll.value = data.value.every((r) => selected.value.includes(r.id));
+  } else {
+    selectAll.value = false;
+  }
+});
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
@@ -81,10 +89,6 @@ defineExpose({ loadData });
         <input v-model="search" placeholder="Search..." class="w-full py-2 pl-9 pr-3 border border-border rounded-lg bg-surface text-fg text-sm outline-none focus:border-primary focus:shadow-[0_0_0_3px_oklch(55%_0.18_255/0.08)] transition-all" />
       </div>
       <slot name="header-actions" />
-      <button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface text-fg border border-border rounded-lg text-sm font-medium hover:bg-surface-alt transition-all ml-auto">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        Export
-      </button>
     </div>
 
     <div class="bg-surface border border-border rounded-xl overflow-hidden">
@@ -153,7 +157,7 @@ defineExpose({ loadData });
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           </button>
           <span class="text-sm text-muted">Page {{ page }}</span>
-          <button @click="page++" :disabled="page >= totalPages()" class="min-w-[32px] h-8 flex items-center justify-center border border-transparent rounded-md text-sm font-medium text-fg-secondary hover:bg-surface-alt hover:border-border transition-all disabled:opacity-50">
+          <button @click="page++" :disabled="page >= totalPages" class="min-w-[32px] h-8 flex items-center justify-center border border-transparent rounded-md text-sm font-medium text-fg-secondary hover:bg-surface-alt hover:border-border transition-all disabled:opacity-50">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
           </button>
           <select v-model="limit" @change="page = 1; loadData()" class="py-1 px-2 border border-border rounded-md bg-surface text-fg text-sm cursor-pointer outline-none focus:border-primary">
