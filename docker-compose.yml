@@ -52,7 +52,7 @@ services:
     container_name: vugex-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "81:80"
     depends_on:
       - backend
     networks:

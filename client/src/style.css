@@ -1,1 +1,64 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bg: oklch(99% 0.002 240);
+  --color-surface: oklch(100% 0 0);
+  --color-surface-alt: oklch(97.5% 0.003 240);
+  --color-fg: oklch(18% 0.012 250);
+  --color-fg-secondary: oklch(40% 0.012 250);
+  --color-muted: oklch(54% 0.012 250);
+  --color-border: oklch(92% 0.005 250);
+  --color-border-light: oklch(95% 0.003 250);
+
+  --color-primary: oklch(55% 0.18 255);
+  --color-primary-hover: oklch(48% 0.18 255);
+  --color-primary-light: oklch(95% 0.04 255);
+  --color-primary-muted: oklch(88% 0.06 255);
+
+  --color-success: oklch(62% 0.19 155);
+  --color-success-light: oklch(95% 0.04 155);
+  --color-warning: oklch(75% 0.16 85);
+  --color-warning-light: oklch(96% 0.04 85);
+  --color-danger: oklch(55% 0.22 25);
+  --color-danger-light: oklch(95% 0.04 25);
+  --color-info: oklch(58% 0.15 250);
+  --color-info-light: oklch(95% 0.04 250);
+
+  --color-sidebar: oklch(13% 0.012 250);
+  --color-sidebar-hover: oklch(18% 0.012 250);
+  --color-sidebar-active: oklch(22% 0.02 250);
+  --color-sidebar-text: oklch(62% 0.012 250);
+  --color-sidebar-text-active: oklch(98% 0.002 240);
+  --color-sidebar-border: oklch(20% 0.012 250);
+  --color-sidebar-accent: oklch(60% 0.18 255);
+
+  --color-stat-blue: oklch(55% 0.18 255);
+  --color-stat-emerald: oklch(62% 0.19 155);
+  --color-stat-amber: oklch(75% 0.16 85);
+  --color-stat-rose: oklch(55% 0.22 25);
+  --color-stat-violet: oklch(52% 0.20 290);
+  --color-stat-cyan: oklch(65% 0.15 210);
+  --color-stat-orange: oklch(68% 0.18 55);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-md: 0 4px 6px -1px oklch(0% 0 0 / 0.06), 0 2px 4px -2px oklch(0% 0 0 / 0.04);
+  --shadow-lg: 0 10px 15px -3px oklch(0% 0 0 / 0.08), 0 4px 6px -4px oklch(0% 0 0 / 0.04);
+  --shadow-xl: 0 20px 25px -5px oklch(0% 0 0 / 0.10), 0 8px 10px -6px oklch(0% 0 0 / 0.06);
+  --shadow-ring: 0 0 0 3px oklch(55% 0.18 255 / 0.15);
+}
+
+html, body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}

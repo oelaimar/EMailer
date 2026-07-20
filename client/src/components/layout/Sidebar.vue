@@ -38,6 +38,25 @@ watch(() => route.path, () => {
   }
 });
 
+const sectionGroups = [
+  {
+    label: 'Infrastructure',
+    items: ['mta', 'smtp', 'smtp-groups', 'domains', 'proxies', 'dns', 'cloud', 'servers-providers', 'management-servers', 'isps', 'pmta'],
+  },
+  {
+    label: 'Campaigns',
+    items: ['production', 'offers', 'virtual-lists', 'auto-responders', 'data-lists', 'data-providers', 'headers', 'affiliate-networks', 'gmail', 'gsuite', 'outlook'],
+  },
+  {
+    label: 'Resources',
+    items: ['mailboxes', 'postmaster', 'geo-manager', 'statistics', 'tools'],
+  },
+  {
+    label: 'Account',
+    items: ['users', 'roles', 'teams', 'sessions', 'audit-logs', 'logs', 'settings'],
+  },
+];
+
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z', path: '/dashboard' },
   { id: 'production', label: 'Production', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4', children: [
@@ -222,61 +241,248 @@ const menuItems = [
   ]},
   { id: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', path: '/settings' },
 ];
+
+const menuItemsMap = Object.fromEntries(menuItems.map((i) => [i.id, i]));
+
+const getMenuItem = (id) => menuItemsMap[id];
+
+const itemGroup = (itemId) => {
+  for (const g of sectionGroups) {
+    if (g.items.includes(itemId)) return g.label;
+  }
+  return null;
+};
 </script>
 
 <template>
-  <div v-if="appStore.sidebarMobileOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden" @click="appStore.sidebarMobileOpen = false"></div>
+  <div
+    v-if="appStore.sidebarMobileOpen"
+    class="fixed inset-0 bg-black/40 z-40 lg:hidden"
+    @click="appStore.sidebarMobileOpen = false"
+  ></div>
 
-  <aside :class="[
-    'fixed left-0 top-0 h-full bg-gray-900 text-white z-50 transition-all duration-300 flex flex-col',
-    'lg:z-40',
-    appStore.sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-    appStore.sidebarCollapsed ? 'w-16' : 'w-64'
-  ]">
-    <div class="h-16 flex items-center px-4 border-b border-gray-700">
+  <aside
+    :class="[
+      'fixed left-0 top-0 h-full bg-sidebar text-white z-50 flex flex-col flex-shrink-0',
+      'transition-all duration-300 ease-in-out',
+      'lg:relative lg:z-auto',
+      appStore.sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+      appStore.sidebarCollapsed ? 'w-16 lg:w-16' : 'w-64 lg:w-64',
+    ]"
+    :style="{ scrollbarWidth: 'thin' }"
+  >
+    <!-- Logo -->
+    <div class="h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
       <div class="flex items-center gap-3 overflow-hidden">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">V</div>
-        <span v-if="!appStore.sidebarCollapsed" class="text-lg font-semibold whitespace-nowrap">Vugex V2</span>
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <span
+          :class="[
+            'text-white font-semibold whitespace-nowrap transition-opacity duration-200',
+            appStore.sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+          ]"
+          style="font-size: 0.9375rem; letter-spacing: -0.02em;"
+        >Vugex</span>
       </div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-4">
-      <div v-for="item in menuItems" :key="item.id">
-        <button
-          v-if="item.children"
-          @click="toggleSection(item.id)"
-          :class="['w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors', openSections.includes(item.id) ? 'bg-gray-800' : '', isSectionActive(item) ? 'text-blue-400' : '']"
-        >
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-          </svg>
-          <span v-if="!appStore.sidebarCollapsed" class="flex-1 text-left whitespace-nowrap">{{ item.label }}</span>
-          <svg v-if="!appStore.sidebarCollapsed" :class="['w-4 h-4 transition-transform', openSections.includes(item.id) ? 'rotate-90' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        <router-link
-          v-else
-          :to="item.path"
-          :class="['flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors', isActive(item.path) ? 'bg-gray-800 text-blue-400' : '']"
-        >
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-          </svg>
-          <span v-if="!appStore.sidebarCollapsed" class="whitespace-nowrap">{{ item.label }}</span>
-        </router-link>
+    <!-- Nav -->
+    <nav
+      class="flex-1 overflow-y-auto py-2"
+      :style="{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent' }"
+    >
+      <style>.sidebar-nav::-webkit-scrollbar { width: 4px; } .sidebar-nav::-webkit-scrollbar-track { background: transparent; } .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; } .sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }</style>
+      <div class="sidebar-nav">
+        <!-- Dashboard (top-level, outside groups) -->
+        <div class="px-3 mb-1">
+          <!-- Section label for top-level -->
+          <div
+            v-if="!appStore.sidebarCollapsed"
+            class="text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-fg-secondary/60 px-1 pt-2 pb-1"
+          >Overview</div>
 
-        <div v-if="item.children && openSections.includes(item.id) && !appStore.sidebarCollapsed" class="bg-gray-950/50">
+          <!-- Dashboard item -->
           <router-link
-            v-for="child in item.children"
-            :key="child.path"
-            :to="child.path"
-            :class="['block px-4 py-2 pl-12 text-sm hover:bg-gray-800 transition-colors', isActive(child.path) ? 'text-blue-400 bg-gray-800' : 'text-gray-400']"
+            :to="getMenuItem('dashboard').path"
+            :class="[
+              'relative flex items-center gap-3 py-2 px-3 rounded-md text-sidebar-text transition-all duration-150',
+              'text-[0.8125rem] font-normal',
+              'hover:bg-sidebar-hover',
+              isActive(getMenuItem('dashboard').path)
+                ? 'bg-sidebar-active text-sidebar-text-active'
+                : '',
+            ]"
+            style="margin-left: 0; margin-right: 0;"
           >
-            {{ child.label }}
+            <span
+              v-if="isActive(getMenuItem('dashboard').path)"
+              class="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r bg-sidebar-accent"
+            ></span>
+            <svg
+              :class="[
+                'w-5 h-5 flex-shrink-0',
+                isActive(getMenuItem('dashboard').path) ? 'text-sidebar-accent' : 'text-sidebar-text',
+              ]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getMenuItem('dashboard').icon" />
+            </svg>
+            <span
+              :class="[
+                'whitespace-nowrap transition-opacity duration-200',
+                appStore.sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+              ]"
+            >Dashboard</span>
           </router-link>
+        </div>
+
+        <!-- Grouped sections -->
+        <div v-for="group in sectionGroups" :key="group.label">
+          <div
+            v-if="!appStore.sidebarCollapsed"
+            class="text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-fg-secondary/60 px-4 pt-4 pb-1"
+          >{{ group.label }}</div>
+
+          <div class="px-3">
+            <div v-for="itemId in group.items" :key="itemId">
+              <!-- Section with children -->
+              <template v-if="getMenuItem(itemId).children">
+                <button
+                  @click="toggleSection(itemId)"
+                  :class="[
+                    'relative w-full flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-150',
+                    'text-[0.8125rem] font-normal',
+                    isSectionActive(itemId) ? 'text-sidebar-text-active' : 'text-sidebar-text',
+                    (openSections.includes(itemId) && !isSectionActive(itemId)) ? 'bg-sidebar-hover' : '',
+                    isSectionActive(itemId) ? 'bg-sidebar-active' : '',
+                    'hover:bg-sidebar-hover',
+                  ]"
+                >
+                  <span
+                    v-if="isSectionActive(itemId)"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r bg-sidebar-accent"
+                  ></span>
+                  <svg
+                    :class="[
+                      'w-5 h-5 flex-shrink-0',
+                      isSectionActive(itemId) ? 'text-sidebar-accent' : '',
+                    ]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getMenuItem(itemId).icon" />
+                  </svg>
+                  <span
+                    :class="[
+                      'flex-1 text-left whitespace-nowrap transition-opacity duration-200',
+                      appStore.sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+                    ]"
+                  >{{ getMenuItem(itemId).label }}</span>
+                  <svg
+                    v-if="!appStore.sidebarCollapsed"
+                    :class="[
+                      'w-4 h-4 flex-shrink-0 transition-transform duration-200',
+                      openSections.includes(itemId) ? 'rotate-90' : '',
+                    ]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <!-- Sub-items -->
+                <div
+                  v-if="openSections.includes(itemId) && !appStore.sidebarCollapsed"
+                  class="mt-0.5 mb-1"
+                >
+                  <router-link
+                    v-for="child in getMenuItem(itemId).children"
+                    :key="child.path"
+                    :to="child.path"
+                    :class="[
+                      'relative block py-1.5 rounded-md transition-all duration-150',
+                      'text-[0.8121875rem] font-normal',
+                      'hover:bg-sidebar-hover',
+                      isActive(child.path)
+                        ? 'bg-sidebar-active text-sidebar-text-active'
+                        : 'text-sidebar-text',
+                    ]"
+                    style="padding-left: 2.625rem; padding-right: 0.75rem;"
+                  >
+                    <span
+                      v-if="isActive(child.path)"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r bg-sidebar-accent"
+                    ></span>
+                    {{ child.label }}
+                  </router-link>
+                </div>
+              </template>
+
+              <!-- Single item (no children) -->
+              <router-link
+                v-else
+                :to="getMenuItem(itemId).path"
+                :class="[
+                  'relative flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-150',
+                  'text-[0.8125rem] font-normal',
+                  'hover:bg-sidebar-hover',
+                  isActive(getMenuItem(itemId).path)
+                    ? 'bg-sidebar-active text-sidebar-text-active'
+                    : 'text-sidebar-text',
+                ]"
+              >
+                <span
+                  v-if="isActive(getMenuItem(itemId).path)"
+                  class="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r bg-sidebar-accent"
+                ></span>
+                <svg
+                  :class="[
+                    'w-5 h-5 flex-shrink-0',
+                    isActive(getMenuItem(itemId).path) ? 'text-sidebar-accent' : '',
+                  ]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getMenuItem(itemId).icon" />
+                </svg>
+                <span
+                  :class="[
+                    'whitespace-nowrap transition-opacity duration-200',
+                    appStore.sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+                  ]"
+                >{{ getMenuItem(itemId).label }}</span>
+              </router-link>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
+
+    <!-- Footer / User -->
+    <div class="border-t border-sidebar-border px-4 py-3 flex-shrink-0">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+          <span class="text-[0.625rem] font-semibold text-white leading-none">A</span>
+        </div>
+        <div
+          :class="[
+            'min-w-0 transition-opacity duration-200',
+            appStore.sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+          ]"
+        >
+          <div class="text-[0.8125rem] font-medium text-sidebar-text leading-tight truncate">Admin</div>
+          <div class="text-[0.6875rem] text-sidebar-text/50 leading-tight truncate">admin@app.com</div>
+        </div>
+      </div>
+    </div>
   </aside>
 </template>

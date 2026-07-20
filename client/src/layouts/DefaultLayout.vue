@@ -8,12 +8,12 @@ const appStore = useAppStore();
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="flex h-screen overflow-hidden bg-bg">
     <Toast />
     <Sidebar />
-    <div :class="['transition-all duration-300', appStore.sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64']">
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
       <Header />
-      <main class="pt-16 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
+      <main class="flex-1 overflow-y-auto p-6">
         <router-view />
       </main>
     </div>
