@@ -17,6 +17,7 @@ const messages = ref([]);
 const summary = ref({ messageCount: 0, uniqueSenders: 0, blacklistedCount: 0, lastRefreshAt: null });
 const loading = ref(false);
 const refreshing = ref(false);
+const toastStore = useToastStore();
 
 const selectedProvider = ref('');
 const selectedServer = ref('');

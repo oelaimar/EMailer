@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
-import { getElasticIps, allocateElasticIps, releaseElasticIps, deleteElasticIp } from '../../api/elasticIps';
+import { getElasticIps, allocateElasticIps, releaseElasticIps } from '../../api/elasticIps';
 import { getCloudInstances } from '../../api/cloudInstances';
 import { useToastStore } from '../../stores/toast';
 import PageHeader from '../../components/common/PageHeader.vue';

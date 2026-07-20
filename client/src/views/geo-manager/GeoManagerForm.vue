@@ -12,6 +12,7 @@ import FormActions from '../../components/common/FormActions.vue';
 
 const route = useRoute();
 const router = useRouter();
+const toastStore = useToastStore();
 const loading = ref(false);
 const error = ref('');
 const isEdit = ref(!!route.params.id);

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import DataTable from '../../components/common/DataTable.vue';
 import { getGeoManagerLogs } from '../../api/geoManager';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '../../components/common/PageHeader.vue';

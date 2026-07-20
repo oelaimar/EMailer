@@ -4,7 +4,6 @@ import { ref } from 'vue';
 export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false);
   const sidebarMobileOpen = ref(false);
-  const loading = ref(false);
 
   function toggleSidebar() {
     sidebarCollapsed.value = !sidebarCollapsed.value;
@@ -14,5 +13,5 @@ export const useAppStore = defineStore('app', () => {
     sidebarMobileOpen.value = !sidebarMobileOpen.value;
   }
 
-  return { sidebarCollapsed, sidebarMobileOpen, loading, toggleSidebar, toggleMobileSidebar };
+  return { sidebarCollapsed, sidebarMobileOpen, toggleSidebar, toggleMobileSidebar };
 });
