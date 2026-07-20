@@ -77,6 +77,11 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
+    const { validateEmail } = require('../utils/validation');
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format.' });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });

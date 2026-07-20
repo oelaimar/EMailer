@@ -55,17 +55,23 @@ exports.create = async (req, res, next) => {
       if (!nameList.length) return res.status(400).json({ error: 'At least one group name is required.' });
 
       const created = [];
-      for (const n of nameList) {
-        const group = await prisma.smtpGroup.create({
-          data: {
+      if (nameList.length > 0) {
+        await prisma.smtpGroup.createMany({
+          data: nameList.map(n => ({
             name: n,
             encryption: encryption || 'None',
             status: status || 'Activated',
             createdBy: req.user?.email || 'admin',
-          },
+          })),
+          skipDuplicates: true,
+        });
+        const createdGroups = await prisma.smtpGroup.findMany({
+          where: { name: { in: nameList } },
           select: groupSelect,
-        }).catch(() => null);
-        if (group) created.push(group);
+          orderBy: { id: 'desc' },
+          take: nameList.length,
+        });
+        created.push(...createdGroups);
       }
       res.status(201).json(created);
       return;

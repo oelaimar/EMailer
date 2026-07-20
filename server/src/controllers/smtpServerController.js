@@ -59,11 +59,17 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ error: 'Name and host are required.' });
     }
 
+    const { validatePort } = require('../utils/validation');
+    const parsedPort = parseInt(port, 10) || 25;
+    if (!validatePort(parsedPort)) {
+      return res.status(400).json({ error: 'Port must be between 1 and 65535.' });
+    }
+
     const server = await prisma.smtpServer.create({
       data: {
         name,
         host,
-        port: parseInt(port, 10) || 25,
+        port: parsedPort,
         encryption: encryption || 'None',
         status: status || 'Activated',
         username,

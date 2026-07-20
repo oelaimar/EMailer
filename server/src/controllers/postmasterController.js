@@ -94,22 +94,28 @@ exports.refreshMailbox = async (req, res, next) => {
     const imapMessages = await imapService.fetchMessageSummaries(account, { limit: 10000 });
 
     let newCount = 0;
-    for (const msg of imapMessages) {
-      const existing = await prisma.postmasterMessage.findUnique({
-        where: { accountId_messageId: { accountId: id, messageId: msg.messageId } },
+    if (imapMessages.length > 0) {
+      const messageIds = imapMessages.map(m => m.messageId);
+      const existingMessages = await prisma.postmasterMessage.findMany({
+        where: { accountId: id, messageId: { in: messageIds } },
+        select: { messageId: true },
       });
-      if (!existing) {
-        await prisma.postmasterMessage.create({
-          data: {
+      const existingSet = new Set(existingMessages.map(m => m.messageId));
+      const newMessages = imapMessages.filter(m => !existingSet.has(m.messageId));
+
+      if (newMessages.length > 0) {
+        await prisma.postmasterMessage.createMany({
+          data: newMessages.map(msg => ({
             accountId: id,
             messageId: msg.messageId,
             uid: msg.uid,
             from: msg.from,
             subject: msg.subject,
             date: msg.date,
-          },
+          })),
+          skipDuplicates: true,
         });
-        newCount++;
+        newCount = newMessages.length;
       }
     }
 

@@ -55,6 +55,14 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ error: 'First name, last name, email and password are required.' });
     }
 
+    const { validateEmail, validatePassword } = require('../utils/validation');
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format.' });
+    }
+    if (!validatePassword(password)) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters with uppercase, lowercase, and a number.' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({

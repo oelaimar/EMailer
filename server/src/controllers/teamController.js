@@ -24,8 +24,10 @@ exports.list = async (req, res, next) => {
     ]);
 
     const enriched = await Promise.all(data.map(async (t) => {
-      const members = await prisma.teamUser.count({ where: { teamId: t.id } });
-      const authorizations = await prisma.teamAuthorization.count({ where: { teamId: t.id } });
+      const [members, authorizations] = await Promise.all([
+        prisma.teamUser.count({ where: { teamId: t.id } }),
+        prisma.teamAuthorization.count({ where: { teamId: t.id } }),
+      ]);
       return { ...t, teamMembersCount: members, teamLeadersCount: authorizations };
     }));
 

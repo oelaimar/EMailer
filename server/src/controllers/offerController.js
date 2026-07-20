@@ -160,7 +160,7 @@ exports.addSuppression = async (req, res, next) => {
       },
     });
 
-    logAction(req.user?.email, 'Offer', 'create', suppression.id, suppression.name, req.user?.id).catch(() => {});
+    logAction(req.user?.email, 'Suppression', 'create', suppression.id, suppression.name, req.user?.id).catch(() => {});
     res.status(201).json(suppression);
   } catch (error) {
     next(error);

@@ -60,6 +60,12 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ error: 'Name and Main IP are required.' });
     }
 
+    const { validatePort } = require('../utils/validation');
+    const parsedSshPort = parseInt(sshPort, 10) || 22;
+    if (!validatePort(parsedSshPort)) {
+      return res.status(400).json({ error: 'SSH port must be between 1 and 65535.' });
+    }
+
     const server = await prisma.mtaServer.create({
       data: {
         name,
@@ -67,7 +73,7 @@ exports.create = async (req, res, next) => {
         status: status || 'Activated',
         hostname,
         mainIp,
-        sshPort: parseInt(sshPort, 10) || 22,
+        sshPort: parsedSshPort,
         os: os || 'ubuntu',
         loginType: loginType || 'user-pass',
         username: username || 'root',

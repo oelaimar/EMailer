@@ -42,10 +42,15 @@ exports.getStats = async (req, res, next) => {
         select: { offerId: true, speed: true },
       });
       let totalEarnings = 0;
-      for (const p of deliveredProcesses) {
-        if (p.offerId) {
-          const offer = await prisma.offer.findUnique({ where: { id: p.offerId }, select: { payout: true } });
-          if (offer && offer.payout) totalEarnings += parseFloat(offer.payout) * (p.speed || 0);
+      const offerIds = [...new Set(deliveredProcesses.map(p => p.offerId).filter(Boolean))];
+      if (offerIds.length > 0) {
+        const offers = await prisma.offer.findMany({ where: { id: { in: offerIds } }, select: { id: true, payout: true } });
+        const offerMap = new Map(offers.map(o => [o.id, o]));
+        for (const p of deliveredProcesses) {
+          if (p.offerId) {
+            const offer = offerMap.get(p.offerId);
+            if (offer && offer.payout) totalEarnings += parseFloat(offer.payout) * (p.speed || 0);
+          }
         }
       }
       monthlyEarnings = totalEarnings.toFixed(2);
@@ -80,20 +85,30 @@ exports.getCharts = async (req, res, next) => {
 
     try {
       const today = new Date();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 6);
+      weekAgo.setHours(0, 0, 0, 0);
+
+      const allProcesses = await prisma.sendProcess.findMany({
+        where: { createdAt: { gte: weekAgo } },
+        select: { createdAt: true, status: true },
+      });
+
       for (let i = 6; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         date.setHours(0, 0, 0, 0);
         const nextDate = new Date(date);
         nextDate.setDate(nextDate.getDate() + 1);
-
         const dayLabel = date.toISOString().split('T')[0];
 
-        const [sent, completed] = await Promise.all([
-          prisma.sendProcess.count({ where: { createdAt: { gte: date, lt: nextDate } } }),
-          prisma.sendProcess.count({ where: { createdAt: { gte: date, lt: nextDate }, status: 'Completed' } }),
-        ]);
-
+        let sent = 0, completed = 0;
+        for (const p of allProcesses) {
+          if (p.createdAt >= date && p.createdAt < nextDate) {
+            sent++;
+            if (p.status === 'Completed') completed++;
+          }
+        }
         sentStats.push({ date: dayLabel, value: sent });
         actionsStats.push({ date: dayLabel, value: completed });
       }
@@ -109,12 +124,19 @@ exports.getCharts = async (req, res, next) => {
         select: { createdAt: true, offerId: true, speed: true },
       });
 
+      const offerIds = [...new Set(processes.map(p => p.offerId).filter(Boolean))];
+      const offerMap = new Map();
+      if (offerIds.length > 0) {
+        const offers = await prisma.offer.findMany({ where: { id: { in: offerIds } }, select: { id: true, payout: true } });
+        offers.forEach(o => offerMap.set(o.id, o));
+      }
+
       const byDate = {};
       for (const p of processes) {
         const day = p.createdAt.toISOString().split('T')[0];
         if (!byDate[day]) byDate[day] = 0;
         if (p.offerId) {
-          const offer = await prisma.offer.findUnique({ where: { id: p.offerId }, select: { payout: true } });
+          const offer = offerMap.get(p.offerId);
           if (offer && offer.payout) byDate[day] += parseFloat(offer.payout) * (p.speed || 0);
         }
       }

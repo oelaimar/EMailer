@@ -8,30 +8,30 @@ datasource db {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   firstName       String
   lastName        String
-  email           String    @unique
+  email           String     @unique
   password        String
   productionId    Int?
-  superUserStatus String    @default("Disabled")
-  status          String    @default("Activated")
+  superUserStatus String     @default("Disabled")
+  status          String     @default("Activated")
   avatar          String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   roles           UserRole[]
   sessions        Session[]
   teamUsers       TeamUser[]
 }
 
 model Role {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  status      String    @default("Activated")
-  type        String    @default("Team Based Role")
-  permissions Json      @default("{}")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  status      String     @default("Activated")
+  type        String     @default("Team Based Role")
+  permissions Json       @default("{}")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   users       UserRole[]
 }
 
@@ -57,26 +57,33 @@ model Session {
   expiresAt    DateTime
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([expiresAt])
 }
 
 model SmtpServer {
-  id              Int       @id @default(autoincrement())
-  name            String
-  host            String
-  port            Int       @default(25)
-  encryption      String    @default("None")
-  status          String    @default("Activated")
-  username        String?
-  password        String?
-  proxyIp         String?
-  proxyPort       Int?
-  proxyUsername   String?
-  proxyPassword   String?
+  id               Int       @id @default(autoincrement())
+  name             String
+  host             String
+  port             Int       @default(25)
+  encryption       String    @default("None")
+  status           String    @default("Activated")
+  username         String?
+  password         String?
+  proxyIp          String?
+  proxyPort        Int?
+  proxyUsername    String?
+  proxyPassword    String?
   serverProviderId Int?
-  expirationDate  DateTime?
-  lastChecked     DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  expirationDate   DateTime?
+  lastChecked      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([serverProviderId])
 }
 
 model ServerProvider {
@@ -89,47 +96,53 @@ model ServerProvider {
 }
 
 model MtaServer {
-  id              Int       @id @default(autoincrement())
-  name            String
-  serverProviderId Int?
-  status          String    @default("Activated")
-  hostname        String?
-  mainIp          String
-  sshPort         Int       @default(22)
-  os              String    @default("ubuntu")
-  loginType       String    @default("user-pass")
-  username        String    @default("root")
-  password        String?
-  pemFile         String?
-  passphrase      String?
-  ips             String?
-  sshStatus       String    @default("Unknown")
-  country         String?
-  expirationDate  DateTime?
-  lastChecked     DateTime?
-  installationStatus String? @default("Not Installed")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  virtualLists    VirtualList[]
-  sendProcesses   SendProcess[]
+  id                 Int           @id @default(autoincrement())
+  name               String
+  serverProviderId   Int?
+  status             String        @default("Activated")
+  hostname           String?
+  mainIp             String
+  sshPort            Int           @default(22)
+  os                 String        @default("ubuntu")
+  loginType          String        @default("user-pass")
+  username           String        @default("root")
+  password           String?
+  pemFile            String?
+  passphrase         String?
+  ips                String?
+  sshStatus          String        @default("Unknown")
+  country            String?
+  expirationDate     DateTime?
+  lastChecked        DateTime?
+  installationStatus String?       @default("Not Installed")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  virtualLists       VirtualList[]
+  sendProcesses      SendProcess[]
+
+  @@index([status])
+  @@index([serverProviderId])
+  @@index([installationStatus])
 }
 
 model Domain {
-  id              Int       @id @default(autoincrement())
-  name            String    @unique
-  accountName     String?
-  status          String    @default("Activated")
-  availability    String    @default("Available")
-  expirationDate  DateTime?
-  hasBrand        Boolean   @default(false)
-  flag            String?
-  country         String?
-  createdBy       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  records         DomainRecord[]
-  mailboxes       Mailbox[]
-  subdomains      DomainSubdomain[]
+  id             Int               @id @default(autoincrement())
+  name           String            @unique
+  accountName    String?
+  status         String            @default("Activated")
+  availability   String            @default("Available")
+  expirationDate DateTime?
+  hasBrand       Boolean           @default(false)
+  flag           String?
+  country        String?
+  createdBy      String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  records        DomainRecord[]
+  mailboxes      Mailbox[]
+  subdomains     DomainSubdomain[]
+
+  @@index([status])
 }
 
 model DomainRecord {
@@ -144,48 +157,52 @@ model DomainRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model DataList {
-  id                  Int       @id @default(autoincrement())
-  name                String
-  emailCount          Int       @default(0)
-  country             String?
-  vertical            String?
-  isp                 String?
-  encryptEmails       String    @default("Disabled")
-  status              String    @default("Activated")
-  createdBy           String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  autoResponderLists  AutoResponderList[]
-  sendProcesses       SendProcess[]
-  blacklists          Blacklist[]
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  emailCount         Int                 @default(0)
+  country            String?
+  vertical           String?
+  isp                String?
+  encryptEmails      String              @default("Disabled")
+  status             String              @default("Activated")
+  createdBy          String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  autoResponderLists AutoResponderList[]
+  sendProcesses      SendProcess[]
+  blacklists         Blacklist[]
+
+  @@index([status])
 }
 
 model SmtpGroup {
-  id              Int       @id @default(autoincrement())
-  name            String    @unique
-  encryption      String    @default("None")
-  status          String    @default("Activated")
-  createdBy       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  virtualLists    VirtualList[]
-  sendProcesses   SendProcess[]
-  customVmtas     CustomVmta[]
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  encryption    String        @default("None")
+  status        String        @default("Activated")
+  createdBy     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  virtualLists  VirtualList[]
+  sendProcesses SendProcess[]
+  customVmtas   CustomVmta[]
 }
 
 model CustomVmta {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   smtpGroupId Int
   name        String
   ip          String?
   port        Int?
-  status      String   @default("Activated")
+  status      String    @default("Activated")
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   smtpGroup   SmtpGroup @relation(fields: [smtpGroupId], references: [id], onDelete: Cascade)
 }
 
@@ -195,14 +212,14 @@ model Proxy {
   port      Int
   username  String?
   password  String?
-  type      String    @default("HTTP")
-  status    String    @default("Activated")
+  type      String   @default("HTTP")
+  status    String   @default("Activated")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Offer {
-  id            Int      @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   name          String
   url           String?
   fromName      String?
@@ -210,50 +227,52 @@ model Offer {
   subject       String?
   replyTo       String?
   headers       String?
-  status        String   @default("Activated")
+  status        String        @default("Activated")
   createdBy     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   suppressions  Suppression[]
   sendProcesses SendProcess[]
+
+  @@index([status])
 }
 
 model Suppression {
-  id            Int      @id @default(autoincrement())
-  offerId       Int?
-  name          String
-  type          String   @default("Email")
-  data          String?
-  count         Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  offer         Offer?   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  offerId   Int?
+  name      String
+  type      String   @default("Email")
+  data      String?
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  offer     Offer?   @relation(fields: [offerId], references: [id], onDelete: Cascade)
 }
 
 model AffiliateNetwork {
-  id            Int      @id @default(autoincrement())
-  name          String
-  url           String?
-  status        String   @default("Activated")
-  createdBy     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  url       String?
+  status    String   @default("Activated")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AutoResponder {
-  id            Int      @id @default(autoincrement())
-  name          String
-  fromName      String?
-  fromEmail     String?
-  subject       String?
-  delay         Int       @default(0)
-  headers       String?
-  message       String?
-  status        String   @default("Activated")
-  createdBy     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  lists         AutoResponderList[]
+  id        Int                 @id @default(autoincrement())
+  name      String
+  fromName  String?
+  fromEmail String?
+  subject   String?
+  delay     Int                 @default(0)
+  headers   String?
+  message   String?
+  status    String              @default("Activated")
+  createdBy String?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  lists     AutoResponderList[]
 }
 
 model AutoResponderList {
@@ -267,203 +286,208 @@ model AutoResponderList {
 }
 
 model VirtualList {
-  id            Int      @id @default(autoincrement())
+  id            Int                  @id @default(autoincrement())
   name          String
   smtpGroupId   Int?
   mtaServerId   Int?
-  status        String   @default("Activated")
+  status        String               @default("Activated")
   createdBy     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  smtpGroup     SmtpGroup? @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
-  mtaServer     MtaServer? @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  smtpGroup     SmtpGroup?           @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
+  mtaServer     MtaServer?           @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
   sendProcesses SendProcess[]
   processes     VirtualListProcess[]
 }
 
 model Production {
-  id              Int      @id @default(autoincrement())
-  name            String
-  status          String   @default("Activated")
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  processes       SendProcess[]
+  id        Int           @id @default(autoincrement())
+  name      String
+  status    String        @default("Activated")
+  createdBy String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  processes SendProcess[]
 }
 
 model SendProcess {
-  id              Int      @id @default(autoincrement())
-  productionId    Int
-  dataListId      Int?
-  smtpGroupId     Int?
-  mtaServerId     Int?
-  offerId         Int?
-  virtualListId   Int?
-  processName     String
-  subject         String?
-  fromEmail       String?
-  fromName        String?
-  replyTo         String?
-  senderScore     Int?
-  throttle        Int       @default(0)
-  speed           Int       @default(100)
-  scheduleAt      DateTime?
-  repeat          String?
-  status          String    @default("Pending")
-  createdBy       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  production      Production @relation(fields: [productionId], references: [id], onDelete: Cascade)
-  dataList        DataList?  @relation(fields: [dataListId], references: [id], onDelete: SetNull)
-  smtpGroup       SmtpGroup? @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
-  mtaServer       MtaServer? @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
-  offer           Offer?     @relation(fields: [offerId], references: [id], onDelete: SetNull)
-  virtualList     VirtualList? @relation(fields: [virtualListId], references: [id], onDelete: SetNull)
+  id            Int          @id @default(autoincrement())
+  productionId  Int
+  dataListId    Int?
+  smtpGroupId   Int?
+  mtaServerId   Int?
+  offerId       Int?
+  virtualListId Int?
+  processName   String
+  subject       String?
+  fromEmail     String?
+  fromName      String?
+  replyTo       String?
+  senderScore   Int?
+  throttle      Int          @default(0)
+  speed         Int          @default(100)
+  scheduleAt    DateTime?
+  repeat        String?
+  status        String       @default("Pending")
+  createdBy     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  production    Production   @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  dataList      DataList?    @relation(fields: [dataListId], references: [id], onDelete: SetNull)
+  smtpGroup     SmtpGroup?   @relation(fields: [smtpGroupId], references: [id], onDelete: SetNull)
+  mtaServer     MtaServer?   @relation(fields: [mtaServerId], references: [id], onDelete: SetNull)
+  offer         Offer?       @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  virtualList   VirtualList? @relation(fields: [virtualListId], references: [id], onDelete: SetNull)
+
+  @@index([productionId])
+  @@index([offerId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model GmailAccount {
-  id              Int      @id @default(autoincrement())
-  email           String   @unique
-  clientId        String?
-  clientSecret    String?
-  refreshToken    String?
-  status          String   @default("Activated")
-  senderScore     Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  clientId     String?
+  clientSecret String?
+  refreshToken String?
+  status       String   @default("Activated")
+  senderScore  Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model GSuiteAccount {
-  id              Int      @id @default(autoincrement())
-  email           String   @unique
-  clientId        String?
-  clientSecret    String?
-  refreshToken    String?
-  status          String   @default("Activated")
-  senderScore     Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  clientId     String?
+  clientSecret String?
+  refreshToken String?
+  status       String   @default("Activated")
+  senderScore  Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model OutlookAccount {
-  id              Int      @id @default(autoincrement())
-  email           String   @unique
-  clientId        String?
-  clientSecret    String?
-  refreshToken    String?
-  tenantId        String?
-  status          String   @default("Activated")
-  senderScore     Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  clientId     String?
+  clientSecret String?
+  refreshToken String?
+  tenantId     String?
+  status       String   @default("Activated")
+  senderScore  Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model CloudAccount {
-  id              Int      @id @default(autoincrement())
-  provider        String
-  name            String
-  status          String   @default("Activated")
-  apiKey          String?
-  apiSecret       String?
-  proxyIp         String?
-  proxyPort       Int?
-  proxyUsername   String?
-  proxyPassword   String?
-  providerConfig  Json?
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  instances       CloudInstance[]
+  id             Int             @id @default(autoincrement())
+  provider       String
+  name           String
+  status         String          @default("Activated")
+  apiKey         String?
+  apiSecret      String?
+  proxyIp        String?
+  proxyPort      Int?
+  proxyUsername  String?
+  proxyPassword  String?
+  providerConfig Json?
+  createdBy      String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  instances      CloudInstance[]
 }
 
 model CloudInstance {
-  id              Int       @id @default(autoincrement())
-  provider        String
-  cloudAccountId  Int?
-  numberOfInstances Int     @default(1)
-  regions         Json?
-  dnsAccountId    Int?
-  os              String    @default("ubuntu-22.04")
-  instanceType    String?
-  privateIps      Int       @default(1)
-  storage         Int       @default(10)
-  status          String    @default("Pending")
-  createdBy       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  cloudAccount    CloudAccount? @relation(fields: [cloudAccountId], references: [id], onDelete: SetNull)
-  elasticIps      ElasticIp[]
+  id                Int           @id @default(autoincrement())
+  provider          String
+  cloudAccountId    Int?
+  numberOfInstances Int           @default(1)
+  regions           Json?
+  dnsAccountId      Int?
+  os                String        @default("ubuntu-22.04")
+  instanceType      String?
+  privateIps        Int           @default(1)
+  storage           Int           @default(10)
+  status            String        @default("Pending")
+  createdBy         String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  cloudAccount      CloudAccount? @relation(fields: [cloudAccountId], references: [id], onDelete: SetNull)
+  elasticIps        ElasticIp[]
 }
 
 model RegistrarAccount {
-  id              Int      @id @default(autoincrement())
-  registrar       String
-  name            String
-  status          String   @default("Activated")
-  apiKey          String?
-  apiSecret       String?
-  apiToken        String?
-  username        String?
-  password        String?
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  registrar String
+  name      String
+  status    String   @default("Activated")
+  apiKey    String?
+  apiSecret String?
+  apiToken  String?
+  username  String?
+  password  String?
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PostmasterAccount {
-  id              Int      @id @default(autoincrement())
-  domain          String
-  serverName      String?
-  providerName    String?
-  imapHost        String?
-  imapPort        Int?
-  smtpHost        String?
-  smtpPort        Int?
-  username        String?
-  password        String?
-  status          String   @default("Activated")
-  lastChecked     DateTime? @map("last_checked")
-  connectionStatus String?  @default("Unknown") @map("connection_status")
-  lastError       String?   @map("last_error")
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  messages        PostmasterMessage[]
-  runs            PostmasterRun[]
+  id               Int                 @id @default(autoincrement())
+  domain           String
+  serverName       String?
+  providerName     String?
+  imapHost         String?
+  imapPort         Int?
+  smtpHost         String?
+  smtpPort         Int?
+  username         String?
+  password         String?
+  status           String              @default("Activated")
+  lastChecked      DateTime?           @map("last_checked")
+  connectionStatus String?             @default("Unknown") @map("connection_status")
+  lastError        String?             @map("last_error")
+  createdBy        String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  messages         PostmasterMessage[]
+  runs             PostmasterRun[]
 }
 
 model PostmasterMessage {
-  id              Int      @id @default(autoincrement())
-  accountId       Int
-  account         PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  messageId       String   @map("message_id")
-  uid             Int
-  folder          String   @default("INBOX")
-  from            String
-  to              String?
-  subject         String?
-  date            DateTime?
-  bodyHtml        String?  @map("body_html") @db.Text
-  bodyText        String?  @map("body_text") @db.Text
-  rawHeaders     String?  @map("raw_headers") @db.Text
-  isBlacklisted  Boolean  @default(false)
-  isDeleted      Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  id            Int               @id @default(autoincrement())
+  accountId     Int
+  account       PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  messageId     String            @map("message_id")
+  uid           Int
+  folder        String            @default("INBOX")
+  from          String
+  to            String?
+  subject       String?
+  date          DateTime?
+  bodyHtml      String?           @map("body_html") @db.Text
+  bodyText      String?           @map("body_text") @db.Text
+  rawHeaders    String?           @map("raw_headers") @db.Text
+  isBlacklisted Boolean           @default(false)
+  isDeleted     Boolean           @default(false)
+  createdAt     DateTime          @default(now())
 
   @@unique([accountId, messageId])
   @@index([accountId])
 }
 
 model PostmasterRun {
-  id              Int      @id @default(autoincrement())
-  accountId       Int
-  account         PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  status          String   @default("running")
-  messageCount    Int      @default(0)
-  newCount        Int      @default(0)
-  errorLog        String?  @map("error_log") @db.Text
-  startedAt       DateTime @default(now())
-  finishedAt      DateTime?
+  id           Int               @id @default(autoincrement())
+  accountId    Int
+  account      PostmasterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status       String            @default("running")
+  messageCount Int               @default(0)
+  newCount     Int               @default(0)
+  errorLog     String?           @map("error_log") @db.Text
+  startedAt    DateTime          @default(now())
+  finishedAt   DateTime?
 
   @@index([accountId])
 }
@@ -497,24 +521,24 @@ model Isp {
 }
 
 model ManagementServer {
-  id              Int      @id @default(autoincrement())
-  name            String
-  providerId      Int?
-  status          String   @default("Activated")
-  expirationDate  DateTime?
-  hostname        String?
-  mainIp          String
-  sshPort         Int      @default(22)
-  loginType       String   @default("user-pass")
-  username        String   @default("root")
-  password        String?
-  passphrase      String?
-  pemFile         String?
-  sshStatus       String   @default("Unknown")
-  lastChecked     DateTime?
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  name           String
+  providerId     Int?
+  status         String    @default("Activated")
+  expirationDate DateTime?
+  hostname       String?
+  mainIp         String
+  sshPort        Int       @default(22)
+  loginType      String    @default("user-pass")
+  username       String    @default("root")
+  password       String?
+  passphrase     String?
+  pemFile        String?
+  sshStatus      String    @default("Unknown")
+  lastChecked    DateTime?
+  createdBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Mailbox {
@@ -538,14 +562,14 @@ model Vertical {
 }
 
 model Team {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  status    String   @default("Activated")
-  isps      Json?
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     TeamUser[]
+  id             Int                 @id @default(autoincrement())
+  name           String              @unique
+  status         String              @default("Activated")
+  isps           Json?
+  createdBy      String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  users          TeamUser[]
   authorizations TeamAuthorization[]
 }
 
@@ -560,28 +584,32 @@ model TeamUser {
 }
 
 model TeamAuthorization {
-  id              Int  @id @default(autoincrement())
-  teamId          Int
-  userId          Int
-  mtaServers      Json?
-  smtpServers     Json?
-  offers          Json?
-  dataLists       Json?
-  team            Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id          Int   @id @default(autoincrement())
+  teamId      Int
+  userId      Int
+  mtaServers  Json?
+  smtpServers Json?
+  offers      Json?
+  dataLists   Json?
+  team        Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([teamId, userId])
 }
 
 model AuditLog {
-  id           Int      @id @default(autoincrement())
-  actionBy     String
-  userId       Int?
-  recordId     Int?
-  recordName   String?
-  recordType   String
-  actionType   String
-  actionTime   DateTime @default(now())
-  createdAt    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  actionBy   String
+  userId     Int?
+  recordId   Int?
+  recordName String?
+  recordType String
+  actionType String
+  actionTime DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([actionBy])
+  @@index([recordType])
+  @@index([actionTime])
 }
 
 model Setting {
@@ -591,61 +619,61 @@ model Setting {
 }
 
 model GeoManagerProcess {
-  id            Int      @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
   name          String
-  status        String   @default("Pending")
-  sourceSchema  String?  @map("source_schema")
-  sourceTables  Json?    @map("source_tables")
+  status        String          @default("Pending")
+  sourceSchema  String?         @map("source_schema")
+  sourceTables  Json?           @map("source_tables")
   targetRows    Int?
   targetGeos    Json?
-  batchSize     Int      @default(500)
-  tablePattern  String   @default("e_")
-  duplicateMode String   @default("delete")
-  movedRows     Int      @default(0) @map("moved_rows")
-  deletedRows   Int      @default(0) @map("deleted_rows")
-  skippedRows   Int      @default(0) @map("skipped_rows")
+  batchSize     Int             @default(500)
+  tablePattern  String          @default("e_")
+  duplicateMode String          @default("delete")
+  movedRows     Int             @default(0) @map("moved_rows")
+  deletedRows   Int             @default(0) @map("deleted_rows")
+  skippedRows   Int             @default(0) @map("skipped_rows")
   scheduledAt   DateTime?
-  startedAt     DateTime? @map("started_at")
-  finishedAt    DateTime? @map("finished_at")
+  startedAt     DateTime?       @map("started_at")
+  finishedAt    DateTime?       @map("finished_at")
   createdBy     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   logs          GeoManagerLog[]
 }
 
 model GeoManagerLog {
-  id        Int      @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   processId Int
   action    String
   details   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime          @default(now())
   process   GeoManagerProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
 }
 
 model PmtaCommand {
-  id           Int       @id @default(autoincrement())
-  serverName   String
-  command      String
-  target       String?
-  isps         String?
-  status       String    @default("Pending")
-  result       String?
-  createdBy    String?
-  createdAt    DateTime  @default(now())
-  completedAt  DateTime?
+  id          Int       @id @default(autoincrement())
+  serverName  String
+  command     String
+  target      String?
+  isps        String?
+  status      String    @default("Pending")
+  result      String?
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
 }
 
 model PmtaSchedule {
-  id           Int       @id @default(autoincrement())
-  serverName   String
-  command      String
-  delay        Int       @default(0)
-  delayUnit    String    @default("seconds")
-  status       String    @default("Pending")
-  startTime    DateTime?
-  finishTime   DateTime?
-  createdBy    String?
-  createdAt    DateTime  @default(now())
+  id         Int       @id @default(autoincrement())
+  serverName String
+  command    String
+  delay      Int       @default(0)
+  delayUnit  String    @default("seconds")
+  status     String    @default("Pending")
+  startTime  DateTime?
+  finishTime DateTime?
+  createdBy  String?
+  createdAt  DateTime  @default(now())
 }
 
 model PmtaTemplate {
@@ -659,14 +687,14 @@ model PmtaTemplate {
 }
 
 model PmtaVmta {
-  id           Int      @id @default(autoincrement())
-  serverName   String
-  vmtaType     String
-  configData   Json?
-  status       String   @default("Activated")
-  createdBy    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  serverName String
+  vmtaType   String
+  configData Json?
+  status     String   @default("Activated")
+  createdBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model FrontendLog {
@@ -679,13 +707,13 @@ model FrontendLog {
 }
 
 model Blacklist {
-  id        Int      @id @default(autoincrement())
-  email     String?
-  domain    String?
-  reason    String?
+  id         Int       @id @default(autoincrement())
+  email      String?
+  domain     String?
+  reason     String?
   dataListId Int?
-  dataList  DataList? @relation(fields: [dataListId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now())
+  dataList   DataList? @relation(fields: [dataListId], references: [id], onDelete: SetNull)
+  createdAt  DateTime  @default(now())
 }
 
 model DomainBrand {
@@ -697,43 +725,45 @@ model DomainBrand {
 }
 
 model DomainSubdomain {
-  id           Int      @id @default(autoincrement())
-  domainId     Int
-  domain       Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  subdomain    String
-  status       String   @default("Activated")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  domain    Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  subdomain String
+  status    String   @default("Activated")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VirtualListProcess {
-  id              Int      @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   virtualListId   Int
   processName     String
-  status          String   @default("Pending")
-  totalEmails     Int      @default(0)
-  processedEmails Int      @default(0)
-  filteredEmails  Int      @default(0)
-  errorCount      Int      @default(0)
+  status          String      @default("Pending")
+  totalEmails     Int         @default(0)
+  processedEmails Int         @default(0)
+  filteredEmails  Int         @default(0)
+  errorCount      Int         @default(0)
   startedAt       DateTime?
   completedAt     DateTime?
   errorMessage    String?
   createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   virtualList     VirtualList @relation(fields: [virtualListId], references: [id], onDelete: Cascade)
 }
 
 model ElasticIp {
-  id              Int      @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   cloudInstanceId Int?
   ipAddress       String?
   allocationId    String?
-  status          String   @default("Pending")
+  status          String         @default("Pending")
   instanceId      String?
   region          String?
   createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
   cloudInstance   CloudInstance? @relation(fields: [cloudInstanceId], references: [id], onDelete: SetNull)
+
+  @@index([cloudInstanceId])
 }
