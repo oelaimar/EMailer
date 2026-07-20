@@ -158,19 +158,25 @@ exports.bulkCheck = async (req, res, next) => {
     const { ids } = req.body;
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs array is required.' });
 
+    const intIds = ids.map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+    if (intIds.length === 0) return res.status(400).json({ error: 'No valid IDs provided.' });
+
+    const servers = await prisma.mtaServer.findMany({
+      where: { id: { in: intIds } },
+      select: { id: true, name: true, mainIp: true, sshPort: true, username: true, password: true },
+    });
+    const serverMap = new Map(servers.map((s) => [s.id, s]));
+
     const results = await Promise.all(
-      ids.map(async (id) => {
-        const parsedId = parseInt(id, 10);
-        const server = await prisma.mtaServer.findUnique({ where: { id: parsedId } });
-        if (server) {
-          const result = await sshService.checkServer(server.mainIp, server.sshPort, server.username, server.password);
-          await prisma.mtaServer.update({
-            where: { id: server.id },
-            data: { sshStatus: result.sshStatus, lastChecked: new Date() },
-          });
-          return { id: server.id, name: server.name, ...result };
-        }
-        return { id: parsedId, status: 'not_found' };
+      intIds.map(async (id) => {
+        const server = serverMap.get(id);
+        if (!server) return { id, name: `Server #${id}`, status: 'not_found' };
+        const result = await sshService.checkServer(server.mainIp, server.sshPort, server.username, server.password);
+        await prisma.mtaServer.update({
+          where: { id: server.id },
+          data: { sshStatus: result.sshStatus, lastChecked: new Date() },
+        });
+        return { id: server.id, name: server.name, ...result };
       })
     );
 
@@ -401,10 +407,16 @@ exports.executeServersCommand = async (req, res, next) => {
       return res.status(400).json({ error: 'Servers array and action are required.' });
     }
 
+    const intIds = servers.map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+    const serverRows = await prisma.mtaServer.findMany({
+      where: { id: { in: intIds } },
+      select: { id: true, name: true, mainIp: true, sshPort: true, username: true, password: true },
+    });
+    const serverMap = new Map(serverRows.map((s) => [s.id, s]));
+
     const results = await Promise.all(
-      servers.map(async (serverId) => {
-        const id = parseInt(serverId, 10);
-        const server = await prisma.mtaServer.findUnique({ where: { id } });
+      intIds.map(async (id) => {
+        const server = serverMap.get(id);
         if (!server) return { id, name: `Server #${id}`, output: 'Server not found' };
         const result = await sshService.executeServersCommand(server.mainIp, server.sshPort, server.username, server.password, action);
         return { id: server.id, name: server.name, output: result.output };
@@ -426,11 +438,17 @@ exports.beginBulkInstallation = async (req, res, next) => {
     const intIds = ids.map((id) => parseInt(id, 10));
     await prisma.mtaServer.updateMany({ where: { id: { in: intIds } }, data: { installationStatus: 'Installing' } });
 
+    const servers = await prisma.mtaServer.findMany({
+      where: { id: { in: intIds } },
+      select: { id: true, mainIp: true, sshPort: true, username: true, password: true },
+    });
+    const serverMap = new Map(servers.map((s) => [s.id, s]));
+
     const installScript = `bash <(curl -s https://raw.githubusercontent.com/mta/installer/main/install.sh) 2>&1`;
 
     const results = await Promise.all(
       intIds.map(async (id) => {
-        const server = await prisma.mtaServer.findUnique({ where: { id } });
+        const server = serverMap.get(id);
         if (!server) return { id, status: 'not_found', output: 'Server not found' };
         try {
           const result = await sshService.executeCommand(server.mainIp, server.sshPort, server.username, server.password, installScript, 120000);
@@ -457,9 +475,15 @@ exports.getBulkInstallationLogs = async (req, res, next) => {
 
     const intIds = ids.map((id) => parseInt(id, 10));
 
+    const servers = await prisma.mtaServer.findMany({
+      where: { id: { in: intIds } },
+      select: { id: true, name: true, installationStatus: true, mainIp: true, sshPort: true, username: true, password: true },
+    });
+    const serverMap = new Map(servers.map((s) => [s.id, s]));
+
     const results = await Promise.all(
       intIds.map(async (id) => {
-        const server = await prisma.mtaServer.findUnique({ where: { id }, select: { id: true, name: true, installationStatus: true, mainIp: true, sshPort: true, username: true, password: true } });
+        const server = serverMap.get(id);
         if (!server) return { id, name: `Server #${id}`, logs: 'Server not found' };
         const serverPassword = server.password;
         try {

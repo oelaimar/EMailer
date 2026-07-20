@@ -181,25 +181,31 @@ exports.bulkCheck = async (req, res, next) => {
       return res.status(400).json({ error: 'IDs array is required.' });
     }
 
+    const parsedIds = ids.map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+    if (parsedIds.length === 0) return res.status(400).json({ error: 'No valid IDs provided.' });
+
+    const servers = await prisma.smtpServer.findMany({
+      where: { id: { in: parsedIds } },
+      select: { id: true, name: true, host: true, port: true, encryption: true, username: true, password: true },
+    });
+    const serverMap = new Map(servers.map((s) => [s.id, s]));
+
     const results = await Promise.all(
-      ids.map(async (id) => {
-        const parsedId = parseInt(id, 10);
-        const server = await prisma.smtpServer.findUnique({ where: { id: parsedId } });
-        if (server) {
-          const result = await checkSmtpServer({
-            host: server.host,
-            port: server.port,
-            encryption: server.encryption,
-            username: server.username,
-            password: server.password,
-          });
-          await prisma.smtpServer.update({
-            where: { id: server.id },
-            data: { status: result.status, lastChecked: new Date() },
-          });
-          return { id: server.id, name: server.name, status: result.status, message: result.message };
-        }
-        return { id: parsedId, status: 'not_found' };
+      parsedIds.map(async (id) => {
+        const server = serverMap.get(id);
+        if (!server) return { id, status: 'not_found' };
+        const result = await checkSmtpServer({
+          host: server.host,
+          port: server.port,
+          encryption: server.encryption,
+          username: server.username,
+          password: server.password,
+        });
+        await prisma.smtpServer.update({
+          where: { id: server.id },
+          data: { status: result.status, lastChecked: new Date() },
+        });
+        return { id: server.id, name: server.name, status: result.status, message: result.message };
       })
     );
 

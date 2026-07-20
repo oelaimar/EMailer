@@ -223,56 +223,60 @@ exports.setMultiDomainsRecords = async (req, res, next) => {
     const intIds = domainIds.map((id) => parseInt(id, 10));
     let affected = 0;
 
-    for (const domainId of intIds) {
-      switch (operation) {
-        case 'add': {
+    switch (operation) {
+      case 'add': {
+        const data = [];
+        for (const domainId of intIds) {
           for (const r of records) {
-            await prisma.domainRecord.create({
+            data.push({
+              domainId,
+              type: r.type,
+              name: r.name,
+              value: r.value,
+              ttl: parseInt(r.ttl, 10) || 3600,
+              priority: r.priority ? parseInt(r.priority, 10) : null,
+              proxied: !!r.proxied,
+            });
+          }
+        }
+        if (data.length > 0) {
+          await prisma.domainRecord.createMany({ data });
+          affected = data.length;
+        }
+        break;
+      }
+      case 'edit': {
+        for (const r of records) {
+          const existing = await prisma.domainRecord.findMany({
+            where: { domainId: { in: intIds }, type: r.type, name: r.name },
+          });
+          for (const rec of existing) {
+            await prisma.domainRecord.update({
+              where: { id: rec.id },
               data: {
-                domainId,
-                type: r.type,
-                name: r.name,
-                value: r.value,
-                ttl: parseInt(r.ttl, 10) || 3600,
-                priority: r.priority ? parseInt(r.priority, 10) : null,
-                proxied: !!r.proxied,
+                value: r.value || rec.value,
+                ttl: r.ttl ? parseInt(r.ttl, 10) : rec.ttl,
+                proxied: r.proxied !== undefined ? !!r.proxied : rec.proxied,
               },
             });
             affected++;
           }
-          break;
         }
-        case 'edit': {
-          for (const r of records) {
-            const existing = await prisma.domainRecord.findFirst({
-              where: { domainId, type: r.type, name: r.name },
-            });
-            if (existing) {
-              await prisma.domainRecord.update({
-                where: { id: existing.id },
-                data: {
-                  value: r.value || existing.value,
-                  ttl: r.ttl ? parseInt(r.ttl, 10) : existing.ttl,
-                  proxied: r.proxied !== undefined ? !!r.proxied : existing.proxied,
-                },
-              });
-              affected++;
-            }
-          }
-          break;
-        }
-        case 'delete': {
-          for (const r of records) {
+        break;
+      }
+      case 'delete': {
+        for (const r of records) {
+          for (const domainId of intIds) {
             const where = { domainId, type: r.type, name: r.name };
             if (r.value) where.value = r.value;
             const deleted = await prisma.domainRecord.deleteMany({ where });
             affected += deleted.count;
           }
-          break;
         }
-        default:
-          return res.status(400).json({ error: 'Invalid operation. Use add, edit, or delete.' });
+        break;
       }
+      default:
+        return res.status(400).json({ error: 'Invalid operation. Use add, edit, or delete.' });
     }
 
     logAction(req.user?.email, 'DomainRecord', `bulk-${operation}`, null, `${operation} ${affected} records across ${intIds.length} domains`, req.user?.id).catch(() => {});
