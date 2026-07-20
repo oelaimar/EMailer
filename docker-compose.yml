@@ -26,14 +26,10 @@ services:
       dockerfile: Dockerfile
     container_name: vugex-backend
     restart: unless-stopped
+    env_file: .env
     environment:
       PORT: 3000
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-password}@mysql:3306/vugex_v2
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
-      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/vugex_v2
       NODE_ENV: production
     ports:
       - "3000:3000"
