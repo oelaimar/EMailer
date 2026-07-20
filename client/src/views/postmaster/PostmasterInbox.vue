@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import { useToastStore } from '../../stores/toast';
 import {
   getPostmasterSources,
   getPostmasterMessages,
@@ -59,7 +60,7 @@ const loadSources = async () => {
     const { data } = await getPostmasterSources();
     sources.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load sources:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 };
 
@@ -77,7 +78,7 @@ const loadMessages = async () => {
     messages.value = data.data || [];
     summary.value = data.summary || {};
   } catch (e) {
-    console.error('Failed to load messages:', e);
+    toastStore.showToast('Failed to load data', 'error');
   } finally {
     loading.value = false;
   }
@@ -93,7 +94,7 @@ const refreshMailbox = async () => {
     messages.value = data.data || [];
     summary.value = data.summary || {};
   } catch (e) {
-    console.error('Refresh failed:', e);
+    toastStore.showToast('Refresh failed', 'error');
     alert(e.response?.data?.error || 'Refresh failed');
   } finally {
     refreshing.value = false;
@@ -117,7 +118,7 @@ const openDetail = async (msg, tab) => {
     const { data } = await getPostmasterMessageDetail(msg.id);
     detailMessage.value = data.data;
   } catch (e) {
-    console.error('Failed to load message:', e);
+    toastStore.showToast('Failed to load data', 'error');
   } finally {
     detailLoading.value = false;
   }
@@ -139,7 +140,7 @@ const executeDelete = async () => {
     messages.value = messages.value.filter(m => m.id !== deleteTarget.value.id);
     summary.value.messageCount = Math.max(0, (summary.value.messageCount || 0) - 1);
   } catch (e) {
-    console.error('Delete failed:', e);
+    toastStore.showToast('Delete failed', 'error');
   } finally {
     showDeleteConfirm.value = false;
     deleteTarget.value = null;
@@ -170,7 +171,7 @@ const executeExport = async () => {
     URL.revokeObjectURL(url);
     showExportModal.value = false;
   } catch (e) {
-    console.error('Export failed:', e);
+    toastStore.showToast('Export failed', 'error');
     alert(e.response?.data?.error || 'Export failed');
   }
 };

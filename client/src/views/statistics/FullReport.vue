@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import { getFullReport, getReportColumns } from '../../api/statistics';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const columns = ref([]);
@@ -82,7 +84,7 @@ const exportCSV = async () => {
     const a = document.createElement('a');
     a.href = url; a.download = 'revenue-report.csv'; a.click();
     URL.revokeObjectURL(url);
-  } catch (e) { console.error(e); }
+  } catch (e) { toastStore.showToast('Action failed', 'error'); }
 };
 
 const formatValue = (val, key) => {

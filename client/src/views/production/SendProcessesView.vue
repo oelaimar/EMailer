@@ -9,6 +9,8 @@ import { getSmtpGroups } from '../../api/smtpGroups';
 import { getMtaServers } from '../../api/mtaServers';
 import { getOffers } from '../../api/offers';
 import { getVirtualLists } from '../../api/virtualLists';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -93,16 +95,14 @@ const handleAdd = async () => {
     };
     showForm.value = false;
     tableRef.value?.loadData();
-  } catch (e) {
-    console.error(e);
-  } finally {
+  } catch (e) { toastStore.showToast('Action failed', 'error'); } finally {
     loading.value = false;
   }
 };
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

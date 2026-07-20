@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { apiLimiter } = require('../middleware/rateLimiter');
+
+router.use(apiLimiter);
 
 router.use('/auth', require('./auth'));
 router.use('/dashboard', require('./dashboard'));

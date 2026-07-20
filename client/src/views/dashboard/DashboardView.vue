@@ -1,19 +1,16 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { getDashboardStats, getDashboardCharts } from '../../api/dashboard';
-import { Bar, Doughnut } from 'vue-chartjs';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import VChart from 'vue-echarts';
+import { use } from 'echarts/core';
+import { BarChart, PieChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { useToastStore } from '../../stores/toast';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+use([BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
+const toastStore = useToastStore();
 const stats = ref({});
 const charts = ref({ sentStats: [], actionsStats: [], dailyEarnings: [], monthlyEarnings: [] });
 const loading = ref(true);
@@ -33,71 +30,38 @@ const statCards = [
   { key: 'monthlyEarnings', label: 'Monthly Earnings', color: 'text-green-600', bg: 'bg-green-50', icon: '💲' },
 ];
 
-const sentVsCompletedData = computed(() => {
+const sentVsCompletedOption = computed(() => {
   const labels = charts.value.sentStats.map(d => {
     const dt = new Date(d.date + 'T00:00:00');
     return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
   return {
-    labels,
-    datasets: [
-      {
-        label: 'Sent',
-        data: charts.value.sentStats.map(d => d.value),
-        backgroundColor: 'rgba(59,130,246,0.7)',
-        borderColor: 'rgba(59,130,246,1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
-      {
-        label: 'Completed',
-        data: charts.value.actionsStats.map(d => d.value),
-        backgroundColor: 'rgba(16,185,129,0.7)',
-        borderColor: 'rgba(16,185,129,1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['Sent', 'Completed'] },
+    grid: { left: 40, right: 16, bottom: 24, top: 36 },
+    xAxis: { type: 'category', data: labels },
+    yAxis: { type: 'value', minInterval: 1 },
+    series: [
+      { name: 'Sent', type: 'bar', data: charts.value.sentStats.map(d => d.value), itemStyle: { color: 'rgba(59,130,246,0.7)', borderRadius: [4,4,0,0] } },
+      { name: 'Completed', type: 'bar', data: charts.value.actionsStats.map(d => d.value), itemStyle: { color: 'rgba(16,185,129,0.7)', borderRadius: [4,4,0,0] } },
     ],
   };
 });
 
-const sentVsCompletedOpts = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { position: 'top' } },
-  scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-};
-
-const dailyEarningsData = computed(() => {
+const dailyEarningsOption = computed(() => {
   const labels = charts.value.dailyEarnings.map(d => {
     const dt = new Date(d.date + 'T00:00:00');
     return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
   return {
-    labels,
-    datasets: [
-      {
-        label: 'Earnings ($)',
-        data: charts.value.dailyEarnings.map(d => parseFloat(d.value)),
-        backgroundColor: 'rgba(16,185,129,0.7)',
-        borderColor: 'rgba(16,185,129,1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
+    tooltip: { trigger: 'axis' },
+    grid: { left: 50, right: 16, bottom: 24, top: 16 },
+    xAxis: { type: 'category', data: labels },
+    yAxis: { type: 'value' },
+    series: [
+      { name: 'Earnings ($)', type: 'bar', data: charts.value.dailyEarnings.map(d => parseFloat(d.value)), itemStyle: { color: 'rgba(16,185,129,0.7)', borderRadius: [4,4,0,0] } },
     ],
   };
-});
-
-const dailyEarningsOpts = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { position: 'top' } },
-  scales: { y: { beginAtZero: true } },
-};
-
-const totalMonthlyEarnings = computed(() => {
-  if (!charts.value.monthlyEarnings.length) return '0.00';
-  return charts.value.monthlyEarnings[0].value;
 });
 
 const completionRate = computed(() => {
@@ -107,34 +71,24 @@ const completionRate = computed(() => {
   return Math.round((completed / sent) * 100);
 });
 
-const completionData = computed(() => {
-  const rate = completionRate.value;
-  return {
-    labels: ['Completed', 'Remaining'],
-    datasets: [
-      {
-        data: [rate, 100 - rate],
-        backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(229,231,235,0.8)'],
-        borderColor: ['rgba(16,185,129,1)', 'rgba(229,231,235,1)'],
-        borderWidth: 1,
-      },
+const completionOption = computed(() => ({
+  tooltip: { trigger: 'item', formatter: '{b}: {d}%' },
+  legend: { bottom: 0 },
+  series: [{
+    type: 'pie',
+    radius: ['50%', '70%'],
+    label: { show: false },
+    data: [
+      { value: completionRate.value, name: 'Completed', itemStyle: { color: 'rgba(16,185,129,0.8)' } },
+      { value: 100 - completionRate.value, name: 'Remaining', itemStyle: { color: 'rgba(229,231,235,0.8)' } },
     ],
-  };
-});
+  }],
+}));
 
-const completionOpts = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { position: 'bottom' },
-    tooltip: {
-      callbacks: {
-        label: (ctx) => `${ctx.label}: ${ctx.parsed}%`,
-      },
-    },
-  },
-  cutout: '65%',
-};
+const totalMonthlyEarnings = computed(() => {
+  if (!charts.value.monthlyEarnings.length) return '0.00';
+  return charts.value.monthlyEarnings[0].value;
+});
 
 onMounted(async () => {
   try {
@@ -144,9 +98,7 @@ onMounted(async () => {
     ]);
     stats.value = statsRes.data;
     charts.value = chartsRes.data;
-  } catch (e) {
-    console.error(e);
-  } finally {
+  } catch (e) { toastStore.showToast('Failed to load dashboard', 'error'); } finally {
     loading.value = false;
   }
 });
@@ -172,7 +124,7 @@ onMounted(async () => {
       <div class="bg-white rounded-xl border border-gray-200 p-6">
         <h3 class="text-sm font-semibold text-gray-700 mb-4">Sent vs Completed (7 Days)</h3>
         <div class="h-60">
-          <Bar v-if="charts.sentStats.length" :data="sentVsCompletedData" :options="sentVsCompletedOpts" />
+          <VChart v-if="charts.sentStats.length" :option="sentVsCompletedOption" autoresize />
           <div v-else class="h-full flex items-center justify-center text-gray-400 text-sm">No data available</div>
         </div>
       </div>
@@ -180,7 +132,7 @@ onMounted(async () => {
       <div class="bg-white rounded-xl border border-gray-200 p-6">
         <h3 class="text-sm font-semibold text-gray-700 mb-4">Daily Earnings (This Month)</h3>
         <div class="h-60">
-          <Bar v-if="charts.dailyEarnings.length" :data="dailyEarningsData" :options="dailyEarningsOpts" />
+          <VChart v-if="charts.dailyEarnings.length" :option="dailyEarningsOption" autoresize />
           <div v-else class="h-full flex items-center justify-center text-gray-400 text-sm">No data available</div>
         </div>
       </div>
@@ -188,8 +140,8 @@ onMounted(async () => {
       <div class="bg-white rounded-xl border border-gray-200 p-6">
         <h3 class="text-sm font-semibold text-gray-700 mb-4">Completion Rate (7 Days)</h3>
         <div class="h-60 relative">
-          <Doughnut :data="completionData" :options="completionOpts" />
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <VChart :option="completionOption" autoresize />
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="margin-top:-24px">
             <span class="text-3xl font-bold text-gray-800">{{ completionRate }}%</span>
           </div>
         </div>

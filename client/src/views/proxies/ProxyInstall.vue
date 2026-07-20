@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import { installProxyOnServers } from '../../api/proxies';
 import { getMtaServers } from '../../api/mtaServers';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const loading = ref(false);
 const servers = ref([]);
@@ -27,7 +29,7 @@ onMounted(async () => {
     const { data } = await getMtaServers({ limit: 1000 });
     servers.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load servers:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

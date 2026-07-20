@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getSettings, updateSettings } from '../../api/settings';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const loading = ref(false);
 const error = ref('');
@@ -51,7 +53,7 @@ onMounted(async () => {
       }
     });
   } catch (e) {
-    console.error('Failed to load settings:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

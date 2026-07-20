@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import { getCloudInstances } from '../../api/cloudInstances';
 import { getDomains } from '../../api/domains';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const loading = ref(false);
@@ -30,7 +32,7 @@ onMounted(async () => {
     instances.value = instRes.data.data || [];
     domains.value = domRes.data.data || [];
   } catch (e) {
-    console.error('Failed to load data:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

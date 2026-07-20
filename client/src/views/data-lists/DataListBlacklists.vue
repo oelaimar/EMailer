@@ -4,6 +4,8 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import client from '../../api/client';
 import { getDataLists } from '../../api/dataLists';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const confirmDialog = ref(false);
@@ -43,13 +45,13 @@ const handleCreate = async () => {
     form.value = { email: '', domain: '', reason: '', dataListId: '' };
     showForm.value = false;
     tableRef.value?.loadData();
-  } catch (e) { console.error(e); }
+  } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
 };
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

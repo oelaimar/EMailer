@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getSessions, forceDisconnectSessions } from '../../api/sessions';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const selected = ref([]);
@@ -30,9 +32,7 @@ const confirmDisconnect = async () => {
     await forceDisconnectSessions(selected.value);
     selected.value = [];
     tableRef.value?.loadData();
-  } catch (e) {
-    console.error(e);
-  } finally {
+  } catch (e) { toastStore.showToast('Action failed', 'error'); } finally {
     loading.value = false;
     confirmDialog.value = false;
   }

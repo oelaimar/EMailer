@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useToastStore } from '../../stores/toast';
 import {
   getGeoManagerProcess, createGeoManagerProcess,
   getGeoSchemas, getGeoSourceTables
@@ -41,7 +42,7 @@ onMounted(async () => {
     const { data } = await getGeoSchemas();
     schemas.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load schemas:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
   if (isEdit.value) {
     try {
@@ -69,7 +70,7 @@ const loadTables = async (schema) => {
     const { data } = await getGeoSourceTables({ schema });
     tables.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load tables:', e);
+    toastStore.showToast('Failed to load data', 'error');
     tables.value = [];
   } finally {
     loadingTables.value = false;

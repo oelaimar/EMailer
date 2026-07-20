@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getOfferSuppressions, addOfferSuppression, deleteOfferSuppression } from '../../api/offers';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -55,7 +57,7 @@ const handleDelete = (sup) => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

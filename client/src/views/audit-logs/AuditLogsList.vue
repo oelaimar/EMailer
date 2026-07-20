@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getAuditLogs, deleteAuditLog, bulkActionAuditLogs } from '../../api/auditLogs';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const confirmDialog = ref(false);
@@ -40,7 +42,7 @@ const handleGroupAction = async ({ action, ids }) => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

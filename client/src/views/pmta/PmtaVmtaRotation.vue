@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPmtaServerNames, createPmtaVmtaRotation, resetPmtaVmtas, getPmtaVmtas } from '../../api/pmta';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const loading = ref(false);
 const creating = ref(false);
@@ -30,7 +32,7 @@ onMounted(async () => {
     servers.value = serversRes.data || [];
     existingVmtas.value = vmtasRes.data || [];
   } catch (e) {
-    console.error('Failed to load data:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

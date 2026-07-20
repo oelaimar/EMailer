@@ -4,6 +4,8 @@ import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getElasticIps, allocateElasticIps, releaseElasticIps, deleteElasticIp } from '../../api/elasticIps';
 import { getCloudInstances } from '../../api/cloudInstances';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const confirmDialog = ref(false);
@@ -48,13 +50,13 @@ const handleAllocate = async () => {
     allocateForm.value = { cloudInstanceId: '', count: 1, region: '' };
     showAllocate.value = false;
     tableRef.value?.loadData();
-  } catch (e) { console.error(e); }
+  } catch (e) { toastStore.showToast('Action failed', 'error'); }
   finally { loading.value = false; }
 };
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

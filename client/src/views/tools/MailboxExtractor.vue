@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import { extractMailbox } from '../../api/tools';
 import { getMailboxes } from '../../api/mailboxes';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const loading = ref(false);
 const error = ref('');
@@ -16,7 +18,7 @@ onMounted(async () => {
     const { data } = await getMailboxes({ limit: 1000 });
     mailboxes.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load mailboxes:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

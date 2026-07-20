@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getDomains, setMultiDomainsRecords } from '../../api/domains';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const loading = ref(false);
 const saving = ref(false);
@@ -36,7 +38,7 @@ onMounted(async () => {
     }
     domainGroups.value = grouped;
   } catch (e) {
-    console.error('Failed to load domains:', e);
+    toastStore.showToast('Failed to load data', 'error');
   }
 });
 

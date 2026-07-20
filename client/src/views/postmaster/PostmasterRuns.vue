@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getPostmasterRuns, getPostmasterRunLogs } from '../../api/postmaster';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const runs = ref([]);
 const loading = ref(true);
@@ -20,7 +22,7 @@ const loadRuns = async () => {
     const { data } = await getPostmasterRuns();
     runs.value = data.data || [];
   } catch (e) {
-    console.error('Failed to load runs:', e);
+    toastStore.showToast('Failed to load data', 'error');
   } finally {
     loading.value = false;
   }
@@ -34,7 +36,7 @@ const viewLog = async (run) => {
     const { data } = await getPostmasterRunLogs(run.id);
     logContent.value = data.data;
   } catch (e) {
-    console.error('Failed to load log:', e);
+    toastStore.showToast('Failed to load data', 'error');
   } finally {
     logLoading.value = false;
   }

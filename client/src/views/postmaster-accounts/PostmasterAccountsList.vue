@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPostmasterAccounts, deletePostmasterAccount, bulkActionPostmasterAccounts } from '../../api/postmasterAccounts';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const router = useRouter();
 const tableRef = ref(null);
@@ -47,7 +49,7 @@ const handleGroupAction = async ({ action, ids }) => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

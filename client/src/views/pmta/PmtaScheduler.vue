@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getPmtaSchedules, createPmtaSchedule, stopPmtaSchedule, deletePmtaSchedule } from '../../api/pmta';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const showModal = ref(false);
@@ -56,7 +58,7 @@ const handleCreate = async () => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

@@ -31,7 +31,12 @@ const expandActiveSection = () => {
 };
 
 onMounted(expandActiveSection);
-watch(() => route.path, expandActiveSection);
+watch(() => route.path, () => {
+  expandActiveSection();
+  if (window.innerWidth < 1024 && appStore.sidebarMobileOpen) {
+    appStore.sidebarMobileOpen = false;
+  }
+});
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z', path: '/dashboard' },
@@ -220,7 +225,14 @@ const menuItems = [
 </script>
 
 <template>
-  <aside :class="['fixed left-0 top-0 h-full bg-gray-900 text-white z-40 transition-all duration-300 flex flex-col', appStore.sidebarCollapsed ? 'w-16' : 'w-64']">
+  <div v-if="appStore.sidebarMobileOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden" @click="appStore.sidebarMobileOpen = false"></div>
+
+  <aside :class="[
+    'fixed left-0 top-0 h-full bg-gray-900 text-white z-50 transition-all duration-300 flex flex-col',
+    'lg:z-40',
+    appStore.sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+    appStore.sidebarCollapsed ? 'w-16' : 'w-64'
+  ]">
     <div class="h-16 flex items-center px-4 border-b border-gray-700">
       <div class="flex items-center gap-3 overflow-hidden">
         <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">V</div>

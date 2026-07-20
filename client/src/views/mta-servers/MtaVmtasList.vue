@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getMtaServers, bulkActionMtaServers } from '../../api/mtaServers';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const tableRef = ref(null);
 const confirmDialog = ref(false);
@@ -35,7 +37,7 @@ const fetchVmtas = () => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };

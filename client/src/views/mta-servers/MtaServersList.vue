@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router';
 import DataTable from '../../components/common/DataTable.vue';
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue';
 import { getMtaServers, deleteMtaServer, bulkActionMtaServers, checkMtaServer } from '../../api/mtaServers';
+import { useToastStore } from '../../stores/toast';
+const toastStore = useToastStore();
 
 const router = useRouter();
 const tableRef = ref(null);
@@ -29,7 +31,7 @@ const actions = [
   { label: 'Edit', class: 'bg-blue-100 text-blue-700 hover:bg-blue-200', handler: (row) => router.push(`/mta-servers/${row.id}/edit`) },
   { label: 'Install', class: 'bg-green-100 text-green-700 hover:bg-green-200', handler: (row) => router.push(`/mta-servers/install/${row.id}`) },
   { label: 'Check', class: 'bg-purple-100 text-purple-700 hover:bg-purple-200', handler: async (row) => {
-    try { await checkMtaServer(row.id); tableRef.value?.loadData(); } catch (e) { console.error(e); }
+    try { await checkMtaServer(row.id); tableRef.value?.loadData(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   }},
   { label: 'Delete', class: 'bg-red-100 text-red-700 hover:bg-red-200', handler: (row) => {
     confirmMessage.value = `Delete MTA server "${row.name}"?`;
@@ -52,7 +54,7 @@ const handleGroupAction = async ({ action, ids }) => {
 
 const handleConfirm = async () => {
   loading.value = true;
-  try { await confirmAction.value(); } catch (e) { console.error(e); }
+  try { await confirmAction.value(); } catch (e) { toastStore.showToast('Action failed', 'error'); }
   loading.value = false;
   confirmDialog.value = false;
 };
